@@ -1,0 +1,153 @@
+.header {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.page-subtitle {
+  color: #6b7280;
+  margin: 4px 0 0 0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.view-store-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.view-store-btn:hover {
+  background-color: #f9fafb;
+}
+
+.user-dropdown {
+  position: relative;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  color: #4b5563;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 240px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 50;
+  overflow: hidden;
+}
+
+.dropdown-header {
+  padding: 16px;
+}
+
+.user-info {
+  text-align: right;
+}
+
+.user-name {
+  font-weight: 500;
+  margin: 0;
+  font-size: 14px;
+}
+
+.user-email {
+  color: #6b7280;
+  margin: 4px 0 0 0;
+  font-size: 12px;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: #e5e7eb;
+}
+
+.dropdown-list {
+  list-style: none;
+  padding: 8px 0;
+  margin: 0;
+}
+
+.dropdown-list li a,
+.dropdown-list li button {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  color: #374151;
+  text-decoration: none;
+  font-size: 14px;
+  width: 100%;
+  text-align: right;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-list li a:hover,
+.dropdown-list li button:hover {
+  background-color: #f9fafb;
+}
+
+.dropdown-list .material-icons {
+  margin-left: 8px;
+  font-size: 18px;
+}
+
+.logout-btn {
+  color: #ef4444;
+}
+
+.login-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #F5C518;
+  color: #000000;
+  border-radius: 4px;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.login-btn:hover {
+  background-color: #e6b400;
+}
+
+.material-icons {
+  font-size: 18px;
+}

@@ -1,0 +1,16 @@
+<div class="recent-sales">
+  <div class="sale-item" *ngFor="let sale of sales">
+    <div class="avatar">
+      <span>{{ sale.initials }}</span>
+    </div>
+    <div class="sale-info">
+      <p class="name">{{ sale.customerName }}</p>
+      <p class="email">{{ sale.customerEmail }}</p>
+    </div>
+    <div class="amount">{{ sale.amount }}</div>
+  </div>
+  
+  <div class="no-data" *ngIf="sales.length === 0">
+    <p>لا توجد مبيعات حديثة</p>
+  </div>
+</div>

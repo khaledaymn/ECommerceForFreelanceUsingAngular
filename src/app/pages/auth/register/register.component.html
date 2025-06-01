@@ -1,0 +1,149 @@
+<div class="register-container">
+  <div class="register-card">
+    <div class="register-header">
+      <div class="logo">
+        <div class="logo-icon">CT</div>
+        <h1 class="logo-text">كات تراك</h1>
+      </div>
+      <h2 class="register-title">إنشاء حساب جديد</h2>
+      <p class="register-subtitle">أدخل بياناتك لإنشاء حساب في منصة كات تراك</p>
+    </div>
+
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <span class="material-icons">error</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+      <div class="form-group">
+        <label for="name">الاسم الكامل</label>
+        <div class="input-wrapper">
+          <span class="material-icons input-icon">person</span>
+          <input
+            type="text"
+            id="name"
+            formControlName="name"
+            placeholder="أدخل اسمك الكامل"
+            [class.invalid]="name?.invalid && name?.touched"
+          />
+        </div>
+        <div class="error-message" *ngIf="name?.invalid && name?.touched">
+          <span *ngIf="name?.errors?.['required']">الاسم الكامل مطلوب</span>
+          <span *ngIf="name?.errors?.['minlength']">يجب أن يتكون الاسم من 3 أحرف على الأقل</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">البريد الإلكتروني</label>
+        <div class="input-wrapper">
+          <span class="material-icons input-icon">email</span>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            placeholder="أدخل بريدك الإلكتروني"
+            [class.invalid]="email?.invalid && email?.touched"
+          />
+        </div>
+        <div class="error-message" *ngIf="email?.invalid && email?.touched">
+          <span *ngIf="email?.errors?.['required']">البريد الإلكتروني مطلوب</span>
+          <span *ngIf="email?.errors?.['email']">يرجى إدخال بريد إلكتروني صحيح</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">رقم الهاتف (اختياري)</label>
+        <div class="input-wrapper">
+          <span class="material-icons input-icon">phone</span>
+          <input
+            type="text"
+            id="phone"
+            formControlName="phone"
+            placeholder="أدخل رقم هاتفك (05xxxxxxxx)"
+            [class.invalid]="phone?.invalid && phone?.touched"
+          />
+        </div>
+        <div class="error-message" *ngIf="phone?.invalid && phone?.touched">
+          <span *ngIf="phone?.errors?.['pattern']">يرجى إدخال رقم هاتف سعودي صحيح</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="company">اسم الشركة (اختياري)</label>
+        <div class="input-wrapper">
+          <span class="material-icons input-icon">business</span>
+          <input
+            type="text"
+            id="company"
+            formControlName="company"
+            placeholder="أدخل اسم شركتك"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">كلمة المرور</label>
+        <div class="input-wrapper">
+          <span class="material-icons input-icon">lock</span>
+          <input
+            [type]="passwordVisible ? 'text' : 'password'"
+            id="password"
+            formControlName="password"
+            placeholder="أدخل كلمة المرور"
+            [class.invalid]="password?.invalid && password?.touched"
+          />
+          <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
+            <span class="material-icons">{{ passwordVisible ? 'visibility_off' : 'visibility' }}</span>
+          </button>
+        </div>
+        <div class="error-message" *ngIf="password?.invalid && password?.touched">
+          <span *ngIf="password?.errors?.['required']">كلمة المرور مطلوبة</span>
+          <span *ngIf="password?.errors?.['minlength']">يجب أن تتكون كلمة المرور من 8 أحرف على الأقل</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="passwordConfirmation">تأكيد كلمة المرور</label>
+        <div class="input-wrapper">
+          <span class="material-icons input-icon">lock</span>
+          <input
+            [type]="confirmPasswordVisible ? 'text' : 'password'"
+            id="passwordConfirmation"
+            formControlName="passwordConfirmation"
+            placeholder="أعد إدخال كلمة المرور"
+            [class.invalid]="passwordConfirmation?.invalid && passwordConfirmation?.touched"
+          />
+          <button type="button" class="toggle-password" (click)="toggleConfirmPasswordVisibility()">
+            <span class="material-icons">{{ confirmPasswordVisible ? 'visibility_off' : 'visibility' }}</span>
+          </button>
+        </div>
+        <div class="error-message" *ngIf="passwordConfirmation?.invalid && passwordConfirmation?.touched">
+          <span *ngIf="passwordConfirmation?.errors?.['required']">تأكيد كلمة المرور مطلوب</span>
+          <span *ngIf="passwordConfirmation?.errors?.['passwordMismatch']">كلمات المرور غير متطابقة</span>
+        </div>
+      </div>
+
+      <div class="form-group terms-group">
+        <div class="checkbox-wrapper">
+          <input type="checkbox" id="acceptTerms" formControlName="acceptTerms" />
+          <label for="acceptTerms" class="checkbox-label">
+            أوافق على <a href="#" class="terms-link">شروط الاستخدام</a> و <a href="#" class="terms-link">سياسة الخصوصية</a>
+          </label>
+        </div>
+        <div class="error-message" *ngIf="acceptTerms?.invalid && acceptTerms?.touched">
+          <span *ngIf="acceptTerms?.errors?.['required']">يجب الموافقة على الشروط والأحكام</span>
+        </div>
+      </div>
+
+      <button type="submit" class="register-button" [disabled]="isLoading">
+        <span class="material-icons" *ngIf="isLoading">hourglass_empty</span>
+        <span *ngIf="!isLoading">إنشاء حساب</span>
+        <span *ngIf="isLoading">جاري التحميل...</span>
+      </button>
+
+      <div class="login-link">
+        لديك حساب بالفعل؟ <a routerLink="/auth/login">تسجيل الدخول</a>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,55 @@
+<header class="header">
+  <div class="header-right">
+    <h1 class="page-title">لوحة التحكم</h1>
+    <p class="page-subtitle">مرحبًا بك في لوحة تحكم المتجر الإلكتروني</p>
+  </div>
+  <div class="header-left">
+    <button class="view-store-btn">
+      <span class="material-icons">storefront</span>
+      عرض المتجر
+    </button>
+    
+    <div class="user-dropdown" *ngIf="currentUser">
+      <button class="user-avatar" (click)="toggleDropdown()">
+        <span>{{ currentUser.initials }}</span>
+      </button>
+      
+      <div class="dropdown-menu" *ngIf="isDropdownOpen" (mouseleave)="closeDropdown()">
+        <div class="dropdown-header">
+          <div class="user-info">
+            <p class="user-name">{{ currentUser.name }}</p>
+            <p class="user-email">{{ currentUser.email }}</p>
+          </div>
+        </div>
+        
+        <div class="dropdown-divider"></div>
+        
+        <ul class="dropdown-list">
+          <li>
+            <a routerLink="/settings/profile">
+              <span class="material-icons">person</span>
+              الملف الشخصي
+            </a>
+          </li>
+          <li>
+            <a routerLink="/settings">
+              <span class="material-icons">settings</span>
+              الإعدادات
+            </a>
+          </li>
+          <li>
+            <button class="logout-btn" (click)="logout()">
+              <span class="material-icons">logout</span>
+              تسجيل الخروج
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <a routerLink="/auth/login" class="login-btn" *ngIf="!currentUser">
+      <span class="material-icons">login</span>
+      تسجيل الدخول
+    </a>
+  </div>
+</header>
