@@ -84,11 +84,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
       action: (item) => this.editProduct(item),
     },
     {
-      label: "نسخ",
-      icon: "copy",
-      action: (item) => this.duplicateProduct(item),
-    },
-    {
       label: "حذف",
       icon: "delete",
       color: "#D32F2F",
@@ -485,7 +480,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   // Truncate text helper
-  truncateText(text: string, maxLength = 100): string {
+   truncateText(text: string, maxLength = 100): string {
     if (!text) return ""
     return text.length > maxLength ? text.substring(0, maxLength) + "..." : text
   }
@@ -537,11 +532,16 @@ export class ProductsComponent implements OnInit, OnDestroy {
     return Math
   }
 
-  trackByProduct(index: number, item: Product): number {
-    return item.id; // Assuming 'id' is a unique identifier for Product
+  // Track by functions for performance
+  trackByFn(index: number, item: Product): any {
+    return item.id || index
   }
+  
+  // trackByProduct(index: number, item: Product): number {
+  //   return item.id; // Assuming 'id' is a unique identifier for Product
+  // }
 
-  trackByAttribute(index: number, item: KeyValue<string, string>): KeyValue<string, string> {
-    return item;
-  }
+  // trackByAttribute(index: number, item: KeyValue<string, string>): KeyValue<string, string> {
+  //   return item;
+  // }
 }

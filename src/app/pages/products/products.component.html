@@ -34,7 +34,7 @@
             </div>
           </div>
 
-          <div class="stat-card">
+          <!-- <div class="stat-card">
             <div class="stat-icon available">
               <svg
                 width="24"
@@ -53,9 +53,9 @@
               </div>
               <div class="stat-label">متاح</div>
             </div>
-          </div>
+          </div> -->
 
-          <div class="stat-card">
+          <!-- <div class="stat-card">
             <div class="stat-icon out-of-stock">
               <svg
                 width="24"
@@ -76,7 +76,7 @@
               </div>
               <div class="stat-label">غير متاح</div>
             </div>
-          </div>
+          </div> -->
 
           <div class="stat-card">
             <div class="stat-icon value">
@@ -293,13 +293,13 @@
   <div class="filters-panel" *ngIf="showFilters" @slideIn>
     <div class="filters-content">
       <div class="filter-group">
-        <label class="filter-label" for="categoryFilterSelect">الفئة</label>
+        <label class="filter-label">الفئة</label>
         <select
-          id="categoryFilterSelect"
           class="filter-select"
-          title="الفئة"
           [(ngModel)]="activeFilters.category"
           (change)="applyFilters()"
+          aria-label="تصفية حسب الفئة"
+          title="تصفية حسب الفئة"
         >
           <option value="">جميع الفئات</option>
           <option *ngFor="let category of categories" [value]="category">
@@ -309,12 +309,16 @@
       </div>
 
       <div class="filter-group">
-        <label class="filter-label">العلامة التجارية</label>
+        <label class="filter-label" for="brand-filter-select"
+          >العلامة التجارية</label
+        >
         <select
+          id="brand-filter-select"
           class="filter-select"
-          title="العلامة التجارية"
           [(ngModel)]="activeFilters.brand"
           (change)="applyFilters()"
+          aria-label="تصفية حسب العلامة التجارية"
+          title="تصفية حسب العلامة التجارية"
         >
           <option value="">جميع العلامات</option>
           <option *ngFor="let brand of brands" [value]="brand">
@@ -324,12 +328,13 @@
       </div>
 
       <div class="filter-group">
-        <label class="filter-label">الحالة</label>
+        <label class="filter-label" for="status-filter-select">الحالة</label>
         <select
+          id="status-filter-select"
           class="filter-select"
-          title="الحالة"
           [(ngModel)]="activeFilters.status"
           (change)="applyFilters()"
+          aria-label="تصفية حسب الحالة"
         >
           <option value="">جميع الحالات</option>
           <option *ngFor="let status of statuses" [value]="status">
@@ -337,17 +342,17 @@
           </option>
         </select>
       </div>
-
       <div class="filter-group">
         <label class="filter-label">نطاق السعر</label>
         <div class="price-range">
           <input
-            type="number"
-            class="price-input"
-            placeholder="من"
-            [(ngModel)]="activeFilters.priceRange.min"
-            (change)="applyFilters()"
+          type="number"
+          class="price-input"
+          placeholder="من"
+          [(ngModel)]="activeFilters.priceRange.min"
+          (change)="applyFilters()"
           />
+          <br>
           <span class="price-separator">إلى</span>
           <input
             type="number"
@@ -358,7 +363,6 @@
           />
         </div>
       </div>
-
       <div class="filter-actions">
         <button class="clear-filters-button" (click)="clearFilters()">
           <svg
@@ -443,14 +447,15 @@
 
         <!-- Product Cards -->
         <div
-  class="product-card"
-  *ngFor="let product of products; trackBy: trackByProduct"
-  @scaleIn
->
+          class="product-card"
+          *ngFor="let product of products; trackBy: trackByFn"
+          @scaleIn
+        >
           <div class="card-image">
             <img
               [src]="getProductImageUrl(product)"
-              alt="{{ product.name }}"
+              alt="{{ product.name }} || 'صورة المنتج'"
+              [title]="product.name || 'صورة المنتج'"
               loading="lazy"
             />
             <div class="card-overlay">
@@ -670,7 +675,7 @@
         <h4>الصور الإضافية ({{ getProductImages(product).length }})</h4>
         <div class="additional-images">
           <img
-            *ngFor="let image of getProductImages(product);"
+            *ngFor="let image of getProductImages(product); trackBy: trackByFn"
             [src]="image.imageThumbnailURL || image.mediaURL"
             alt="{{ product.name }}"
             class="additional-image"
@@ -690,10 +695,14 @@
         </h4>
         <div class="attributes-grid">
           <div
-          *ngFor="let attr of parseAdditionalAttributes(product.additionalAttributes) | keyvalue;"            
-          class="attribute-item"
+            *ngFor="
+              let attr of parseAdditionalAttributes(
+                product.additionalAttributes
+              ) | keyvalue
+            "
+            class="attribute-item"
           >
-            <span class="attribute-label">{{ attr.key }} :</span>
+            <span class="attribute-label">{{ attr.key }}:</span>
             <span class="attribute-value">{{ attr.value }}</span>
           </div>
         </div>
