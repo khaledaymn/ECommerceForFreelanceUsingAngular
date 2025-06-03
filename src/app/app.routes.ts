@@ -1,6 +1,9 @@
 import type { Routes } from "@angular/router"
 import { AuthGuard } from "./guards/auth.guard"
 import { RoleGuard } from "./guards/role.guard"
+import { OrdersComponent } from "./pages/orders/orders.component"
+import { OrderDetailsComponent } from "./pages/orders/order-details/order-details.component"
+import { OrderStatusBadgeComponent } from "./pages/orders/order-status-badge/order-status-badge.component"
 
 export const routes: Routes = [
   {
@@ -15,7 +18,17 @@ export const routes: Routes = [
   },
   {
     path: "orders",
-    loadComponent: () => import("./pages/orders/orders.component").then((m) => m.OrdersComponent),
+    component:OrdersComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: "order",
+    component:OrderDetailsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: "or",
+    component:OrderStatusBadgeComponent,
     canActivate: [AuthGuard],
   },
   {
