@@ -25,6 +25,11 @@ export class SidebarComponent {
       icon: "dashboard",
     },
     {
+      label: "الفئات",
+      route: "/categories",
+      icon: "inventory_2",
+    },
+    {
       label: "المنتجات",
       route: "/products",
       icon: "inventory_2",

@@ -2,12 +2,13 @@ import { Injectable } from "@angular/core"
 import {   HttpClient, HttpParams } from "@angular/common/http"
 import   { Observable } from "rxjs"
 import { PaginationResponse, Product, ProductParams } from "../interfaces/product.interface"
+import { environment } from "../enviroments/enviroment"
 
 @Injectable({
   providedIn: "root",
 })
 export class ProductService {
-  private readonly baseUrl = "https://e-commerce.tryasp.net" // Replace with your actual API URL
+  private readonly baseUrl = environment // Replace with your actual API URL
 
   constructor(private http: HttpClient) {}
 
