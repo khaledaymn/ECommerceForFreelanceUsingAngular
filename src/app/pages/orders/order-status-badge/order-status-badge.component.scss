@@ -1,0 +1,34 @@
+ .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      text-align: center;
+      min-width: 80px;
+    }
+    
+    .pending {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    
+    .processing {
+      background-color: #e0f2fe;
+      color: #0369a1;
+    }
+    
+    .shipped {
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .delivered {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    
+    .cancelled {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }

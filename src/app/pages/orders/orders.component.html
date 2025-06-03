@@ -1,4 +1,313 @@
 <div class="orders-container">
-  <h1>صفحة الطلبات</h1>
-  <p>هذا مكان مؤقت لصفحة إدارة الطلبات.</p>
+  <!-- Header -->
+  <div class="orders-header">
+    <div class="header-title">
+      <h1>إدارة الطلبات</h1>
+      <p class="header-subtitle" *ngIf="!isMobile">إدارة وتتبع جميع الطلبات في النظام</p>
+    </div>
+    <div class="header-actions">
+      
+      <button class="action-btn grid-btn" [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')">
+        <span class="material-icons">grid_view</span>
+        <span *ngIf="!isMobile">شبكة</span>
+      </button>
+      <button class="action-btn table-btn" [class.active]="viewMode === 'table'" (click)="setViewMode('table')" *ngIf="!isMobile">
+        <span class="material-icons">table_rows</span>
+        جدول
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="search-container">
+      <div class="search-box">
+        <input 
+          type="text" 
+          [formControl]="searchControl" 
+          placeholder="البحث في الطلبات..."
+          class="search-input"
+        />
+        <button class="search-btn">
+          <span class="material-icons">search</span>
+          <span *ngIf="!isMobile">بحث</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Desktop filters -->
+    <div class="filters-row" *ngIf="!isMobile">
+      <div class="filter-group">
+        <button class="filter-btn" (click)="toggleFilter('status')">
+          الحالة
+          <span class="material-icons">expand_more</span>
+        </button>
+        <div class="filter-dropdown" *ngIf="activeFilter === 'status'">
+          <div class="filter-option" (click)="selectStatus('')">
+            <span>جميع الحالات</span>
+          </div>
+          <div class="filter-option" *ngFor="let status of statusOptions" (click)="selectStatus(status)">
+            <span>{{ getStatusLabel(status) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile filters -->
+    <div class="mobile-filters" *ngIf="isMobile">
+      <select class="mobile-filter-select" [(ngModel)]="selectedStatus" (change)="selectStatus(selectedStatus)">
+        <option value="">جميع الحالات</option>
+        <option *ngFor="let status of statusOptions" [value]="status">{{ getStatusLabel(status) }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Error Alert -->
+  <div class="alert alert-error" *ngIf="error">
+    <span class="material-icons">error</span>
+    <span>{{ error }}</span>
+  </div>
+
+  <!-- Table View (Desktop only) -->
+  <div class="table-container" *ngIf="viewMode === 'table' && !isMobile">
+    <table class="orders-table">
+      <thead>
+        <tr>
+          <th class="checkbox-col">
+            <input type="checkbox" [checked]="selectAll" (change)="toggleSelectAll($event)">
+          </th>    <th class="product-name sortable" (click)="onSort(0)">
+            المنتج
+            <span class="material-icons sort-icon">{{ getSortIcon(0) }}</span>
+          </th>
+          <th class="description">اسم العميل</th>
+          <th class="description">الوصف</th>
+          <th class="amount sortable" (click)="onSort(1)">
+            السعر
+            <span class="material-icons sort-icon">{{ getSortIcon(1) }}</span>
+          </th>
+          <th class="status-col sortable" (click)="onSort(2)">
+            الحالة
+            <span class="material-icons sort-icon">{{ getSortIcon(2) }}</span>
+          </th>
+          <th class="date">التاريخ</th>
+          <th class="actions-col">إجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="isLoading">
+          <td colspan="9" class="loading-cell">
+            <div class="loading-spinner"></div>
+            <span>جاري تحميل الطلبات...</span>
+          </td>
+        </tr>
+        <tr *ngIf="!isLoading && orders.length === 0">
+          <td colspan="9" class="empty-cell">
+            <span class="material-icons">inbox</span>
+            <span>لا توجد طلبات متاحة</span>
+          </td>
+        </tr>
+        <tr *ngFor="let order of orders; let i = index" [class.selected]="selectedOrders.has(order.orderID)">
+          <td class="checkbox-col">
+            <input type="checkbox" [checked]="selectedOrders.has(order.orderID)" (change)="toggleOrderSelection(order.orderID, $event)">
+          </td>
+          
+          <td class="product-name" [title]="getProductName(order)">{{ getProductName(order) }}</td>
+          <td class="user-name" [title]="getUserName(order)">{{ getUserName(order) }}</td>
+          <td class="description" [title]="getProductDescription(order)">{{ getProductDescription(order) }}</td>
+          <td class="amount">{{ order.totalAmount | currency:'SAR':'symbol':'1.0-0' }}</td>
+          <td class="status-col">
+            <app-order-status-badge [status]="order.status"></app-order-status-badge>
+          </td>
+          <td class="date">{{ formatArabicDate(order.orderDate) }}</td>
+          <td class="actions-col">
+            <div class="actions-menu" [class.open]="activeMenu === i">
+              <button class="menu-trigger" (click)="toggleMenu(i, $event)">
+                <span class="material-icons">more_vert</span>
+              </button>
+              <div class="menu-dropdown" *ngIf="activeMenu === i" (click)="$event.stopPropagation()">
+                <button class="menu-item" (click)="viewOrderDetails(order)">
+                  <span class="material-icons">visibility</span>
+                  عرض
+                </button>
+                <button class="menu-item" (click)="editOrder(order)">
+                  <span class="material-icons">edit</span>
+                  تعديل
+                </button>
+                <button class="menu-item" (click)="duplicateOrder(order)">
+                  <span class="material-icons">content_copy</span>
+                  نسخ
+                </button>
+                <div class="menu-divider"></div>
+                <button class="menu-item danger" (click)="deleteOrder(order.orderID)">
+                  <span class="material-icons">delete</span>
+                  حذف
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Grid View -->
+  <div class="grid-container" *ngIf="viewMode === 'grid' || isMobile">
+    <div class="loading-grid" *ngIf="isLoading">
+      <div class="loading-spinner"></div>
+      <span>جاري تحميل الطلبات...</span>
+    </div>
+    
+    <div class="empty-grid" *ngIf="!isLoading && orders.length === 0">
+      <span class="material-icons">inbox</span>
+      <span>لا توجد طلبات متاحة</span>
+    </div>
+
+    <div class="order-card" *ngFor="let order of orders; let i = index" [class.selected]="selectedOrders.has(order.orderID)">
+      <div class="card-header">
+        <div class="card-checkbox">
+          <input type="checkbox" [checked]="selectedOrders.has(order.orderID)" (change)="toggleOrderSelection(order.orderID, $event)">
+        </div>
+        <div class="card-actions">
+          <div class="actions-menu" [class.open]="activeMenu === i">
+            <button class="menu-trigger" (click)="toggleMenu(i, $event)">
+              <span class="material-icons">more_vert</span>
+            </button>
+            <div class="menu-dropdown" *ngIf="activeMenu === i" (click)="$event.stopPropagation()">
+              <button class="menu-item" (click)="viewOrderDetails(order)">
+                <span class="material-icons">visibility</span>
+                عرض التفاصيل
+              </button>
+              <button class="menu-item" (click)="editOrder(order)">
+                <span class="material-icons">edit</span>
+                تعديل
+              </button>
+              <button class="menu-item" (click)="duplicateOrder(order)">
+                <span class="material-icons">content_copy</span>
+                نسخ
+              </button>
+              <div class="menu-divider"></div>
+              <button class="menu-item danger" (click)="deleteOrder(order.orderID)">
+                <span class="material-icons">delete</span>
+                حذف
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-content" (click)="viewOrderDetails(order)">
+        <div class="card-image">
+          <span class="material-icons">image</span>
+        </div>
+        
+        <div class="card-info">
+          <h3 class="card-title">{{ getProductName(order) }}</h3>
+          <p class="card-description">{{ getProductDescription(order) }}</p>
+          
+          <div class="card-details">
+            <div class="detail-item">
+              <span class="detail-label">رقم الطلب:</span>
+              <span class="detail-value">#{{ order.orderID }}</span>
+            </div>
+            
+            <div class="detail-item">
+              <span class="detail-label">المبلغ:</span>
+              <span class="detail-value amount">{{ order.totalAmount | currency:'SAR':'symbol':'1.0-0' }} ر.س.</span>
+            </div>
+            
+            <div class="detail-item">
+              <span class="detail-label">التاريخ:</span>
+              <span class="detail-value">{{ formatArabicDate(order.orderDate) }}</span>
+            </div>
+          </div>
+          
+          <div class="card-status">
+            <app-order-status-badge [status]="order.status"></app-order-status-badge>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-container" *ngIf="!isLoading && totalCount > 0">
+    <div class="pagination-info">
+      <span *ngIf="!isMobile">عرض {{ startItem }} إلى {{ endItem }} من {{ totalCount }} عنصر</span>
+      <span *ngIf="isMobile">{{ startItem }}-{{ endItem }} من {{ totalCount }}</span>
+    </div>
+    
+    <div class="pagination-controls">
+      <button 
+        class="pagination-btn" 
+        [disabled]="!hasPrevious" 
+        (click)="goToFirstPage()"
+        title="الصفحة الأولى"
+      >
+        <span class="material-icons">first_page</span>
+      </button>
+      
+      <button 
+        class="pagination-btn" 
+        [disabled]="!hasPrevious" 
+        (click)="goToPreviousPage()"
+        title="الصفحة السابقة"
+      >
+        <span class="material-icons">chevron_right</span>
+      </button>
+      
+      <div class="pagination-pages">
+        <button 
+          *ngFor="let page of pageNumbers" 
+          class="page-btn" 
+          [class.active]="page === pageIndex"
+          [class.ellipsis]="page === -1"
+          [disabled]="page === -1"
+          (click)="page !== -1 && onPageChange(page)"
+        >
+          {{ page === -1 ? '...' : page }} 
+          
+        </button>
+      </div>
+      
+      <button 
+        class="pagination-btn" 
+        [disabled]="!hasNext" 
+        (click)="goToNextPage()"
+        title="الصفحة التالية"
+      >
+        <span class="material-icons">chevron_left</span>
+      </button>
+      
+      <button 
+        class="pagination-btn" 
+        [disabled]="!hasNext" 
+        (click)="goToLastPage()"
+        title="الصفحة الأخيرة"
+      >
+        <span class="material-icons">last_page</span>
+      </button>
+    </div>
+    
+    <div class="page-size-selector">
+      <span>عناصر لكل صفحة:</span>
+      <select 
+        [ngModel]="pageSize" 
+        (ngModelChange)="onPageSizeChange($event)"
+      >
+        <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Order Details Modal -->
+  <div class="modal-overlay" *ngIf="showDetails" (click)="closeDetails()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <app-order-details 
+        *ngIf="selectedOrder" 
+        [order]="selectedOrder" 
+        (close)="closeDetails()"
+        (updateStatus)="updateOrderStatus($event.orderId, $event.status)"
+      ></app-order-details>
+    </div>
+  </div>
 </div>

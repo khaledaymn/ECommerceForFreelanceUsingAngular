@@ -42,7 +42,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   selectedProducts: Product[] = []
   currentParams: ProductParams = {
     pageIndex: 1,
-    pageSize: 10,
+    pageSize: 50,
   }
 
   // View modes and filters

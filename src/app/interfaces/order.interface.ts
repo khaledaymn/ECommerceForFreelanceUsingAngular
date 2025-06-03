@@ -1,25 +1,46 @@
-import type { Address } from "./address.interface"
 
 export interface Order {
-  id: string
-  orderNumber: string
-  customerId: string
-  customerName: string
-  customerEmail: string
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled"
-  total: number
-  items: OrderItem[]
-  shippingAddress: Address
-  billingAddress: Address
-  paymentMethod: string
-  createdAt: Date
-  updatedAt: Date
+  orderID: number
+  userId: string
+  name: string
+  orderDate: string
+  totalAmount: number
+  status: OrderStatus
+  orderItems: OrderItem[]
+  
 }
 
 export interface OrderItem {
-  productId: string
+  orderItemID: number
+  productID: number
   productName: string
   quantity: number
-  unitPrice: number
-  total: number
+  price: number
+  subtotal: number
+}
+
+export type OrderStatus = "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled"
+
+export interface OrdersResponse {
+  pageSize: number
+  pageIndex: number
+  totalCount: number
+  data: Order[]
+}
+
+export interface OrdersFilter {
+  search?: string
+  userId?: string
+  status?: OrderStatus
+  sortProp?: number
+  sortDirection?: number
+  pageIndex: number
+  pageSize: number
+}
+export interface OrderRequest {
+  userId: string
+  orderDate: string
+  totalAmount: number
+  status: OrderStatus
+  orderItems: OrderItem[]
 }
