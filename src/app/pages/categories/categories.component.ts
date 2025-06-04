@@ -1,433 +1,253 @@
-import { Component, OnInit, OnDestroy,  TemplateRef, ViewChild } from "@angular/core"
-import { Subject, takeUntil, debounceTime, distinctUntilChanged } from "rxjs"
-import { animate, style, transition, trigger } from "@angular/animations"
-import { Category, CategoryParams } from "../../interfaces/category"
-import { PaginationEvent, RowAction, SortEvent, TableColumn, DataTableComponent } from "../../components/data-table/data-table.component"
-import { CategoryService } from "../../services/category.service"
-import { PaginationResponse } from "../../interfaces/product.interface"
-import { CategoryFormComponent } from "./category-form/category-form.component";
-import { FormsModule } from "@angular/forms"
+import { Component, OnInit } from "@angular/core"
 import { CommonModule } from "@angular/common"
+import { FormsModule } from "@angular/forms"
+import { CategoryService } from "../../services/category.service"
+import { Category, CategoryParams } from "../../interfaces/category"
+import { DataTableComponent, TableAction, TableColumn } from "../../components/data-table/data-table.component"
+import { CategoryModalComponent } from "./modals/category-modal/category-modal.component"
+import { ConfirmDialogComponent } from "../../components/confirm-dialog/confirm-dialog.component"
+import { CategoryDetailsModalComponent } from "./modals/category-details-modal/category-details-modal.component"
 
 @Component({
-  selector: "app-categories",
+  selector: "app-category",
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    DataTableComponent,
+    CategoryModalComponent,
+    ConfirmDialogComponent,
+    CategoryDetailsModalComponent,
+  ],
   templateUrl: "./categories.component.html",
   styleUrls: ["./categories.component.scss"],
-  animations: [
-    trigger("slideIn", [
-      transition(":enter", [
-        style({ opacity: 0, transform: "translateY(20px)" }),
-        animate("300ms ease-out", style({ opacity: 1, transform: "translateY(0)" })),
-      ]),
-    ]),
-    trigger("fadeIn", [
-      transition(":enter", [style({ opacity: 0 }), animate("200ms ease-out", style({ opacity: 1 }))]),
-    ]),
-    trigger("scaleIn", [
-      transition(":enter", [
-        style({ opacity: 0, transform: "scale(0.95)" }),
-        animate("200ms ease-out", style({ opacity: 1, transform: "scale(1)" })),
-      ]),
-    ]),
-  ],
-  imports: [CategoryFormComponent, DataTableComponent, FormsModule,CommonModule],
 })
-export class CategoriesComponent implements OnInit, OnDestroy {
-  @ViewChild("expandedRowTemplate") expandedRowTemplate!: TemplateRef<any>
-
-  private destroy$ = new Subject<void>()
-  private searchSubject = new Subject<string>()
-
+export class CategoryManagementComponent implements OnInit {
+  // Data
   categories: Category[] = []
+  filteredCategories: Category[] = []
   loading = false
-  totalCount = 0
-  selectedCategories: Category[] = []
-  currentParams: CategoryParams = {
-    pageIndex: 1,
-    pageSize: 10,
+
+  // Pagination
+  currentPage = 1
+  pageSize = 10
+  totalPages = 1
+  totalItems = 0
+
+  // Sorting and filtering
+  searchTerm = ""
+  sortColumn = "name"
+  sortDirection: "asc" | "desc" = "asc"
+
+  // Modal state
+  isModalOpen = false
+  isDetailsModalOpen = false
+  editingCategory: Category | null = null
+  selectedCategory: Category | null = null
+  deleteConfirm: { isOpen: boolean; categoryId: number | null } = {
+    isOpen: false,
+    categoryId: null,
   }
 
-  // View modes and filters
+  // Table configuration
+  columns: TableColumn[] = [
+    { key: "imageThumbnailUrl", title: "الصورة", type: "image", width: "80px", align: "center" },
+    { key: "name", title: "اسم الفئة", sortable: true, width: "30%" },
+    { key: "description", title: "الوصف", width: "50%" },
+  ]
+
+  actions: TableAction[] = [
+    { label: "عرض", icon: "visibility", action: "view" },
+    { label: "تعديل", icon: "edit", action: "edit" },
+    { label: "حذف", icon: "delete", action: "delete", type: "danger" },
+  ]
+
   viewMode: "table" | "grid" = "table"
-  showFilters = false
-  showBulkActions = false
-
-  // Statistics
-  stats = {
-    total: 0,
-    withImages: 0,
-    withoutImages: 0,
-    totalProducts: 0,
-  }
-
-  // Category form modal
-  showCategoryForm = false
-  categoryFormMode: "add" | "edit" = "add"
-  categoryToEdit: Category | null = null
-
-  // Row actions for the table
-  rowActions: RowAction[] = [
-    {
-      label: "عرض التفاصيل",
-      icon: "view",
-      action: (item) => this.viewCategory(item),
-    },
-    {
-      label: "تعديل",
-      icon: "edit",
-      action: (item) => this.editCategory(item),
-    },
-    {
-      label: "نسخ",
-      icon: "copy",
-      action: (item) => this.duplicateCategory(item),
-    },
-    {
-      label: "حذف",
-      icon: "delete",
-      color: "#D32F2F",
-      action: (item) => this.deleteCategory(item),
-      disabled: (item) => (item.productsCount || 0) > 0,
-    },
-  ]
-
-  // Bulk actions
-  bulkActions = [
-    { label: "تصدير المحدد", action: () => this.exportSelected() },
-    { label: "حذف المحدد", action: () => this.deleteSelected(), color: "#D32F2F" },
-    { label: "تحديث الصور", action: () => this.updateImagesSelected() },
-  ]
-
-  tableColumns: TableColumn[] = [
-    {
-      key: "imageURL",
-      label: "الصورة",
-      type: "image",
-      width: "80px",
-    },
-    {
-      key: "name",
-      label: "اسم الفئة",
-      sortable: true,
-      type: "text",
-      resizable: true,
-      filterable: true,
-    },
-    {
-      key: "description",
-      label: "الوصف",
-      type: "text",
-      resizable: true,
-      hidden: false,
-    },
-    {
-      key: "productsCount",
-      label: "عدد المنتجات",
-      sortable: true,
-      type: "text",
-      resizable: true,
-      width: "120px",
-    },
-    {
-      key: "createdAt",
-      label: "تاريخ الإنشاء",
-      sortable: true,
-      type: "date",
-      resizable: true,
-    },
-    {
-      key: "updatedAt",
-      label: "آخر تحديث",
-      sortable: true,
-      type: "date",
-      resizable: true,
-      hidden: true,
-    },
-    {
-      key: "actions",
-      label: "الإجراءات",
-      type: "actions",
-      width: "60px",
-    },
-  ]
 
   constructor(private categoryService: CategoryService) {}
 
-  ngOnInit() {
-    this.setupSearchDebounce()
+  ngOnInit(): void {
     this.loadCategories()
   }
 
-  ngOnDestroy() {
-    this.destroy$.next()
-    this.destroy$.complete()
-  }
-
-  private setupSearchDebounce() {
-    this.searchSubject
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe((searchTerm) => {
-        this.currentParams.search = searchTerm || undefined
-        this.currentParams.pageIndex = 1
-        this.loadCategories()
-      })
-  }
-
-  loadCategories() {
+  loadCategories(): void {
     this.loading = true
 
-    this.categoryService
-      .getAllCategories(this.currentParams)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: PaginationResponse<Category>) => {
-          this.categories = response.data
-          this.totalCount = response.totalCount
-          this.currentParams.pageIndex = response.pageIndex
-          this.currentParams.pageSize = response.pageSize
-          this.loading = false
-          this.calculateStats()
-        },
-        error: (error) => {
-          console.error("Error loading categories:", error)
-          this.loading = false
-          this.showErrorMessage("حدث خطأ أثناء تحميل الفئات")
-        },
-      })
-  }
-
-  calculateStats() {
-    this.stats.total = this.totalCount
-    this.stats.withImages = this.categories.filter((c) => c.imageURL).length
-    this.stats.withoutImages = this.categories.filter((c) => !c.imageURL).length
-    this.stats.totalProducts = this.categories.reduce((sum, c) => sum + (c.productsCount || 0), 0)
-  }
-
-  // Category form methods
-  openAddCategoryForm() {
-    this.categoryFormMode = "add"
-    this.categoryToEdit = null
-    this.showCategoryForm = true
-  }
-
-  openEditCategoryForm(category: Category) {
-    this.categoryFormMode = "edit"
-    this.categoryToEdit = category
-    this.showCategoryForm = true
-  }
-
-  closeCategoryForm() {
-    this.showCategoryForm = false
-    this.categoryToEdit = null
-  }
-
-  onCategoryAdded() {
-    this.loadCategories()
-    this.showSuccessMessage("تم إضافة الفئة بنجاح")
-  }
-
-  onCategoryUpdated() {
-    this.loadCategories()
-    this.showSuccessMessage("تم تحديث الفئة بنجاح")
-  }
-
-  // Event handlers
-  onSort(event: SortEvent) {
-    if (event.column && event.direction) {
-      this.currentParams.sortProp = event.column
-      this.currentParams.sortDirection = event.direction
-    } else {
-      this.currentParams.sortProp = undefined
-      this.currentParams.sortDirection = undefined
-    }
-    this.currentParams.pageIndex = 1
-    this.loadCategories()
-  }
-
-  onPageChange(event: PaginationEvent) {
-    this.currentParams.pageIndex = event.pageIndex
-    this.currentParams.pageSize = event.pageSize
-    this.loadCategories()
-  }
-
-  onSearch(searchTerm: string) {
-    this.searchSubject.next(searchTerm)
-  }
-
-  onRowSelect(selectedRows: Category[]) {
-    this.selectedCategories = selectedRows
-    this.showBulkActions = selectedRows.length > 0
-  }
-
-  onColumnChange(columns: TableColumn[]) {
-    this.tableColumns = columns
-  }
-
-  // View mode toggle
-  toggleViewMode() {
-    this.viewMode = this.viewMode === "table" ? "grid" : "table"
-  }
-
-  // Filter methods
-  toggleFilters() {
-    this.showFilters = !this.showFilters
-  }
-
-  // Category actions
-  viewCategory(category: Category) {
-    console.log("Viewing category:", category)
-    // Navigate to category detail page or show details modal
-  }
-
-  editCategory(category: Category) {
-    // this.openEditCategoryForm(category)
-    this.openEditCategoryForm(category)
-    // If you want to navigate instead of opening a modal, use Angular Router:
-    // this.router.navigate([`/categories/form/${category.id}`])
-  }
-
-  duplicateCategory(category: Category) {
-    console.log("Duplicating category:", category)
-    // Implement duplication logic
-    this.showSuccessMessage(`تم نسخ الفئة "${category.name}" بنجاح`)
-  }
-
-  deleteCategory(category: Category) {
-    if (category.productsCount && category.productsCount > 0) {
-      this.showErrorMessage(`لا يمكن حذف الفئة "${category.name}" لأنها تحتوي على ${category.productsCount} منتج`)
-      return
+    const params: CategoryParams = {
+      pageIndex: this.currentPage,
+      pageSize: this.pageSize,
+      search: this.searchTerm,
+      sortProp: this.sortColumn as any,
+      sortDirection: (this.sortDirection as import("../../interfaces/category").SortDirection) || "asc",
     }
 
-    if (confirm(`هل أنت متأكد من حذف الفئة "${category.name}"؟`)) {
+    this.categoryService.getAllCategories(params).subscribe({
+      next: (response) => {
+        console.log(response.data);
+
+        this.categories = response.data
+        this.filteredCategories = response.data
+        this.totalItems = response.totalCount
+        this.totalPages = Math.ceil(response.totalCount / this.pageSize)
+        this.loading = false
+      },
+      error: (error) => {
+        console.error("Error loading categories:", error)
+        this.loading = false
+      },
+    })
+  }
+
+  onSearch(searchTerm: string): void {
+    this.searchTerm = searchTerm
+    this.currentPage = 1
+    this.loadCategories()
+  }
+
+  onSort(event: { column: string; direction: "asc" | "desc" }): void {
+    this.sortColumn = event.column
+    this.sortDirection = event.direction
+    this.currentPage = 1
+    this.loadCategories()
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page
+    this.loadCategories()
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize = size
+    this.currentPage = 1
+    this.loadCategories()
+  }
+
+  onRowClick(category: Category): void {
+    this.viewDetails(category)
+  }
+
+  onActionClick(event: { action: string; item: Category }): void {
+    switch (event.action) {
+      case "view":
+        this.viewDetails(event.item)
+        break
+      case "edit":
+        this.openEditModal(event.item)
+        break
+      case "delete":
+        this.openDeleteConfirm(event.item)
+        break
+    }
+  }
+
+  onViewModeChange(mode: "table" | "grid"): void {
+    this.viewMode = mode
+  }
+
+  // Modal management
+  openAddModal(): void {
+    this.editingCategory = null
+    this.isModalOpen = true
+  }
+
+  openEditModal(category: Category): void {
+    this.editingCategory = { ...category }
+    this.isModalOpen = true
+  }
+
+  closeModal(): void {
+    this.isModalOpen = false
+  }
+
+  saveCategory(categoryData: any): void {
+    if (this.editingCategory) {
+      // Update existing category
       this.categoryService
-        .deleteCategory(category.id)
-        .pipe(takeUntil(this.destroy$))
+        .updateCategory({
+          id: this.editingCategory.id,
+          name: categoryData.name,
+          description: categoryData.description,
+          image: categoryData.image,
+        })
         .subscribe({
-          next: (result) => {
-            if (result.isSuccess) {
-              this.showSuccessMessage(`تم حذف الفئة "${category.name}" بنجاح`)
-              this.loadCategories()
-            } else {
-              this.showErrorMessage(result.message || "حدث خطأ أثناء حذف الفئة")
-            }
+          next: () => {
+            this.loadCategories()
+            this.closeModal()
           },
           error: (error) => {
-            console.error("Error deleting category:", error)
-            this.showErrorMessage("حدث خطأ أثناء حذف الفئة")
+            console.error("Error updating category:", error)
+          },
+        })
+    } else {
+      // Create new category
+      this.categoryService
+        .createCategory({
+          name: categoryData.name,
+          description: categoryData.description,
+          image: categoryData.image,
+        })
+        .subscribe({
+          next: () => {
+            this.loadCategories()
+            this.closeModal()
+          },
+          error: (error) => {
+            console.error("Error creating category:", error)
           },
         })
     }
   }
 
-  // Bulk actions
-  exportSelected() {
-    console.log("Exporting selected categories:", this.selectedCategories)
-    this.showSuccessMessage(`تم تصدير ${this.selectedCategories.length} فئة بنجاح`)
-  }
-
-  deleteSelected() {
-    const categoriesWithProducts = this.selectedCategories.filter((c) => (c.productsCount || 0) > 0)
-
-    if (categoriesWithProducts.length > 0) {
-      this.showErrorMessage(`لا يمكن حذف ${categoriesWithProducts.length} فئة لأنها تحتوي على منتجات`)
-      return
-    }
-
-    if (confirm(`هل أنت متأكد من حذف ${this.selectedCategories.length} فئة؟`)) {
-      console.log("Deleting selected categories:", this.selectedCategories)
-      this.showSuccessMessage(`تم حذف ${this.selectedCategories.length} فئة بنجاح`)
-      this.selectedCategories = []
-      this.showBulkActions = false
-      this.loadCategories()
+  // Delete management
+  openDeleteConfirm(category: Category): void {
+    this.deleteConfirm = {
+      isOpen: true,
+      categoryId: category.id,
     }
   }
 
-  updateImagesSelected() {
-    console.log("Updating images for selected categories:", this.selectedCategories)
-    // Show bulk image update modal
-  }
-
-  // Utility methods
-  refreshData() {
-    this.loadCategories()
-    this.showSuccessMessage("تم تحديث البيانات بنجاح")
-  }
-
-  exportAllCategories() {
-    console.log("Exporting all categories")
-    this.showSuccessMessage("تم تصدير جميع الفئات بنجاح")
-  }
-
-  importCategories() {
-    console.log("Importing categories")
-    // Show import modal
-  }
-
-  // Notification methods
-  private showSuccessMessage(message: string) {
-    // Implement toast notification
-    console.log("Success:", message)
-  }
-
-  private showErrorMessage(message: string) {
-    // Implement toast notification
-    console.log("Error:", message)
-  }
-
-  // Grid view methods
-  getGridCategories() {
-    return this.categories
-  }
-
-  // Helper methods
-  getCategoryImageUrl(category: Category): string {
-    return category.imageURL || "/placeholder.svg?height=200&width=200"
-  }
-
-  // Enhanced date formatting
-  formatDate(dateString: string): string {
-    if (!dateString) return ""
-
-    try {
-      const date = new Date(dateString)
-      return new Intl.DateTimeFormat("ar-SA", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      }).format(date)
-    } catch {
-      return dateString
+  closeDeleteConfirm(): void {
+    this.deleteConfirm = {
+      isOpen: false,
+      categoryId: null,
     }
   }
 
-  // Truncate text helper
-  truncateText(text: string, maxLength = 100): string {
-    if (!text) return ""
-    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text
+  confirmDelete(): void {
+    if (this.deleteConfirm.categoryId) {
+      this.categoryService.deleteCategory(this.deleteConfirm.categoryId).subscribe({
+        next: () => {
+          this.loadCategories()
+          this.closeDeleteConfirm()
+        },
+        error: (error) => {
+          console.error("Error deleting category:", error)
+          this.closeDeleteConfirm()
+        },
+      })
+    }
   }
 
-  // Safe number formatting
-  safeNumber(value: any): number {
-    const num = Number(value)
-    return isNaN(num) ? 0 : num
+  // Details modal
+  viewDetails(category: Category): void {
+    this.selectedCategory = { ...category }
+    this.isDetailsModalOpen = true
   }
 
-  // Calculate pagination info
-  getPaginationInfo(): { start: number; end: number; total: number } {
-    const start = (this.currentParams.pageIndex - 1) * this.currentParams.pageSize + 1
-    const end = Math.min(this.currentParams.pageIndex * this.currentParams.pageSize, this.totalCount)
-    return { start, end, total: this.totalCount }
+  closeDetailsModal(): void {
+    this.isDetailsModalOpen = false
+    this.selectedCategory = null
   }
 
-  // Get total pages
-  getTotalPages(): number {
-    return Math.ceil(this.totalCount / this.currentParams.pageSize)
+  openEditModalFromDetails(category: Category): void {
+    this.editingCategory = { ...category }
+    this.isModalOpen = true
   }
 
-  // Track by functions for performance
-  trackByFn(index: number, item: Category): any {
-    return item.id || index
+  openDeleteConfirmFromDetails(category: Category): void {
+    this.deleteConfirm = {
+      isOpen: true,
+      categoryId: category.id,
+    }
   }
 }

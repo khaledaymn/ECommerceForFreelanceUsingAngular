@@ -1,31 +1,52 @@
 export interface Category {
-  id: number
-  name: string
-  description?: string
-  imageURL?: string
-  imagePublicId?: string
-  createdAt: string
-  updatedAt?: string
-  productsCount?: number
+  id: number;
+  name?: string | null;
+  description?: string | null;
+  imageUrl?: string | null;
+  imageThumbnailUrl?: string | null;
+  imagePublicId: string;
 }
 
-export interface AddCategoryDTO {
+export interface AddCategory {
   name: string
   description?: string
   image?: File
 }
 
-export interface UpdateCategoryDTO {
+export interface PaginatedResponse<T> {
+  pageSize: number;
+  pageIndex: number;
+  totalCount: number;
+  data: T[];
+}
+
+export interface Result {
+  isSuccess: boolean;
+  message: string;
+}
+
+export interface UpdateCategory {
   id: number
   name?: string
   description?: string
   image?: File
 }
 
+export enum SortProp {
+  Id = 'id',
+  Name = 'name',
+  Description = 'description'
+}
+
+export enum SortDirection {
+  Ascending = 'asc',
+  Descending = 'desc'
+}
+
 export interface CategoryParams {
-  search?: string
-  sortProp?: string
-  sortDirection?: "asc" | "desc"
-  pageIndex: number
-  pageSize: number
+  search?: string | null;
+  sortProp?: SortProp | null;
+  sortDirection?: SortDirection | null;
+  pageIndex: number;
+  pageSize: number;
 }

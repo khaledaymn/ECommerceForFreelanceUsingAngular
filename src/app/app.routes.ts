@@ -13,12 +13,12 @@ export const routes: Routes = [
   },
   {
     path: "categories",
-    loadComponent: () => import("./pages/categories/categories.component").then((m) => m.CategoriesComponent),
+    loadComponent: () => import("./pages/categories/categories.component").then((m) => m.CategoryManagementComponent),
 
   },
   {
     path: "products",
-    loadComponent: () => import("./pages/products/products.component").then((m) => m.ProductsComponent),
+    loadComponent: () => import("./pages/products/products.component").then((m) => m.ProductManagementComponent),
     canActivate: [AuthGuard],
   },
   {

@@ -1,0 +1,62 @@
+<div
+  class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6"
+  *ngIf="totalPages > 1"
+>
+  <div class="text-sm text-gray-600 text-right" dir="rtl">
+    عرض {{ startItem }} إلى {{ endItem }} من {{ totalItems }} عنصر
+  </div>
+
+  <div class="flex items-center space-x-1">
+    <button
+      class="px-3 py-1 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+      (click)="onPageChange(1)"
+      [disabled]="currentPage === 1"
+      title="الصفحة الأولى"
+      aria-label="الصفحة الأولى"
+    >
+      <i class="bi bi-chevron-double-right"></i>
+    </button>
+
+    <button
+      class="px-3 py-1 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+      (click)="onPageChange(currentPage - 1)"
+      [disabled]="currentPage === 1"
+      title="الصفحة السابقة"
+      aria-label="الصفحة السابقة"
+    >
+      <i class="bi bi-chevron-right"></i>
+    </button>
+
+    <button
+      *ngFor="let page of visiblePages"
+      [ngClass]="{
+        'bg-yellow-400 text-black': page === currentPage,
+        'border hover:bg-gray-50': page !== currentPage
+      }"
+      class="px-3 py-1 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+      (click)="typeof page === 'number' && onPageChange(page)"
+    >
+      {{ page }}
+    </button>
+
+    <button
+      class="px-3 py-1 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+      (click)="onPageChange(currentPage + 1)"
+      [disabled]="currentPage === totalPages"
+      title="الصفحة التالية"
+      aria-label="الصفحة التالية"
+    >
+      <i class="bi bi-chevron-left"></i>
+    </button>
+
+    <button
+      class="px-3 py-1 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+      (click)="onPageChange(totalPages)"
+      [disabled]="currentPage === totalPages"
+      title="الصفحة الأخيرة"
+      aria-label="الصفحة الأخيرة"
+    >
+      <i class="bi bi-chevron-double-left"></i>
+    </button>
+  </div>
+</div>

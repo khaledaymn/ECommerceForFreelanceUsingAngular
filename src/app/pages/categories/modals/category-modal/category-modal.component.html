@@ -1,0 +1,122 @@
+<div *ngIf="isOpen" class="fixed inset-0 z-50 overflow-y-auto">
+  <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <!-- Background overlay -->
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="onClose()"></div>
+
+    <!-- Modal panel -->
+    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full" dir="rtl">
+      <form (ngSubmit)="onSubmit()" #categoryForm="ngForm">
+        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div class="sm:flex sm:items-start">
+            <div class="w-full">
+              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4 text-right">
+                {{ category ? 'تعديل الفئة' : 'إضافة فئة جديدة' }}
+              </h3>
+
+              <!-- Name Field -->
+              <div class="mb-4">
+                <label for="name" class="block text-sm font-medium text-gray-700 text-right mb-2">
+                  اسم الفئة *
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  [(ngModel)]="formData.name"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-right"
+                  placeholder="أدخل اسم الفئة"
+                  dir="rtl"
+                  #nameField="ngModel"
+                />
+                <div *ngIf="nameField.invalid && nameField.touched" class="text-red-600 text-sm mt-1 text-right">
+                  اسم الفئة مطلوب
+                </div>
+              </div>
+
+              <!-- Description Field -->
+              <div class="mb-4">
+                <label for="description" class="block text-sm font-medium text-gray-700 text-right mb-2">
+                  الوصف
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  [(ngModel)]="formData.description"
+                  rows="3"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-right"
+                  placeholder="أدخل وصف الفئة"
+                  dir="rtl"
+                ></textarea>
+              </div>
+
+              <!-- Image Upload -->
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 text-right mb-2">
+                  صورة الفئة
+                </label>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                  <div *ngIf="imagePreview; else uploadArea" class="relative">
+                    <img
+                      [src]="imagePreview"
+                      alt="Preview"
+                      class="w-full h-32 object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      class="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700"
+                      (click)="removeImage()"
+                      title="إزالة الصورة"
+                      aria-label="إزالة الصورة"
+                    >
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                  <ng-template #uploadArea>
+                    <div class="text-center">
+                      <i class="bi bi-cloud-upload text-gray-400 text-4xl"></i>
+                      <div class="mt-2">
+                        <label for="image-upload" class="cursor-pointer text-blue-600 hover:text-blue-800">
+                          اضغط لرفع صورة
+                          <input
+                            id="image-upload"
+                            type="file"
+                            class="hidden"
+                            accept="image/*"
+                            (change)="onImageChange($event)"
+                          />
+                        </label>
+                      </div>
+                      <p class="text-xs text-gray-500 mt-1">PNG, JPG, JPEG, WebP, SVG (حد أقصى 3MB)</p>
+                    </div>
+                  </ng-template>
+                </div>
+                <div *ngIf="imageError" class="text-red-600 text-sm mt-1 text-right">
+                  {{ imageError }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+          <button
+            type="submit"
+            [disabled]="categoryForm.invalid || isSubmitting"
+            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-yellow-400 text-base font-medium text-black hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <i *ngIf="isSubmitting" class="bi bi-arrow-clockwise animate-spin me-2"></i>
+            {{ category ? 'تحديث' : 'إضافة' }}
+          </button>
+          <button
+            type="button"
+            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+            (click)="onClose()"
+          >
+            إلغاء
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

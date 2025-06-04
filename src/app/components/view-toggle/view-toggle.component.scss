@@ -1,0 +1,57 @@
+.flex {
+  display: flex;
+}
+
+.border {
+  border-width: 1px;
+  border-color: #D1D5DB;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.px-3 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.rounded-none {
+  border-radius: 0;
+}
+
+.bg-yellow-400 {
+  background-color: #FBBF24;
+}
+
+.text-black {
+  color: #000000;
+}
+
+.hover\:bg-yellow-500:hover {
+  background-color: #F59E0B;
+}
+
+.hover\:bg-gray-100:hover {
+  background-color: #F3F4F6;
+}
+
+button {
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.5);
+}

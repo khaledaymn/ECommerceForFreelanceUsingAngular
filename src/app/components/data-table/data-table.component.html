@@ -1,380 +1,370 @@
-<div class="data-table-container" #tableContainer>
-  <!-- Table Header with Search and Controls -->
+<div class="data-table-container">
+  <!-- Header -->
   <div class="table-header">
-    <!-- Search Bar -->
-    <div class="search-container" *ngIf="showSearch">
-      <div class="search-input-wrapper">
-        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"></circle>
-          <path d="m21 21-4.35-4.35"></path>
-        </svg>
-        <input 
-          type="text" 
-          class="search-input"
-          placeholder="البحث في المنتجات..."
-          [(ngModel)]="searchTerm"
-          (keyup.enter)="onSearch()"
-        >
-        <button *ngIf="searchTerm" class="clear-search-button" (click)="onClearSearch()"
-        title="بحث">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-        <button class="search-button" (click)="onSearch()">
-          بحث
-        </button>
-      </div>
+    <div class="header-title">
+      <ng-content select="[slot=title]"></ng-content>
     </div>
+    <div class="header-actions">
+      <ng-content select="[slot=actions]"></ng-content>
 
-    <!-- Table Controls -->
-    <div class="table-controls">
-      <!-- Column Selector -->
-      <div class="column-selector" *ngIf="showColumnSelector">
-        <button class="column-selector-button" (click)="toggleColumnMenu()" [class.active]="columnMenuOpen">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 3v18M3 12h18M3 6h18M3 18h18"></path>
-          </svg>
-          <span>الأعمدة</span>
-        </button>
-        <div class="column-menu" *ngIf="columnMenuOpen" @fadeIn>
-          <div class="column-menu-header">
-            <h4>إظهار/إخفاء الأعمدة</h4>
-            <button 
-              class="close-menu-button" 
-              (click)="toggleColumnMenu()"
-              title="إغلاق القائمة"
-              aria-label="إغلاق القائمة"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-          </div>
-          <div class="column-menu-items">
-            <div class="column-menu-item" *ngFor="let column of columns; trackBy: trackByColumnFn">
-              <label class="checkbox-container">
-                <input type="checkbox" [checked]="!column.hidden" (change)="toggleColumnVisibility(column)">
-                <span class="checkmark"></span>
-                <span class="column-label">{{ column.label }}</span>
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
+      <button
+        *ngIf="enableViewToggle"
+        class="action-btn grid-btn"
+        [class.active]="viewMode === 'grid'"
+        (click)="setViewMode('grid')">
+        <i class="material-icons">grid_view</i>
+        <span class="btn-text">شبكة</span>
+      </button>
+      <button
+        *ngIf="enableViewToggle"
+        class="action-btn table-btn"
+        [class.active]="viewMode === 'table'"
+        (click)="setViewMode('table')">
+        <i class="material-icons">table_rows</i>
+        <span class="btn-text">جدول</span>
+      </button>
     </div>
   </div>
 
-  <!-- Table Content -->
-  <div class="table-content" [class.sticky-header]="stickyHeader">
+  <!-- Search and Filters -->
+  <div class="filters-section" *ngIf="showSearch || showFilters">
+    <div class="search-container" *ngIf="showSearch">
+      <div class="search-box">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()"
+          [placeholder]="searchPlaceholder"
+          class="search-input"
+          title="بحث"
+          placeholder="بحث"
+        />
+        <button class="search-btn" (click)="onSearch()">
+          <i class="material-icons">search</i>
+          <span class="btn-text">بحث</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="filters-row" *ngIf="showFilters">
+      <ng-content select="[slot=filters]"></ng-content>
+    </div>
+  </div>
+
+  <!-- Table View -->
+  <div class="table-container" *ngIf="viewMode === 'table'">
     <table class="data-table">
       <thead>
         <tr>
-          <!-- Selection Column -->
-          <th class="selection-column" *ngIf="selectable">
-            <div class="checkbox-container">
-              <input type="checkbox" [checked]="allSelected" [indeterminate]="someSelected" (change)="toggleAllRows()" title="تحديد الكل" aria-label="تحديد الكل">
-              <span class="checkmark"></span>
-            </div>
+          <th *ngIf="selectable" class="checkbox-col">
+            <input
+              type="checkbox"
+              [checked]="selectAll"
+              (change)="toggleSelectAll($event)"
+              [title]="'تحديد/إلغاء تحديد الكل'"
+              aria-label="تحديد/إلغاء تحديد الكل"
+            />
           </th>
-          
-          <!-- Expansion Column -->
-          <th class="expansion-column" *ngIf="expandable"></th>
-          
-          <!-- Data Columns -->
-          <th *ngFor="let column of visibleColumns; trackBy: trackByColumnFn" 
-              [style.width]="getColumnWidth(column)"
-              [style.min-width]="column.minWidth"
-              [style.max-width]="column.maxWidth"
-              [class.sortable]="column.sortable"
-              [class.resizing]="resizingColumn === column.key"
-              (click)="onSort(column)">
-            <div class="header-content">
-              <span class="header-label">{{ column.label }}</span>
-              <div class="header-actions">
-                <div class="sort-icons" *ngIf="column.sortable">
-                  <svg 
-                    class="sort-icon"
-                    [class.active]="currentSort.column === column.key && currentSort.direction === 'asc'"
-                    width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="18,15 12,9 6,15"></polyline>
-                  </svg>
-                  <svg 
-                    class="sort-icon"
-                    [class.active]="currentSort.column === column.key && currentSort.direction === 'desc'"
-                    width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="6,9 12,15 18,9"></polyline>
-                  </svg>
-                </div>
-              </div>
-            </div>
-            <!-- Resizer -->
-            <div *ngIf="column.resizable" class="column-resizer" (mousedown)="onResizeStart($event, column)"></div>
+          <th
+            *ngFor="let column of columns; let i = index"
+            [class]="'col-' + column.key"
+            [class.sortable]="column.sortable"
+            [style.width]="column.width"
+            [style.text-align]="column.align || 'right'"
+            (click)="onSort(column, i)"
+          >
+            {{ column.title }}
+            <i
+              *ngIf="column.sortable"
+              class="material-icons sort-icon"
+            >{{ getSortIcon(column) }}</i>
           </th>
+          <th *ngIf="actions.length > 0" class="actions-col">إجراءات</th>
         </tr>
       </thead>
-      
       <tbody>
         <!-- Loading State -->
-        <ng-container *ngIf="loading">
-          <tr *ngFor="let i of skeletonRows" class="skeleton-row">
-            <td *ngIf="selectable" class="selection-column">
-              <div class="skeleton-checkbox"></div>
-            </td>
-            <td *ngIf="expandable" class="expansion-column">
-              <div class="skeleton-icon"></div>
-            </td>
-            <td *ngFor="let column of visibleColumns" [attr.colspan]="column.type === 'actions' ? 1 : null">
-              <div class="skeleton-cell" [ngClass]="'skeleton-' + column.type">
-                <div class="skeleton-content"></div>
-              </div>
-            </td>
-          </tr>
-        </ng-container>
-        
-        <!-- Empty State -->
-        <tr *ngIf="!loading && data.length === 0" class="empty-row">
-          <td [attr.colspan]="visibleColumns.length + (selectable ? 1 : 0) + (expandable ? 1 : 0)">
-            <div class="empty-state">
-              <div class="empty-icon">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                  <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
-                  <polyline points="13 2 13 9 20 9"></polyline>
-                </svg>
-              </div>
-              <h3 class="empty-title">{{ emptyStateMessage }}</h3>
-              <p class="empty-description">يمكنك إضافة منتجات جديدة أو تغيير معايير البحث</p>
+        <tr *ngIf="loading">
+          <td [attr.colspan]="columns.length + (selectable ? 1 : 0) + (actions.length > 0 ? 1 : 0)" class="loading-cell">
+            <div class="loading-content">
+              <div class="loading-spinner"></div>
+              <span>جاري التحميل...</span>
             </div>
           </td>
         </tr>
-        
+
+        <!-- Empty State -->
+        <tr *ngIf="!loading && data.length === 0">
+          <td [attr.colspan]="columns.length + (selectable ? 1 : 0) + (actions.length > 0 ? 1 : 0)" class="empty-cell">
+            <div class="empty-content">
+              <i class="material-icons">inbox</i>
+              <span>{{ emptyMessage }}</span>
+            </div>
+          </td>
+        </tr>
+
         <!-- Data Rows -->
-        <ng-container *ngIf="!loading && data.length > 0">
-          <ng-container *ngFor="let item of data; let i = index; trackBy: trackByFn">
-            <!-- Main Row -->
-            <tr class="data-row" 
-                [class.selected]="isSelected(i)"
-                [class.expanded]="isExpanded(i)"
-                (click)="onRowClick(item, i)">
-              
-              <!-- Selection Column -->
-              <td class="selection-column" *ngIf="selectable">
-                <div class="checkbox-container">
-                  <input 
-                  type="checkbox" 
-                  [checked]="isSelected(i)" 
-                  (change)="toggleRow(i, $event)" 
-                  (click)="$event.stopPropagation()"
-                  placeholder="تحديد الصف"
-                  title="تحديد الصف"
-                  >
-                  <span class="checkmark"></span>
-                </div>
-              </td>
-              
-              <!-- Expansion Column -->
-              <td class="expansion-column" *ngIf="expandable">
-                <button 
-                class="expand-button" 
-                [class.expanded]="isExpanded(i)"
-                (click)="toggleRowExpansion(i, $event)"
-                title="توسيع الصف"
-                aria-label="توسيع الصف">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="6,9 12,15 18,9"></polyline>
-                  </svg>
+        <tr
+          *ngFor="let item of data; let i = index"
+          [class.selected]="isSelected(item)"
+          (click)="onRowClick(item)"
+        >
+          <td *ngIf="selectable" class="checkbox-col">
+            <input
+              type="checkbox"
+              [checked]="isSelected(item)"
+              (change)="toggleItemSelection(item, $event)"
+              (click)="$event.stopPropagation()"
+              placeholder="تحديد العنصر"
+              title="تحديد العنصر"
+            />
+          </td>
+
+          <td
+            *ngFor="let column of columns"
+            [class]="'col-' + column.key"
+            [style.text-align]="column.align || 'right'"
+          >
+            <!-- Image Type -->
+            <div *ngIf="column.type === 'image'" class="cell-image">
+              <img
+                [src]="getCellValue(item, column) || '/placeholder.svg'"
+                alt="{{item.name }}|| 'صورة'"
+                class="table-image"
+              />
+            </div>
+
+            <!-- Badge Type -->
+            <span
+              *ngIf="column.type === 'badge'"
+              class="status-badge"
+              [class]="getStatusClass(getCellValue(item, column))"
+            >
+              {{ getCellValue(item, column) }}
+            </span>
+
+            <!-- Currency Type -->
+            <span
+              *ngIf="column.type === 'currency'"
+              class="currency-value"
+            >
+              {{ formatCurrency(getCellValue(item, column)) }}
+            </span>
+
+            <!-- Date Type -->
+            <span
+              *ngIf="column.type === 'date'"
+              class="date-value"
+            >
+              {{ formatDate(getCellValue(item, column)) }}
+            </span>
+
+            <!-- Text Type (Default) -->
+            <span
+              *ngIf="!column.type || column.type === 'text'"
+              class="text-value"
+              [title]="getCellValue(item, column)"
+            >
+              {{ getCellValue(item, column) }}
+            </span>
+          </td>
+
+          <td *ngIf="actions.length > 0" class="actions-col">
+            <div class="actions-menu" [class.open]="activeMenu === i">
+              <button
+                class="menu-trigger"
+                (click)="toggleMenu(i, $event)"
+              >
+                <i class="material-icons">more_vert</i>
+              </button>
+              <div class="menu-dropdown" *ngIf="activeMenu === i">
+                <button
+                  *ngFor="let action of actions"
+                  class="menu-item"
+                  [class.danger]="action.type === 'danger'"
+                  (click)="onActionClick(action.action, item)"
+                >
+                  <i class="material-icons">{{ action.icon }}</i>
+                  {{ action.label }}
                 </button>
-              </td>
-              
-              <!-- Data Columns -->
-              <td *ngFor="let column of visibleColumns; trackBy: trackByColumnFn" 
-                  [class]="'cell-' + column.type"
-                  [style.width]="getColumnWidth(column)">
-                <ng-container [ngSwitch]="column.type">
-                  <!-- Image Type -->
-                  <div *ngSwitchCase="'image'" class="image-cell">
-                    <img 
-                      *ngIf="getNestedValue(item, column.key)" 
-                      [src]="getNestedValue(item, column.key)" 
-                      alt="{{item.name}} || 'صورة المنتج'" 
-                      class="product-image"
-                      loading="lazy"
-                    >
-                    <div *ngIf="!getNestedValue(item, column.key)" class="no-image">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                        <polyline points="21,15 16,10 5,21"></polyline>
-                      </svg>
-                    </div>
-                  </div>
-                  
-                  <!-- Currency Type -->
-                  <span *ngSwitchCase="'currency'" class="currency-cell">
-                    {{ getNestedValue(item, column.key) | currency:'SAR':'symbol':'1.0-0':'ar' }}
-                  </span>
-                  
-                  <!-- Date Type -->
-                  <span *ngSwitchCase="'date'" class="date-cell">
-                    {{ getNestedValue(item, column.key) | date:'dd/MM/yyyy':'':'ar' }}
-                  </span>
-                  
-                  <!-- Custom Type for Additional Attributes -->
-                  <div *ngSwitchCase="'custom'" class="custom-cell">
-                    <ng-container *ngIf="column.key === 'additionalAttributes'">
-                      <div class="attributes-list">
-                        <span 
-                          *ngFor="let attr of parseAdditionalAttributes(getNestedValue(item, column.key)) | keyvalue" 
-                          class="attribute-tag">
-                          {{ attr.key }}: {{ attr.value }}
-                        </span>
-                      </div>
-                    </ng-container>
-                  </div>
-                  
-                  <!-- Actions Type -->
-                  <div *ngSwitchCase="'actions'" class="actions-cell">
-                    <button class="action-menu-button" (click)="toggleDropdown(i, $event)" [class.active]="activeDropdown === i" title="إجراءات الصف" aria-label="إجراءات الصف">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="1"></circle>
-                        <circle cx="12" cy="5" r="1"></circle>
-                        <circle cx="12" cy="19" r="1"></circle>
-                      </svg>
-                    </button>
-                    <div class="action-dropdown" *ngIf="activeDropdown === i" @fadeIn>
-                      <div class="action-dropdown-content">
-                        <button 
-                          *ngFor="let action of rowActions" 
-                          class="action-item"
-                          [class.disabled]="isActionDisabled(action, item)"
-                          [style.color]="action.color"
-                          (click)="executeAction(action, item, $event)">
-                          <svg *ngIf="action.icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <ng-container [ngSwitch]="action.icon">
-                              <!-- Edit icon -->
-                              <g *ngSwitchCase="'edit'">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                              </g>
-                              <!-- Delete icon -->
-                              <g *ngSwitchCase="'delete'">
-                                <path d="M3 6h18"></path>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                              </g>
-                              <!-- View icon -->
-                              <g *ngSwitchCase="'view'">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" y1="8" x2="12" y2="16"></line>
-                                <line x1="8" y1="12" x2="16" y2="12"></line>
-                              </g>
-                              <!-- Default icon -->
-                              <g *ngSwitchDefault>
-                                <circle cx="12" cy="12" r="10"></circle>
-                              </g>
-                            </ng-container>
-                          </svg>
-                          <span>{{ action.label }}</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Default Text Type -->
-                  <span *ngSwitchDefault class="text-cell">
-                    {{ getNestedValue(item, column.key) }}
-                  </span>
-                </ng-container>
-              </td>
-            </tr>
-            
-            <!-- Expanded Row -->
-            <tr *ngIf="expandable && isExpanded(i)" class="expanded-row">
-              <td [attr.colspan]="visibleColumns.length + (selectable ? 1 : 0) + (expandable ? 1 : 0)">
-                <div class="expanded-content" [@detailExpand]="isExpanded(i) ? 'expanded' : 'collapsed'">
-                  <ng-container *ngTemplateOutlet="expandTemplate; context: { $implicit: item, index: i }"></ng-container>
-                </div>
-              </td>
-            </tr>
-          </ng-container>
-        </ng-container>
+              </div>
+            </div>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- Pagination -->
-  <div class="pagination-container" *ngIf="showPagination && !loading && data.length > 0">
-    <div class="pagination-info">
-      <span>عرض {{ startIndex }} إلى {{ endIndex }} من {{ totalCount }} عنصر</span>
+  <!-- Grid View -->
+  <div class="grid-container" *ngIf="viewMode === 'grid'">
+    <!-- Loading State -->
+    <div class="loading-grid" *ngIf="loading">
+      <div class="loading-spinner"></div>
+      <span>جاري التحميل...</span>
     </div>
-    
-    <div class="pagination-controls">
-      <div class="page-size-selector">
-        <span class="page-size-label">عناصر لكل صفحة:</span>
-        <select 
-          class="page-size-select" 
-          [value]="pageSize" 
-          (change)="onPageSizeChange(+$any($event.target).value)"
-          aria-label="تحديد عدد العناصر لكل صفحة"
-          title="تحديد عدد العناصر لكل صفحة">
-          <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
-        </select>
-      </div>
-      
-      <div class="page-navigation">
-        <button 
-          class="page-button first-page-button" 
-          [disabled]="pageIndex === 1"
-          (click)="onPageChange(1)"
-          aria-label="الصفحة الأولى">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="11 17 6 12 11 7"></polyline>
-            <polyline points="18 17 13 12 18 7"></polyline>
-          </svg>
-        </button>
-        
-        <button 
-          class="page-button prev-page-button" 
-          [disabled]="pageIndex === 1"
-          (click)="onPageChange(pageIndex - 1)"
-          aria-label="الصفحة السابقة">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-        </button>
-        
-        <div class="page-numbers">
-          <button 
-            *ngFor="let pageNum of pageNumbers"
-            class="page-number-button" 
-            [class.active]="pageNum === pageIndex"
-            (click)="onPageChange(pageNum)">
-            {{ pageNum }}
-          </button>
+
+    <!-- Empty State -->
+    <div class="empty-grid" *ngIf="!loading && data.length === 0">
+      <i class="material-icons">inbox</i>
+      <span>{{ emptyMessage }}</span>
+    </div>
+
+    <!-- Grid Cards -->
+    <div
+      class="grid-card"
+      *ngFor="let item of data; let i = index"
+      [class.selected]="isSelected(item)"
+      (click)="onRowClick(item)"
+    >
+      <div class="card-header">
+        <div class="card-checkbox" *ngIf="selectable">
+          <input
+            type="checkbox"
+            [checked]="isSelected(item)"
+            (change)="toggleItemSelection(item, $event)"
+            (click)="$event.stopPropagation()"
+            placeholder="تحديد العنصر"
+            title="تحديد العنصر"
+          />
         </div>
-        
-        <button 
-          class="page-button next-page-button" 
-          [disabled]="pageIndex === totalPages"
-          (click)="onPageChange(pageIndex + 1)"
-          aria-label="الصفحة التالية">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </button>
-        
-        <button 
-          class="page-button last-page-button" 
-          [disabled]="pageIndex === totalPages"
-          (click)="onPageChange(totalPages)"
-          aria-label="الصفحة الأخيرة">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="13 17 18 12 13 7"></polyline>
-            <polyline points="6 17 11 12 6 7"></polyline>
-          </svg>
+        <div class="card-actions" *ngIf="actions.length > 0">
+          <div class="actions-menu" [class.open]="activeMenu === i">
+            <button
+              class="menu-trigger"
+              (click)="toggleMenu(i, $event)"
+            >
+              <i class="material-icons">more_vert</i>
+            </button>
+            <div class="menu-dropdown" *ngIf="activeMenu === i">
+              <button
+                *ngFor="let action of actions"
+                class="menu-item"
+                [class.danger]="action.type === 'danger'"
+                (click)="onActionClick(action.action, item)"
+              >
+                <i class="material-icons">{{ action.icon }}</i>
+                {{ action.label }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-content">
+        <!-- Default card content -->
+        <div class="default-card-content">
+          <div class="card-image" *ngIf="getImageColumn()">
+            <img
+              [src]="getCellValue(item, getImageColumn()!) || '/placeholder.svg'"
+              alt="item.name || 'صورة'"
+              class="card-img"
+            />
+          </div>
+
+          <div class="card-info">
+            <h3 class="card-title">{{ item.name || item.title || 'عنصر' }}</h3>
+            <p class="card-description">{{ item.description || '' }}</p>
+
+            <div class="card-details">
+              <div
+                *ngFor="let column of getDisplayColumns()"
+                class="detail-item"
+              >
+                <span class="detail-label">{{ column.title }}:</span>
+                <span class="detail-value">
+                  <span
+                    *ngIf="column.type === 'badge'"
+                    class="status-badge"
+                    [class]="getStatusClass(getCellValue(item, column))"
+                  >
+                    {{ getCellValue(item, column) }}
+
+                  </span>
+                  <span
+                    *ngIf="column.type === 'currency'"
+                    class="currency-value"
+                  >
+                    {{ formatCurrency(getCellValue(item, column)) }}
+                  </span>
+                  <span *ngIf="!column.type || column.type === 'text'">
+                    {{ getCellValue(item, column) }}
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Always Visible Pagination -->
+  <div class="pagination-container">
+    <div class="pagination-info">
+      <span>عرض {{ startItem }} إلى {{ endItem }} من {{ totalItems }} عنصر</span>
+    </div>
+
+    <div class="pagination-controls">
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 1"
+        (click)="goToFirstPage()"
+        title="الصفحة الأولى"
+      >
+        <i class="material-icons">first_page</i>
+      </button>
+
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 1"
+        (click)="goToPreviousPage()"
+        title="الصفحة السابقة"
+      >
+        <i class="material-icons">chevron_right</i>
+      </button>
+
+      <div class="pagination-pages">
+        <button
+          *ngFor="let page of pageNumbers"
+          class="page-btn"
+          [class.active]="page === currentPage"
+          [class.ellipsis]="page === -1"
+          [disabled]="page === -1"
+          (click)="page !== -1 && onPageChange(page)"
+        >
+          {{ page === -1 ? '...' : page }}
         </button>
       </div>
+
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === totalPages"
+        (click)="goToNextPage()"
+        title="الصفحة التالية"
+      >
+        <i class="material-icons">chevron_left</i>
+      </button>
+
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === totalPages"
+        (click)="goToLastPage()"
+        title="الصفحة الأخيرة"
+      >
+        <i class="material-icons">last_page</i>
+      </button>
+    </div>
+
+    <div class="page-size-selector">
+      <span>عناصر لكل صفحة:</span>
+      <select
+        [ngModel]="pageSize"
+        (ngModelChange)="onPageSizeChange($event)"
+        aria-label="تحديد عدد العناصر لكل صفحة"
+        title="تحديد عدد العناصر لكل صفحة"
+      >
+        <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }}</option>
+      </select>
     </div>
   </div>
 </div>

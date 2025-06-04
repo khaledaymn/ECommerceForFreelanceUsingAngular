@@ -7,6 +7,7 @@ import { OrderService } from "../../services/order.service";
 import { Order, OrderStatus, OrdersFilter } from "../../interfaces/order.interface";
 import { OrderDetailsComponent } from "./order-details/order-details.component";
 import { OrderStatusBadgeComponent } from "./order-status-badge/order-status-badge.component";
+import { PaginationComponent } from "../../components/pagination/pagination.component";
 
 @Component({
   selector: "app-orders",
@@ -181,7 +182,7 @@ export class OrdersComponent implements OnInit,OnChanges  {
       this.pageIndex = newPageIndex;
       console.log("Changing to page:", newPageIndex);
       this.loadOrders();
-      
+
       // Scroll to top of container when changing pages
       const container = document.querySelector(".orders-container");
       if (container) {

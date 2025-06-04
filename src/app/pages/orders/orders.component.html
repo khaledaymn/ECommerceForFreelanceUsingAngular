@@ -6,7 +6,7 @@
       <p class="header-subtitle" *ngIf="!isMobile">إدارة وتتبع جميع الطلبات في النظام</p>
     </div>
     <div class="header-actions">
-      
+
       <button class="action-btn grid-btn" [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')">
         <span class="material-icons">grid_view</span>
         <span *ngIf="!isMobile">شبكة</span>
@@ -22,9 +22,9 @@
   <div class="filters-section">
     <div class="search-container">
       <div class="search-box">
-        <input 
-          type="text" 
-          [formControl]="searchControl" 
+        <input
+          type="text"
+          [formControl]="searchControl"
           placeholder="البحث في الطلبات..."
           class="search-input"
         />
@@ -110,7 +110,7 @@
           <td class="checkbox-col">
             <input type="checkbox" [checked]="selectedOrders.has(order.orderID)" (change)="toggleOrderSelection(order.orderID, $event)">
           </td>
-          
+
           <td class="product-name" [title]="getProductName(order)">{{ getProductName(order) }}</td>
           <td class="user-name" [title]="getUserName(order)">{{ getUserName(order) }}</td>
           <td class="description" [title]="getProductDescription(order)">{{ getProductDescription(order) }}</td>
@@ -156,7 +156,7 @@
       <div class="loading-spinner"></div>
       <span>جاري تحميل الطلبات...</span>
     </div>
-    
+
     <div class="empty-grid" *ngIf="!isLoading && orders.length === 0">
       <span class="material-icons">inbox</span>
       <span>لا توجد طلبات متاحة</span>
@@ -199,28 +199,28 @@
         <div class="card-image">
           <span class="material-icons">image</span>
         </div>
-        
+
         <div class="card-info">
           <h3 class="card-title">{{ getProductName(order) }}</h3>
           <p class="card-description">{{ getProductDescription(order) }}</p>
-          
+
           <div class="card-details">
             <div class="detail-item">
               <span class="detail-label">رقم الطلب:</span>
               <span class="detail-value">#{{ order.orderID }}</span>
             </div>
-            
+
             <div class="detail-item">
               <span class="detail-label">المبلغ:</span>
               <span class="detail-value amount">{{ order.totalAmount | currency:'SAR':'symbol':'1.0-0' }} ر.س.</span>
             </div>
-            
+
             <div class="detail-item">
               <span class="detail-label">التاريخ:</span>
               <span class="detail-value">{{ formatArabicDate(order.orderDate) }}</span>
             </div>
           </div>
-          
+
           <div class="card-status">
             <app-order-status-badge [status]="order.status"></app-order-status-badge>
           </div>
@@ -235,63 +235,63 @@
       <span *ngIf="!isMobile">عرض {{ startItem }} إلى {{ endItem }} من {{ totalCount }} عنصر</span>
       <span *ngIf="isMobile">{{ startItem }}-{{ endItem }} من {{ totalCount }}</span>
     </div>
-    
+
     <div class="pagination-controls">
-      <button 
-        class="pagination-btn" 
-        [disabled]="!hasPrevious" 
+      <button
+        class="pagination-btn"
+        [disabled]="!hasPrevious"
         (click)="goToFirstPage()"
         title="الصفحة الأولى"
       >
         <span class="material-icons">first_page</span>
       </button>
-      
-      <button 
-        class="pagination-btn" 
-        [disabled]="!hasPrevious" 
+
+      <button
+        class="pagination-btn"
+        [disabled]="!hasPrevious"
         (click)="goToPreviousPage()"
         title="الصفحة السابقة"
       >
         <span class="material-icons">chevron_right</span>
       </button>
-      
+
       <div class="pagination-pages">
-        <button 
-          *ngFor="let page of pageNumbers" 
-          class="page-btn" 
+        <button
+          *ngFor="let page of pageNumbers"
+          class="page-btn"
           [class.active]="page === pageIndex"
           [class.ellipsis]="page === -1"
           [disabled]="page === -1"
           (click)="page !== -1 && onPageChange(page)"
         >
-          {{ page === -1 ? '...' : page }} 
-          
+          {{ page === -1 ? '...' : page }}
+
         </button>
       </div>
-      
-      <button 
-        class="pagination-btn" 
-        [disabled]="!hasNext" 
+
+      <button
+        class="pagination-btn"
+        [disabled]="!hasNext"
         (click)="goToNextPage()"
         title="الصفحة التالية"
       >
         <span class="material-icons">chevron_left</span>
       </button>
-      
-      <button 
-        class="pagination-btn" 
-        [disabled]="!hasNext" 
+
+      <button
+        class="pagination-btn"
+        [disabled]="!hasNext"
         (click)="goToLastPage()"
         title="الصفحة الأخيرة"
       >
         <span class="material-icons">last_page</span>
       </button>
     </div>
-    
+
     <div class="page-size-selector">
       <span>عناصر لكل صفحة:</span>
-      <select 
-        [ngModel]="pageSize" 
+      <select
+        [ngModel]="pageSize"
         (ngModelChange)="onPageSizeChange($event)"
       >
         <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }}</option>
@@ -302,9 +302,9 @@
   <!-- Order Details Modal -->
   <div class="modal-overlay" *ngIf="showDetails" (click)="closeDetails()">
     <div class="modal-content" (click)="$event.stopPropagation()">
-      <app-order-details 
-        *ngIf="selectedOrder" 
-        [order]="selectedOrder" 
+      <app-order-details
+        *ngIf="selectedOrder"
+        [order]="selectedOrder"
         (close)="closeDetails()"
         (updateStatus)="updateOrderStatus($event.orderId, $event.status)"
       ></app-order-details>

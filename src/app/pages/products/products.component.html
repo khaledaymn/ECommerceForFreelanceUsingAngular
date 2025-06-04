@@ -1,736 +1,104 @@
-<div class="products-page" @slideIn>
-  <!-- Page Header -->
-  <div class="page-header">
-    <div class="header-main">
-      <div class="header-content">
-        <div class="title-section">
-          <h1 class="page-title">إدارة المنتجات</h1>
-          <p class="page-description">عرض وإدارة جميع المنتجات في النظام</p>
-        </div>
-
-        <!-- Statistics Cards -->
-        <div class="stats-grid" @fadeIn>
-          <div class="stat-card">
-            <div class="stat-icon total">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M20 7h-9"></path>
-                <path d="M14 17H5"></path>
-                <circle cx="17" cy="17" r="3"></circle>
-                <circle cx="7" cy="7" r="3"></circle>
-              </svg>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value">
-                {{ stats.total | number : "1.0-0" : "ar" }}
-              </div>
-              <div class="stat-label">إجمالي المنتجات</div>
-            </div>
-          </div>
-
-          <!-- <div class="stat-card">
-            <div class="stat-icon available">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <polyline points="20,6 9,17 4,12"></polyline>
-              </svg>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value">
-                {{ stats.available | number : "1.0-0" : "ar" }}
-              </div>
-              <div class="stat-label">متاح</div>
-            </div>
-          </div> -->
-
-          <!-- <div class="stat-card">
-            <div class="stat-icon out-of-stock">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="15" y1="9" x2="9" y2="15"></line>
-                <line x1="9" y1="9" x2="15" y2="15"></line>
-              </svg>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value">
-                {{ stats.outOfStock | number : "1.0-0" : "ar" }}
-              </div>
-              <div class="stat-label">غير متاح</div>
-            </div>
-          </div> -->
-
-          <div class="stat-card">
-            <div class="stat-icon value">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <line x1="12" y1="1" x2="12" y2="23"></line>
-                <path
-                  d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
-                ></path>
-              </svg>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value">{{ formatPrice(stats.totalValue) }}</div>
-              <div class="stat-label">إجمالي القيمة</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Header Actions -->
-      <div class="header-actions">
-        <button
-          class="action-button secondary"
-          (click)="refreshData()"
-          [disabled]="loading"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <polyline points="23,4 23,10 17,10"></polyline>
-            <polyline points="1,20 1,14 7,14"></polyline>
-            <path
-              d="M20.49,9A9,9,0,0,0,5.64,5.64L1,10m22,4L18.36,18.36A9,9,0,0,1,3.51,15"
-            ></path>
-          </svg>
-          <span>تحديث</span>
-        </button>
-
-        <button class="action-button secondary" (click)="importProducts()">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-            ></path>
-            <polyline points="14,2 14,8 20,8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="12" y1="18" x2="12" y2="8"></line>
-          </svg>
-          <span>استيراد</span>
-        </button>
-
-        <button class="action-button secondary" (click)="exportAllProducts()">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-            ></path>
-            <polyline points="14,2 14,8 20,8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="12" y1="18" x2="12" y2="8"></line>
-          </svg>
-          <span>تصدير</span>
-        </button>
-
-        <button class="action-button primary" (click)="addNewProduct()">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          <span>إضافة منتج جديد</span>
-        </button>
-      </div>
-    </div>
+<app-data-table
+  [columns]="columns"
+  [data]="filteredProducts"
+  [loading]="loading"
+  [actions]="actions"
+  [selectable]="false"
+  [viewMode]="viewMode"
+  [enableViewToggle]="true"
+  searchPlaceholder="البحث في المنتجات..."
+  emptyMessage="لا توجد منتجات متاحة"
+  [currentPage]="currentPage"
+  [totalPages]="totalPages"
+  [totalItems]="totalItems"
+  [pageSize]="pageSize"
+  (searchChange)="onSearch($event)"
+  (sortChange)="onSort($event)"
+  (rowClick)="onRowClick($event)"
+  (actionClick)="onActionClick($event)"
+  (viewModeChange)="onViewModeChange($event)"
+  (pageChange)="onPageChange($event)"
+  (pageSizeChange)="onPageSizeChange($event)"
+>
+  <div slot="title">
+    <h1>إدارة المنتجات</h1>
+    <p class="header-subtitle">إدارة وتنظيم جميع المنتجات</p>
   </div>
 
-  <!-- Toolbar -->
-  <div class="toolbar" @fadeIn>
-    <div class="toolbar-left">
-      <!-- View Mode Toggle -->
-      <div class="view-toggle">
-        <button
-          class="view-button"
-          [class.active]="viewMode === 'table'"
-          (click)="viewMode = 'table'"
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M9 3H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"
-            ></path>
-            <path
-              d="M19 3h-4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"
-            ></path>
-            <path
-              d="M9 13H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2z"
-            ></path>
-            <path
-              d="M19 13h-4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2z"
-            ></path>
-          </svg>
-          <span>جدول</span>
-        </button>
-        <button
-          class="view-button"
-          [class.active]="viewMode === 'grid'"
-          (click)="viewMode = 'grid'"
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <rect x="3" y="3" width="7" height="7"></rect>
-            <rect x="14" y="3" width="7" height="7"></rect>
-            <rect x="14" y="14" width="7" height="7"></rect>
-            <rect x="3" y="14" width="7" height="7"></rect>
-          </svg>
-          <span>شبكة</span>
-        </button>
-      </div>
+  <div slot="actions">
+    <button class="action-btn export-btn" (click)="openAddModal()">
+      <i class="material-icons">add</i>
+      <span class="btn-text">إضافة منتج</span>
+    </button>
+  </div>
 
-      <!-- Filters Toggle -->
-      <button
-        class="filter-button"
-        [class.active]="showFilters"
-        (click)="toggleFilters()"
-      >
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"></polygon>
-        </svg>
-        <span>الفلاتر</span>
-        <span
-          class="filter-count"
-          *ngIf="
-            activeFilters.category ||
-            activeFilters.brand ||
-            activeFilters.status
-          "
-        >
-          {{
-            (activeFilters.category ? 1 : 0) +
-              (activeFilters.brand ? 1 : 0) +
-              (activeFilters.status ? 1 : 0)
-          }}
-        </span>
+  <div slot="filters">
+    <div class="filter-group">
+      <button class="filter-btn" (click)="toggleFilter('status')">
+        الحالة
+        <i class="material-icons">expand_more</i>
       </button>
+      <div class="filter-dropdown" *ngIf="activeFilter === 'status'">
+        <div class="filter-option" (click)="onStatusFilterChange('')">
+          <span>جميع الحالات</span>
+        </div>
+        <div class="filter-option" (click)="onStatusFilterChange('متوفر')">
+          <span>متوفر</span>
+        </div>
+        <div class="filter-option" (click)="onStatusFilterChange('غير متوفر')">
+          <span>غير متوفر</span>
+        </div>
+        <div class="filter-option" (click)="onStatusFilterChange('قريباً')">
+          <span>قريباً</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Bulk Actions -->
-    <div class="bulk-actions" *ngIf="showBulkActions" @scaleIn>
-      <div class="bulk-info">
-        <span>{{ selectedProducts.length }} عنصر محدد</span>
-      </div>
-      <div class="bulk-buttons">
-        <button
-          *ngFor="let action of bulkActions"
-          class="bulk-action-button"
-          [style.color]="action.color"
-          (click)="action.action()"
-        >
-          {{ action.label }}
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Filters Panel -->
-  <div class="filters-panel" *ngIf="showFilters" @slideIn>
-    <div class="filters-content">
-      <div class="filter-group">
-        <label class="filter-label">الفئة</label>
-        <select
-          class="filter-select"
-          [(ngModel)]="activeFilters.category"
-          (change)="applyFilters()"
-          aria-label="تصفية حسب الفئة"
-          title="تصفية حسب الفئة"
-        >
-          <option value="">جميع الفئات</option>
-          <option *ngFor="let category of categories" [value]="category">
-            {{ category }}
-          </option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label class="filter-label" for="brand-filter-select"
-          >العلامة التجارية</label
-        >
-        <select
-          id="brand-filter-select"
-          class="filter-select"
-          [(ngModel)]="activeFilters.brand"
-          (change)="applyFilters()"
-          aria-label="تصفية حسب العلامة التجارية"
-          title="تصفية حسب العلامة التجارية"
-        >
-          <option value="">جميع العلامات</option>
-          <option *ngFor="let brand of brands" [value]="brand">
-            {{ brand }}
-          </option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label class="filter-label" for="status-filter-select">الحالة</label>
-        <select
-          id="status-filter-select"
-          class="filter-select"
-          [(ngModel)]="activeFilters.status"
-          (change)="applyFilters()"
-          aria-label="تصفية حسب الحالة"
-        >
-          <option value="">جميع الحالات</option>
-          <option *ngFor="let status of statuses" [value]="status">
-            {{ status }}
-          </option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">نطاق السعر</label>
-        <div class="price-range">
-          <input
-          type="number"
-          class="price-input"
-          placeholder="من"
-          [(ngModel)]="activeFilters.priceRange.min"
-          (change)="applyFilters()"
-          />
-          <br>
-          <span class="price-separator">إلى</span>
-          <input
-            type="number"
-            class="price-input"
-            placeholder="إلى"
-            [(ngModel)]="activeFilters.priceRange.max"
-            (change)="applyFilters()"
-          />
+    <div class="filter-group">
+      <button class="filter-btn" (click)="toggleFilter('category')">
+        الفئة
+        <i class="material-icons">expand_more</i>
+      </button>
+      <div class="filter-dropdown" *ngIf="activeFilter === 'category'">
+        <div class="filter-option" (click)="onCategoryFilterChange('')">
+          <span>جميع الفئات</span>
         </div>
-      </div>
-      <div class="filter-actions">
-        <button class="clear-filters-button" (click)="clearFilters()">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-          مسح الفلاتر
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Content Area -->
-  <div class="content-area">
-    <!-- Table View -->
-    <div class="table-view" *ngIf="viewMode === 'table'" @fadeIn>
-      <app-data-table
-        [columns]="tableColumns"
-        [data]="products"
-        [loading]="loading"
-        [totalCount]="totalCount"
-        [pageSize]="currentParams.pageSize"
-        [pageIndex]="currentParams.pageIndex"
-        [showPagination]="true"
-        [showSearch]="true"
-        [rowActions]="rowActions"
-        [selectable]="true"
-        [expandable]="true"
-        [expandTemplate]="expandedRowTemplate"
-        [stickyHeader]="true"
-        (sort)="onSort($event)"
-        (pageChange)="onPageChange($event)"
-        (search)="onSearch($event)"
-        (rowSelect)="onRowSelect($event)"
-        (columnChange)="onColumnChange($event)"
-      >
-      </app-data-table>
-    </div>
-
-    <!-- Grid View -->
-    <div class="grid-view" *ngIf="viewMode === 'grid'" @fadeIn>
-      <div class="grid-container">
-        <!-- Loading State -->
-        <div class="grid-loading" *ngIf="loading">
-          <div class="grid-skeleton" *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8]">
-            <div class="skeleton-image"></div>
-            <div class="skeleton-content">
-              <div class="skeleton-line"></div>
-              <div class="skeleton-line short"></div>
-              <div class="skeleton-line"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Empty State -->
-        <div class="grid-empty" *ngIf="!loading && products.length === 0">
-          <div class="empty-icon">
-            <svg
-              width="64"
-              height="64"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1"
-            >
-              <path
-                d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"
-              ></path>
-              <polyline points="13 2 13 9 20 9"></polyline>
-            </svg>
-          </div>
-          <h3>لا توجد منتجات</h3>
-          <p>يمكنك إضافة منتجات جديدة أو تغيير معايير البحث</p>
-        </div>
-
-        <!-- Product Cards -->
-        <div
-          class="product-card"
-          *ngFor="let product of products; trackBy: trackByFn"
-          @scaleIn
-        >
-          <div class="card-image">
-            <img
-              [src]="getProductImageUrl(product)"
-              alt="{{ product.name }} || 'صورة المنتج'"
-              [title]="product.name || 'صورة المنتج'"
-              loading="lazy"
-            />
-            <div class="card-overlay">
-              <button
-                class="quick-action"
-                (click)="viewProduct(product)"
-                title="عرض التفاصيل"
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
-              <button
-                class="quick-action"
-                (click)="editProduct(product)"
-                title="تعديل"
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path
-                    d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-                  ></path>
-                  <path
-                    d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-                  ></path>
-                </svg>
-              </button>
-            </div>
-            <div
-              class="status-badge"
-              [style.background-color]="getStatusColor(product.status)"
-              [class]="getStatusBadgeClass(product.status)"
-            >
-              {{ product.status }}
-            </div>
-          </div>
-
-          <div class="card-content">
-            <h3 class="card-title" [title]="product.name">
-              {{ truncateText(product.name, 50) }}
-            </h3>
-            <p class="card-description" [title]="product.description">
-              {{ truncateText(product.description, 80) }}
-            </p>
-
-            <div class="card-meta">
-              <div class="meta-item">
-                <span class="meta-label">الفئة:</span>
-                <span class="meta-value">{{
-                  product.categoryName || "غير محدد"
-                }}</span>
-              </div>
-              <div class="meta-item">
-                <span class="meta-label">العلامة:</span>
-                <span class="meta-value">{{
-                  product.brandName || "غير محدد"
-                }}</span>
-              </div>
-              <div
-                class="meta-item"
-                *ngIf="getAttributesCount(product.additionalAttributes) > 0"
-              >
-                <span class="meta-label">المواصفات:</span>
-                <span class="meta-value"
-                  >{{
-                    getAttributesCount(product.additionalAttributes)
-                  }}
-                  خاصية</span
-                >
-              </div>
-            </div>
-
-            <div class="card-footer">
-              <div class="card-price">
-                {{ formatPrice(safeNumber(product.price)) }}
-              </div>
-              <div class="card-actions">
-                <button
-                  class="card-action-button"
-                  (click)="duplicateProduct(product)"
-                  title="نسخ المنتج"
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <rect
-                      x="9"
-                      y="9"
-                      width="13"
-                      height="13"
-                      rx="2"
-                      ry="2"
-                    ></rect>
-                    <path
-                      d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
-                    ></path>
-                  </svg>
-                </button>
-                <button
-                  class="card-action-button delete"
-                  (click)="deleteProduct(product)"
-                  title="حذف المنتج"
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path d="M3 6h18"></path>
-                    <path
-                      d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                    ></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Grid Pagination -->
-      <div class="grid-pagination" *ngIf="!loading && products.length > 0">
-        <div class="pagination-info">
-          <span
-            >عرض {{ getPaginationInfo().start }} إلى
-            {{ getPaginationInfo().end }} من
-            {{ getPaginationInfo().total }} منتج</span
-          >
-        </div>
-        <div class="pagination-controls">
-          <button
-            class="pagination-button"
-            [disabled]="currentParams.pageIndex === 1"
-            (click)="
-              onPageChange({
-                pageIndex: currentParams.pageIndex - 1,
-                pageSize: currentParams.pageSize
-              })
-            "
-          >
-            السابق
-          </button>
-          <span class="page-info"
-            >صفحة {{ currentParams.pageIndex }} من {{ getTotalPages() }}</span
-          >
-          <button
-            class="pagination-button"
-            [disabled]="currentParams.pageIndex >= getTotalPages()"
-            (click)="
-              onPageChange({
-                pageIndex: currentParams.pageIndex + 1,
-                pageSize: currentParams.pageSize
-              })
-            "
-          >
-            التالي
-          </button>
+        <div class="filter-option" *ngFor="let category of categories" (click)="onCategoryFilterChange(category.id.toString())">
+          <span>{{ category.name }}</span>
         </div>
       </div>
     </div>
   </div>
-</div>
+</app-data-table>
 
-<!-- Expanded Row Template -->
-<ng-template #expandedRowTemplate let-product let-index="index">
-  <div class="expanded-product-details">
-    <div class="details-grid">
-      <div class="detail-section">
-        <h4>معلومات أساسية</h4>
-        <div class="detail-item">
-          <span class="detail-label">الرقم التعريفي:</span>
-          <span class="detail-value">{{ product.id || "غير محدد" }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">تاريخ الإنشاء:</span>
-          <span class="detail-value">{{ formatDate(product.createdAt) }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">السعر:</span>
-          <span class="detail-value">{{
-            formatPrice(safeNumber(product.price))
-          }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">الحالة:</span>
-          <span
-            class="detail-value"
-            [style.color]="getStatusColor(product.status)"
-            >{{ product.status }}</span
-          >
-        </div>
-      </div>
+<!-- Product Modal -->
+<app-product-modal
+  *ngIf="isModalOpen"
+  [isOpen]="isModalOpen"
+  [product]="editingProduct"
+  [categories]="categories"
+  (close)="closeModal()"
+  (save)="saveProduct($event)"
+/>
 
-      <div class="detail-section" *ngIf="hasAdditionalImages(product)">
-        <h4>الصور الإضافية ({{ getProductImages(product).length }})</h4>
-        <div class="additional-images">
-          <img
-            *ngFor="let image of getProductImages(product); trackBy: trackByFn"
-            [src]="image.imageThumbnailURL || image.mediaURL"
-            alt="{{ product.name }}"
-            class="additional-image"
-            loading="lazy"
-          />
-        </div>
-      </div>
+<!-- Product Details Modal -->
+<app-product-details-modal
+  *ngIf="isDetailsModalOpen"
+  [isOpen]="isDetailsModalOpen"
+  [product]="selectedProduct"
+  (close)="closeDetailsModal()"
+  (edit)="openEditModalFromDetails($event)"
+  (delete)="openDeleteConfirmFromDetails($event)"
+/>
 
-      <div
-        class="detail-section"
-        *ngIf="getAttributesCount(product.additionalAttributes) > 0"
-      >
-        <h4>
-          المواصفات الإضافية ({{
-            getAttributesCount(product.additionalAttributes)
-          }})
-        </h4>
-        <div class="attributes-grid">
-          <div
-            *ngFor="
-              let attr of parseAdditionalAttributes(
-                product.additionalAttributes
-              ) | keyvalue
-            "
-            class="attribute-item"
-          >
-            <span class="attribute-label">{{ attr.key }}:</span>
-            <span class="attribute-value">{{ attr.value }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="detail-section"
-        *ngIf="
-          !hasAdditionalImages(product) &&
-          getAttributesCount(product.additionalAttributes) === 0
-        "
-      >
-        <div class="no-additional-info">
-          <svg
-            width="48"
-            height="48"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1"
-          >
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-          </svg>
-          <p>لا توجد معلومات إضافية متاحة</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</ng-template>
+<!-- Delete Confirmation Dialog -->
+<app-confirm-dialog
+  *ngIf="deleteConfirm.isOpen"
+  [isOpen]="deleteConfirm.isOpen"
+  title="تأكيد الحذف"
+  message="هل أنت متأكد من حذف هذا المنتج؟ لا يمكن التراجع عن هذا الإجراء."
+  confirmText="حذف"
+  cancelText="إلغاء"
+  (confirm)="confirmDelete()"
+  (cancel)="closeDeleteConfirm()"
+/>

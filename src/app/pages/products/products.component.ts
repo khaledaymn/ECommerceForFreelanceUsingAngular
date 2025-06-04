@@ -1,547 +1,331 @@
-import { Component, OnInit, OnDestroy, TemplateRef, ViewChild } from "@angular/core"
-import { Subject, takeUntil, debounceTime, distinctUntilChanged } from "rxjs"
-import { animate, style, transition, trigger } from "@angular/animations"
-import { ProductService } from "../../services/product.service"
-import { CommonModule, KeyValue } from "@angular/common"
+import { Component, OnInit } from "@angular/core"
+import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
-import { PaginationResponse, Product, ProductParams } from "../../interfaces/product.interface"
-import { RowAction, SortEvent, TableColumn, DataTableComponent, PaginationEvent } from "../../components/data-table/data-table.component"
+import { ProductService } from "../../services/product.service"
+import { CategoryService } from "../../services/category.service"
+import { Product, ProductParams } from "../../interfaces/product.interface"
+import { Category } from "../../interfaces/category"
+import { DataTableComponent, TableAction, TableColumn } from "../../components/data-table/data-table.component"
+import { ProductModalComponent } from "./modals/product-modal/product-modal.component"
+import { ConfirmDialogComponent } from "../../components/confirm-dialog/confirm-dialog.component"
+import { ProductDetailsModalComponent } from "./modals/product-details-modal/product-details-modal.component"
 
 @Component({
-  selector: "app-products",
-  imports: [CommonModule, FormsModule, DataTableComponent],
+  selector: "app-product",
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    DataTableComponent,
+    ProductModalComponent,
+    ConfirmDialogComponent,
+    ProductDetailsModalComponent,
+  ],
   templateUrl: "./products.component.html",
   styleUrls: ["./products.component.scss"],
-  animations: [
-    trigger("slideIn", [
-      transition(":enter", [
-        style({ opacity: 0, transform: "translateY(20px)" }),
-        animate("300ms ease-out", style({ opacity: 1, transform: "translateY(0)" })),
-      ]),
-    ]),
-    trigger("fadeIn", [
-      transition(":enter", [style({ opacity: 0 }), animate("200ms ease-out", style({ opacity: 1 }))]),
-    ]),
-    trigger("scaleIn", [
-      transition(":enter", [
-        style({ opacity: 0, transform: "scale(0.95)" }),
-        animate("200ms ease-out", style({ opacity: 1, transform: "scale(1)" })),
-      ]),
-    ]),
-  ],
 })
-export class ProductsComponent implements OnInit, OnDestroy {
-  @ViewChild("expandedRowTemplate") expandedRowTemplate!: TemplateRef<any>
-
-  private destroy$ = new Subject<void>()
-  private searchSubject = new Subject<string>()
-
+export class ProductManagementComponent implements OnInit {
+  // Data
   products: Product[] = []
+  categories: Category[] = []
+  filteredProducts: Product[] = []
   loading = false
-  totalCount = 0
-  selectedProducts: Product[] = []
-  currentParams: ProductParams = {
-    pageIndex: 1,
-    pageSize: 50,
+
+  // Pagination
+  currentPage = 1
+  pageSize = 10
+  totalPages = 1
+  totalItems = 0
+
+  // Filters
+  searchTerm = ""
+  statusFilter = ""
+  categoryFilter = ""
+  sortColumn = "name"
+  sortDirection: "asc" | "desc" = "asc"
+  activeFilter: string | null = null
+
+  // Modal state
+  isModalOpen = false
+  isDetailsModalOpen = false
+  editingProduct: Product | null = null
+  selectedProduct: Product | null = null
+  deleteConfirm: { isOpen: boolean; productId: number | null } = {
+    isOpen: false,
+    productId: null,
   }
 
-  // View modes and filters
+  // Table configuration
+  columns: TableColumn[] = [
+    { key: "mainImageUrl", title: "الصورة", type: "image", width: "80px", align: "center" },
+    { key: "name", title: "اسم المنتج", sortable: true, width: "25%" },
+    { key: "categoryName", title: "الفئة", sortable: true, width: "15%" },
+    { key: "price", title: "السعر", type: "currency", sortable: true, width: "12%", align: "left" },
+    { key: "status", title: "الحالة", type: "badge", sortable: true, width: "12%", align: "center" },
+    { key: "createdAt", title: "التاريخ", type: "date", sortable: true, width: "10%", align: "center" },
+  ]
+
+  actions: TableAction[] = [
+    { label: "عرض", icon: "visibility", action: "view" },
+    { label: "تعديل", icon: "edit", action: "edit" },
+    { label: "نسخ", icon: "content_copy", action: "duplicate" },
+    { label: "حذف", icon: "delete", action: "delete", type: "danger" },
+  ]
+
   viewMode: "table" | "grid" = "table"
-  showFilters = false
-  showBulkActions = false
 
-  // Filter options
-  categories: string[] = []
-  brands: string[] = []
-  statuses: string[] = []
+  constructor(
+    private productService: ProductService,
+    private categoryService: CategoryService,
+  ) {}
 
-  // Active filters
-  activeFilters = {
-    category: "",
-    brand: "",
-    status: "",
-    priceRange: { min: 0, max: 10000 },
-  }
-
-  // Statistics
-  stats = {
-    total: 0,
-    available: 0,
-    outOfStock: 0,
-    totalValue: 0,
-  }
-
-  // Row actions for the table
-  rowActions: RowAction[] = [
-    {
-      label: "عرض التفاصيل",
-      icon: "view",
-      action: (item) => this.viewProduct(item),
-    },
-    {
-      label: "تعديل",
-      icon: "edit",
-      action: (item) => this.editProduct(item),
-    },
-    {
-      label: "حذف",
-      icon: "delete",
-      color: "#D32F2F",
-      action: (item) => this.deleteProduct(item),
-      disabled: (item) => item.status === "محجوز",
-    },
-  ]
-
-  // Bulk actions
-  bulkActions = [
-    { label: "تصدير المحدد", action: () => this.exportSelected() },
-    { label: "حذف المحدد", action: () => this.deleteSelected(), color: "#D32F2F" },
-    { label: "تغيير الحالة", action: () => this.changeStatusSelected() },
-  ]
-
-  tableColumns: TableColumn[] = [
-    {
-      key: "mainImageURL",
-      label: "الصورة",
-      type: "image",
-      width: "80px",
-    },
-    {
-      key: "name",
-      label: "اسم المنتج",
-      sortable: true,
-      type: "text",
-      resizable: true,
-      filterable: true,
-    },
-    {
-      key: "description",
-      label: "الوصف",
-      type: "text",
-      resizable: true,
-      hidden: false,
-    },
-    {
-      key: "categoryName",
-      label: "الفئة",
-      sortable: true,
-      type: "text",
-      resizable: true,
-      filterable: true,
-    },
-    {
-      key: "brandName",
-      label: "العلامة التجارية",
-      sortable: true,
-      type: "text",
-      resizable: true,
-      filterable: true,
-    },
-    {
-      key: "price",
-      label: "السعر",
-      sortable: true,
-      type: "currency",
-      resizable: true,
-    },
-    {
-      key: "status",
-      label: "الحالة",
-      type: "text",
-      resizable: true,
-      filterable: true,
-    },
-    {
-      key: "additionalAttributes",
-      label: "المواصفات الإضافية",
-      type: "custom",
-      resizable: true,
-      hidden: true,
-    },
-    {
-      key: "createdAt",
-      label: "تاريخ الإنشاء",
-      sortable: true,
-      type: "date",
-      resizable: true,
-    },
-    {
-      key: "actions",
-      label: "الإجراءات",
-      type: "actions",
-      width: "60px",
-    },
-  ]
-
-  constructor(private productService: ProductService) {}
-
-  ngOnInit() {
-    this.setupSearchDebounce()
+  ngOnInit(): void {
+    this.loadCategories()
     this.loadProducts()
-    this.loadFilterOptions()
   }
 
-  ngOnDestroy() {
-    this.destroy$.next()
-    this.destroy$.complete()
-  }
-
-  private setupSearchDebounce() {
-    this.searchSubject
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe((searchTerm) => {
-        this.currentParams.search = searchTerm || undefined
-        this.currentParams.pageIndex = 1
-        this.loadProducts()
+  loadCategories(): void {
+    this.categoryService
+      .getAllCategories({
+        pageIndex: 1,
+        pageSize: 100,
       })
-  }
-
-  loadProducts() {
-    this.loading = true
-
-    // Apply active filters to params
-    const params = { ...this.currentParams }
-    if (this.activeFilters.category) {
-      params.categoryId = Number.parseInt(this.activeFilters.category)
-    }
-    if (this.activeFilters.brand) {
-      params.brandId = Number.parseInt(this.activeFilters.brand)
-    }
-    if (this.activeFilters.status) {
-      params.status = this.activeFilters.status
-    }
-
-    this.productService
-      .getAllProducts(params)
-      .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response: PaginationResponse<Product>) => {
-          this.products = response.data
-          this.totalCount = response.totalCount
-          this.currentParams.pageIndex = response.pageIndex
-          this.currentParams.pageSize = response.pageSize
-          this.loading = false
-          this.calculateStats()
+        next: (response) => {
+          this.categories = response.data
         },
         error: (error) => {
-          console.error("Error loading products:", error)
-          this.loading = false
-          this.showErrorMessage("حدث خطأ أثناء تحميل المنتجات")
+          console.error("Error loading categories:", error)
         },
       })
   }
 
-  loadFilterOptions() {
-    // Extract unique values from products for filters
-    // In a real app, these would come from separate API calls
-    this.categories = ["الكل", "فئة 1", "فئة 2", "فئة 3"]
-    this.brands = ["الكل", "علامة 1", "علامة 2", "علامة 3"]
-    this.statuses = ["الكل", "متاح", "غير متاح", "محجوز"]
+  loadProducts(): void {
+    this.loading = true
+
+    const params: ProductParams = {
+      pageIndex: this.currentPage,
+      pageSize: this.pageSize,
+      search: this.searchTerm,
+      status: this.statusFilter || undefined,
+      categoryId: this.categoryFilter ? Number.parseInt(this.categoryFilter) : undefined,
+      sortProp: this.sortColumn as any, // Cast to SortProp if compatible
+    }
+
+    this.productService.getAllProducts(params).subscribe({
+      next: (response) => {
+        this.products = response.data
+        this.filteredProducts = response.data
+        this.totalItems = response.totalCount
+        this.totalPages = Math.ceil(response.totalCount / this.pageSize)
+        this.loading = false
+      },
+      error: (error) => {
+        console.error("Error loading products:", error)
+        this.loading = false
+      },
+    })
   }
 
-  calculateStats() {
-    this.stats.total = this.totalCount
-    this.stats.available = this.products.filter((p) => p.status === "متاح").length
-    this.stats.outOfStock = this.products.filter((p) => p.status === "غير متاح").length
-    this.stats.totalValue = this.products.reduce((sum, p) => sum + p.price, 0)
+  onSearch(searchTerm: string): void {
+    this.searchTerm = searchTerm
+    this.currentPage = 1
+    this.loadProducts()
   }
 
-  // Event handlers
-  onSort(event: SortEvent) {
-    if (event.column && event.direction) {
-      this.currentParams.sortProp = event.column
-      this.currentParams.sortDirection = event.direction
+  onSort(event: { column: string; direction: "asc" | "desc" }): void {
+    this.sortColumn = event.column
+    this.sortDirection = event.direction
+    this.currentPage = 1
+    this.loadProducts()
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page
+    this.loadProducts()
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize = size
+    this.currentPage = 1
+    this.loadProducts()
+  }
+
+  onRowClick(product: Product): void {
+    this.viewDetails(product)
+  }
+
+  onActionClick(event: { action: string; item: Product }): void {
+    switch (event.action) {
+      case "view":
+        this.viewDetails(event.item)
+        break
+      case "edit":
+        this.openEditModal(event.item)
+        break
+      case "duplicate":
+        this.duplicateProduct(event.item)
+        break
+      case "delete":
+        this.openDeleteConfirm(event.item)
+        break
+    }
+  }
+
+  onViewModeChange(mode: "table" | "grid"): void {
+    this.viewMode = mode
+  }
+
+  toggleFilter(filterType: string): void {
+    this.activeFilter = this.activeFilter === filterType ? null : filterType
+  }
+
+  onStatusFilterChange(status: string): void {
+    this.statusFilter = status
+    this.activeFilter = null
+    this.currentPage = 1
+    this.loadProducts()
+  }
+
+  onCategoryFilterChange(category: string): void {
+    this.categoryFilter = category
+    this.activeFilter = null
+    this.currentPage = 1
+    this.loadProducts()
+  }
+
+  // Modal management
+  openAddModal(): void {
+    this.editingProduct = null
+    this.isModalOpen = true
+  }
+
+  openEditModal(product: Product): void {
+    this.editingProduct = { ...product }
+    this.isModalOpen = true
+  }
+
+  closeModal(): void {
+    this.isModalOpen = false
+  }
+
+  saveProduct(productData: any): void {
+    if (this.editingProduct) {
+      // Update existing product
+      this.productService
+        .updateProduct({
+          id: this.editingProduct.id,
+          name: productData.name,
+          description: productData.description,
+          price: productData.price,
+          status: productData.status,
+          categoryId: productData.categoryId,
+          mainImage: productData.mainImage,
+          additionalImages: productData.additionalImages,
+          imagesToDelete: productData.imagesToDelete,
+        })
+        .subscribe({
+          next: () => {
+            this.loadProducts()
+            this.closeModal()
+          },
+          error: (error) => {
+            console.error("Error updating product:", error)
+          },
+        })
     } else {
-      this.currentParams.sortProp = undefined
-      this.currentParams.sortDirection = undefined
-    }
-    this.currentParams.pageIndex = 1
-    this.loadProducts()
-  }
-
-  onPageChange(event: PaginationEvent) {
-    this.currentParams.pageIndex = event.pageIndex
-    this.currentParams.pageSize = event.pageSize
-    this.loadProducts()
-  }
-
-  onSearch(searchTerm: string) {
-    this.searchSubject.next(searchTerm)
-  }
-
-  onRowSelect(selectedRows: Product[]) {
-    this.selectedProducts = selectedRows
-    this.showBulkActions = selectedRows.length > 0
-  }
-
-  onColumnChange(columns: TableColumn[]) {
-    this.tableColumns = columns
-  }
-
-  // View mode toggle
-  toggleViewMode() {
-    this.viewMode = this.viewMode === "table" ? "grid" : "table"
-  }
-
-  // Filter methods
-  toggleFilters() {
-    this.showFilters = !this.showFilters
-  }
-
-  applyFilters() {
-    this.currentParams.pageIndex = 1
-    this.loadProducts()
-  }
-
-  clearFilters() {
-    this.activeFilters = {
-      category: "",
-      brand: "",
-      status: "",
-      priceRange: { min: 0, max: 10000 },
-    }
-    this.applyFilters()
-  }
-
-  // Product actions
-  viewProduct(product: Product) {
-    console.log("Viewing product:", product)
-    // Navigate to product detail page
-  }
-
-  editProduct(product: Product) {
-    console.log("Editing product:", product)
-    // Navigate to product edit page
-  }
-
-  duplicateProduct(product: Product) {
-    console.log("Duplicating product:", product)
-    // Implement duplication logic
-    this.showSuccessMessage(`تم نسخ المنتج "${product.name}" بنجاح`)
-  }
-
-  deleteProduct(product: Product) {
-    if (confirm(`هل أنت متأكد من حذف المنتج "${product.name}"؟`)) {
-      console.log("Deleting product:", product)
-      // Implement delete logic
-      this.showSuccessMessage(`تم حذف المنتج "${product.name}" بنجاح`)
-      this.loadProducts()
+      // Create new product
+      this.productService
+        .createProduct({
+          name: productData.name,
+          description: productData.description,
+          price: productData.price,
+          status: productData.status,
+          categoryId: productData.categoryId,
+          mainImage: productData.mainImage,
+          additionalImages: productData.additionalImages,
+        })
+        .subscribe({
+          next: () => {
+            this.loadProducts()
+            this.closeModal()
+          },
+          error: (error) => {
+            console.error("Error creating product:", error)
+          },
+        })
     }
   }
 
-  // Bulk actions
-  exportSelected() {
-    console.log("Exporting selected products:", this.selectedProducts)
-    this.showSuccessMessage(`تم تصدير ${this.selectedProducts.length} منتج بنجاح`)
-  }
-
-  deleteSelected() {
-    if (confirm(`هل أنت متأكد من حذف ${this.selectedProducts.length} منتج؟`)) {
-      console.log("Deleting selected products:", this.selectedProducts)
-      this.showSuccessMessage(`تم حذف ${this.selectedProducts.length} منتج بنجاح`)
-      this.selectedProducts = []
-      this.showBulkActions = false
-      this.loadProducts()
-    }
-  }
-
-  changeStatusSelected() {
-    console.log("Changing status for selected products:", this.selectedProducts)
-    // Show status change modal
-  }
-
-  // Utility methods
-  refreshData() {
-    this.loadProducts()
-    this.showSuccessMessage("تم تحديث البيانات بنجاح")
-  }
-
-  addNewProduct() {
-    console.log("Adding new product")
-    // Navigate to add product page
-  }
-
-  exportAllProducts() {
-    console.log("Exporting all products")
-    this.showSuccessMessage("تم تصدير جميع المنتجات بنجاح")
-  }
-
-  importProducts() {
-    console.log("Importing products")
-    // Show import modal
-  }
-
-  // Notification methods
-  private showSuccessMessage(message: string) {
-    // Implement toast notification
-    console.log("Success:", message)
-  }
-
-  private showErrorMessage(message: string) {
-    // Implement toast notification
-    console.log("Error:", message)
-  }
-
-  // Grid view methods
-  getGridProducts() {
-    return this.products
-  }
-
-  // Helper methods
-  getStatusColor(status: string): string {
-    const statusColors: { [key: string]: string } = {
-      متاح: "#4CAF50",
-      "غير متاح": "#F44336",
-      محجوز: "#FF9800",
-      "قيد المراجعة": "#2196F3",
-      مؤرشف: "#9E9E9E",
-    }
-    return statusColors[status] || "#9E9E9E"
-  }
-
-  formatPrice(price: number): string {
-    if (!price || isNaN(price)) return "0 ر.س"
-
-    return new Intl.NumberFormat("ar-SA", {
-      style: "currency",
-      currency: "SAR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(price)
-  }
-
-  getProductImageUrl(product: Product): string {
-    return product.mainImageURL || "/placeholder.svg?height=200&width=200"
-  }
-
-  // Enhanced date formatting
-  // formatDate(dateString: string): string {
-  //   if (!dateString) return ""
-
-  //   try {
-  //     const date = new Date(dateString)
-  //     return new Intl.DateTimeFormat("ar-SA", {
-  //       year: "numeric",
-  //       month: "2-digit",
-  //       day: "2-digit",
-  //       hour: "2-digit",
-  //       minute: "2-digit",
-  //     }).format(date)
-  //   } catch {
-  //     return dateString
-  //   }
-  // }
-
-
-  formatDate(dateString: string): string {
-    if (!dateString) return '';
-
-    try {
-      const date = new Date(dateString);
-
-      // Format the date part (DD/MM/YYYY)
-      const datePart = new Intl.DateTimeFormat('ar-EG', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      }).format(date);
-
-      // Format the time part (HH:MM ص/م)
-      const timePart = new Intl.DateTimeFormat('ar-EG', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
+  duplicateProduct(product: Product): void {
+    this.productService
+      .createProduct({
+        name: `${product.name} (نسخة)`,
+        description: product.description,
+        price: product.price,
+        status: product.status,
+        categoryId: product.categoryId,
       })
-        .format(date)
-        .replace(/,/, '')
-        .replace(/(\d+:\d+\s[صم]+)/, '$1');
-
-      // Combine the parts with extra spaces between date and time
-      return `${datePart} م    ${timePart}`; // Added three extra spaces
-    } catch {
-      return dateString;
-    }
-  }
-  // Safe array access
-  getProductImages(product: Product): any[] {
-    return product.productImages || []
+      .subscribe({
+        next: () => {
+          this.loadProducts()
+        },
+        error: (error) => {
+          console.error("Error duplicating product:", error)
+        },
+      })
   }
 
-  // Status badge class helper
-  getStatusBadgeClass(status: string): string {
-    const statusClasses: { [key: string]: string } = {
-      متاح: "status-available",
-      "غير متاح": "status-unavailable",
-      محجوز: "status-reserved",
-      "قيد المراجعة": "status-pending",
-      مؤرشف: "status-archived",
-    }
-    return statusClasses[status] || "status-default"
-  }
-
-  // Truncate text helper
-   truncateText(text: string, maxLength = 100): string {
-    if (!text) return ""
-    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text
-  }
-
-  // Check if product has additional images
-  hasAdditionalImages(product: Product): boolean {
-    return product.productImages && product.productImages.length > 0
-  }
-
-  // Get additional attributes count
-  getAttributesCount(attributesJson: string): number {
-    try {
-      const attrs = JSON.parse(attributesJson || "{}")
-      return Object.keys(attrs).length
-    } catch {
-      return 0
+  // Delete management
+  openDeleteConfirm(product: Product): void {
+    this.deleteConfirm = {
+      isOpen: true,
+      productId: product.id,
     }
   }
 
-  // Safe number formatting
-  safeNumber(value: any): number {
-    const num = Number(value)
-    return isNaN(num) ? 0 : num
-  }
-
-  // Calculate pagination info
-  getPaginationInfo(): { start: number; end: number; total: number } {
-    const start = (this.currentParams.pageIndex - 1) * this.currentParams.pageSize + 1
-    const end = Math.min(this.currentParams.pageIndex * this.currentParams.pageSize, this.totalCount)
-    return { start, end, total: this.totalCount }
-  }
-
-  // Get total pages
-  getTotalPages(): number {
-    return Math.ceil(this.totalCount / this.currentParams.pageSize)
-  }
-
-  // Helper methods for template
-  parseAdditionalAttributes(attributesJson: string): any {
-    try {
-      return JSON.parse(attributesJson || "{}")
-    } catch {
-      return {}
+  closeDeleteConfirm(): void {
+    this.deleteConfirm = {
+      isOpen: false,
+      productId: null,
     }
   }
 
-  // Math utility for template
-  get Math() {
-    return Math
+  confirmDelete(): void {
+    if (this.deleteConfirm.productId) {
+      this.productService.deleteProduct(this.deleteConfirm.productId).subscribe({
+        next: () => {
+          this.loadProducts()
+          this.closeDeleteConfirm()
+        },
+        error: (error) => {
+          console.error("Error deleting product:", error)
+          this.closeDeleteConfirm()
+        },
+      })
+    }
   }
 
-  // Track by functions for performance
-  trackByFn(index: number, item: Product): any {
-    return item.id || index
+  // Details modal
+  viewDetails(product: Product): void {
+    this.selectedProduct = { ...product }
+    this.isDetailsModalOpen = true
   }
-  
-  // trackByProduct(index: number, item: Product): number {
-  //   return item.id; // Assuming 'id' is a unique identifier for Product
-  // }
 
-  // trackByAttribute(index: number, item: KeyValue<string, string>): KeyValue<string, string> {
-  //   return item;
-  // }
+  closeDetailsModal(): void {
+    this.isDetailsModalOpen = false
+    this.selectedProduct = null
+  }
+
+  openEditModalFromDetails(product: Product): void {
+    this.editingProduct = { ...product }
+    this.isModalOpen = true
+  }
+
+  openDeleteConfirmFromDetails(product: Product): void {
+    this.deleteConfirm = {
+      isOpen: true,
+      productId: product.id,
+    }
+  }
 }

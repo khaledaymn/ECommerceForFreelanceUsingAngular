@@ -1,0 +1,18 @@
+<div class="flex border rounded-lg overflow-hidden">
+  <button
+    [ngClass]="{'bg-yellow-400 text-black hover:bg-yellow-500': viewMode === 'table', 'hover:bg-gray-100': viewMode !== 'table'}"
+    class="px-3 py-2 rounded-none"
+    (click)="onViewModeChange('table')"
+    title="Table view"
+  >
+    <i class="bi bi-list"></i>
+  </button>
+  <button
+    [ngClass]="{'bg-yellow-400 text-black hover:bg-yellow-500': viewMode === 'grid', 'hover:bg-gray-100': viewMode !== 'grid'}"
+    class="px-3 py-2 rounded-none"
+    (click)="onViewModeChange('grid')"
+    title="Grid view"
+  >
+    <i class="bi bi-grid"></i>
+  </button>
+</div>

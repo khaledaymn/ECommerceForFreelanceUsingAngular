@@ -1,345 +1,253 @@
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  type OnInit,
-  ViewChild,
-  type ElementRef,
-  HostListener,
-} from "@angular/core"
-import { animate, state, style, transition, trigger } from "@angular/animations"
-import { FormsModule } from "@angular/forms"
+import { Component, Input, Output, EventEmitter, type OnInit, HostListener } from "@angular/core"
 import { CommonModule } from "@angular/common"
+import { FormsModule } from "@angular/forms"
 
 export interface TableColumn {
   key: string
-  label: string
+  title: string
   sortable?: boolean
-  type?: "text" | "image" | "currency" | "date" | "custom" | "actions"
   width?: string
-  minWidth?: string
-  maxWidth?: string
-  resizable?: boolean
-  filterable?: boolean
-  hidden?: boolean
+  type?: "text" | "image" | "badge" | "currency" | "date" | "actions"
+  align?: "left" | "center" | "right"
 }
 
-export interface SortEvent {
-  column: string
-  direction: "asc" | "desc" | null
-}
-
-export interface PaginationEvent {
-  pageIndex: number
-  pageSize: number
-}
-
-export interface RowAction {
+export interface TableAction {
   label: string
-  icon?: string
-  action: (item: any) => void
-  color?: string
-  disabled?: (item: any) => boolean
+  icon: string
+  action: string
+  type?: "default" | "danger"
 }
 
 @Component({
   selector: "app-data-table",
-  imports:[FormsModule, CommonModule],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: "./data-table.component.html",
   styleUrls: ["./data-table.component.scss"],
-  animations: [
-    trigger("detailExpand", [
-      state("collapsed", style({ height: "0px", minHeight: "0", overflow: "hidden", opacity: 0 })),
-      state("expanded", style({ height: "*", opacity: 1 })),
-      transition("expanded <=> collapsed", animate("225ms cubic-bezier(0.4, 0.0, 0.2, 1)")),
-    ]),
-    trigger("fadeIn", [
-      transition(":enter", [
-        style({ opacity: 0, transform: "translateY(10px)" }),
-        animate("300ms ease-out", style({ opacity: 1, transform: "translateY(0)" })),
-      ]),
-    ]),
-  ],
 })
 export class DataTableComponent implements OnInit {
   @Input() columns: TableColumn[] = []
   @Input() data: any[] = []
   @Input() loading = false
-  @Input() totalCount = 0
-  @Input() pageSize = 10
-  @Input() pageIndex = 1
-  @Input() showPagination = true
-  @Input() showSearch = true
-  @Input() rowActions: RowAction[] = []
   @Input() selectable = false
-  @Input() expandable = false
-  @Input() expandTemplate: any
-  @Input() showColumnSelector = true
-  @Input() stickyHeader = true
-  @Input() emptyStateMessage = "لا توجد بيانات للعرض"
-  @Input() loadingMessage = "جاري التحميل..."
+  @Input() actions: TableAction[] = []
+  @Input() emptyMessage = "لا توجد بيانات متاحة"
+  @Input() searchPlaceholder = "البحث..."
+  @Input() showSearch = true
+  @Input() showFilters = false
+  @Input() viewMode: "table" | "grid" = "table"
+  @Input() enableViewToggle = true
 
-  @Output() sort = new EventEmitter<SortEvent>()
-  @Output() pageChange = new EventEmitter<PaginationEvent>()
-  @Output() search = new EventEmitter<string>()
-  @Output() rowSelect = new EventEmitter<any[]>()
+  // Pagination inputs
+  @Input() currentPage = 1
+  @Input() totalPages = 1
+  @Input() totalItems = 0
+  @Input() pageSize = 10
+  @Input() pageSizeOptions = [5, 10, 25, 50]
+
   @Output() rowClick = new EventEmitter<any>()
-  @Output() columnChange = new EventEmitter<TableColumn[]>()
-
-  @ViewChild("tableContainer") tableContainer!: ElementRef
+  @Output() actionClick = new EventEmitter<{ action: string; item: any }>()
+  @Output() selectionChange = new EventEmitter<any[]>()
+  @Output() sortChange = new EventEmitter<{ column: string; direction: "asc" | "desc" }>()
+  @Output() searchChange = new EventEmitter<string>()
+  @Output() viewModeChange = new EventEmitter<"table" | "grid">()
+  @Output() pageChange = new EventEmitter<number>()
+  @Output() pageSizeChange = new EventEmitter<number>()
 
   searchTerm = ""
-  currentSort: { column: string; direction: "asc" | "desc" | null } = { column: "", direction: null }
-  selectedRows: Set<number> = new Set()
-  expandedRow: number | null = null
-  visibleColumns: TableColumn[] = []
-  columnMenuOpen = false
-  activeDropdown: number | null = null
-  resizingColumn: string | null = null
-  resizeStartX = 0
-  originalWidth = 0
-  columnWidths: { [key: string]: string } = {}
-
-  // Pagination variables
-  pageSizeOptions = [5, 10, 25, 50, 100]
-  pageNumbers: number[] = []
-
-  // Skeleton loading
-  skeletonRows = Array(5)
-    .fill(0)
-    .map((_, i) => i)
+  selectedItems = new Set<any>()
+  selectAll = false
+  sortColumn = ""
+  sortDirection: "asc" | "desc" = "asc"
+  activeMenu: number | null = null
 
   ngOnInit() {
-    this.visibleColumns = this.columns.filter((col) => !col.hidden)
-    this.updatePageNumbers()
+    // Initialize pagination if not set
+    if (this.totalPages === 0 && this.totalItems > 0) {
+      this.totalPages = Math.ceil(this.totalItems / this.pageSize)
+    }
+    if (this.totalPages === 0) {
+      this.totalPages = 1
+    }
   }
 
-  updatePageNumbers() {
-    const totalPages = this.totalPages
-    const currentPage = this.pageIndex
+  @HostListener("document:click", ["$event"])
+  onDocumentClick(event: Event) {
+    this.activeMenu = null
+  }
 
-    let startPage = Math.max(1, currentPage - 2)
-    const endPage = Math.min(totalPages, startPage + 4)
+  get startItem(): number {
+    return Math.min((this.currentPage - 1) * this.pageSize + 1, this.totalItems)
+  }
 
-    if (endPage - startPage < 4) {
-      startPage = Math.max(1, endPage - 4)
+  get endItem(): number {
+    return Math.min(this.currentPage * this.pageSize, this.totalItems)
+  }
+
+  get pageNumbers(): (number | -1)[] {
+    const delta = 2
+    const range: number[] = []
+    const rangeWithDots: (number | -1)[] = []
+
+    for (
+      let i = Math.max(2, this.currentPage - delta);
+      i <= Math.min(this.totalPages - 1, this.currentPage + delta);
+      i++
+    ) {
+      range.push(i)
     }
 
-    this.pageNumbers = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i)
-  }
-
-  onSort(column: TableColumn) {
-    if (!column.sortable) return
-
-    if (this.currentSort.column === column.key) {
-      // Toggle direction
-      if (this.currentSort.direction === "asc") {
-        this.currentSort.direction = "desc"
-      } else if (this.currentSort.direction === "desc") {
-        this.currentSort.direction = null
-      } else {
-        this.currentSort.direction = "asc"
-      }
+    if (this.currentPage - delta > 2) {
+      rangeWithDots.push(1, -1)
     } else {
-      this.currentSort.column = column.key
-      this.currentSort.direction = "asc"
+      rangeWithDots.push(1)
     }
 
-    this.sort.emit({
-      column: this.currentSort.direction ? column.key : "",
-      direction: this.currentSort.direction,
-    })
-  }
+    rangeWithDots.push(...range)
 
-  onPageChange(newPageIndex: number) {
-    if (newPageIndex < 1 || newPageIndex > this.totalPages) return
-
-    this.pageIndex = newPageIndex
-    this.pageChange.emit({
-      pageIndex: this.pageIndex,
-      pageSize: this.pageSize,
-    })
-
-    this.updatePageNumbers()
-    this.scrollToTop()
-  }
-
-  onPageSizeChange(newPageSize: number) {
-    this.pageSize = newPageSize
-    this.pageIndex = 1
-    this.pageChange.emit({
-      pageIndex: this.pageIndex,
-      pageSize: this.pageSize,
-    })
-
-    this.updatePageNumbers()
-    this.scrollToTop()
-  }
-
-  scrollToTop() {
-    if (this.tableContainer) {
-      this.tableContainer.nativeElement.scrollTop = 0
+    if (this.currentPage + delta < this.totalPages - 1) {
+      rangeWithDots.push(-1, this.totalPages)
+    } else if (this.totalPages > 1) {
+      rangeWithDots.push(this.totalPages)
     }
+
+    return rangeWithDots
   }
 
   onSearch() {
-    this.search.emit(this.searchTerm)
+    this.searchChange.emit(this.searchTerm)
   }
 
-  onClearSearch() {
-    this.searchTerm = ""
-    this.search.emit("")
-  }
+  onSort(column: TableColumn, index: number) {
+    if (!column.sortable) return
 
-  getNestedValue(obj: any, path: string): any {
-    return path.split(".").reduce((current, prop) => current?.[prop], obj)
-  }
-
-  get totalPages(): number {
-    return Math.ceil(this.totalCount / this.pageSize)
-  }
-
-  get startIndex(): number {
-    return (this.pageIndex - 1) * this.pageSize + 1
-  }
-
-  get endIndex(): number {
-    return Math.min(this.pageIndex * this.pageSize, this.totalCount)
-  }
-
-  get allSelected(): boolean {
-    return this.data.length > 0 && this.selectedRows.size === this.data.length
-  }
-
-  get someSelected(): boolean {
-    return this.selectedRows.size > 0 && !this.allSelected
-  }
-
-  parseAdditionalAttributes(attributesJson: string): any {
-    try {
-      return JSON.parse(attributesJson)
-    } catch {
-      return {}
-    }
-  }
-
-  toggleAllRows() {
-    if (this.allSelected) {
-      this.selectedRows.clear()
+    if (this.sortColumn === column.key) {
+      this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc"
     } else {
-      this.data.forEach((item, index) => {
-        this.selectedRows.add(index)
-      })
+      this.sortColumn = column.key
+      this.sortDirection = "asc"
     }
-    this.emitSelectedRows()
+
+    this.sortChange.emit({
+      column: column.key,
+      direction: this.sortDirection,
+    })
   }
 
-  toggleRow(index: number, event: Event) {
-    event.stopPropagation()
+  getSortIcon(column: TableColumn): string {
+    if (!column.sortable) return ""
+    if (this.sortColumn !== column.key) return "unfold_more"
+    return this.sortDirection === "asc" ? "keyboard_arrow_up" : "keyboard_arrow_down"
+  }
 
-    if (this.selectedRows.has(index)) {
-      this.selectedRows.delete(index)
+  toggleSelectAll(event: any) {
+    this.selectAll = event.target.checked
+    if (this.selectAll) {
+      this.data.forEach((item) => this.selectedItems.add(item))
     } else {
-      this.selectedRows.add(index)
+      this.selectedItems.clear()
     }
-    this.emitSelectedRows()
+    this.selectionChange.emit(Array.from(this.selectedItems))
   }
 
-  isSelected(index: number): boolean {
-    return this.selectedRows.has(index)
+  toggleItemSelection(item: any, event: any) {
+    if (event.target.checked) {
+      this.selectedItems.add(item)
+    } else {
+      this.selectedItems.delete(item)
+    }
+
+    this.selectAll = this.selectedItems.size === this.data.length
+    this.selectionChange.emit(Array.from(this.selectedItems))
   }
 
-  emitSelectedRows() {
-    const selectedItems = Array.from(this.selectedRows).map((index) => this.data[index])
-    this.rowSelect.emit(selectedItems)
+  isSelected(item: any): boolean {
+    return this.selectedItems.has(item)
   }
 
-  toggleRowExpansion(index: number, event: Event) {
-    event.stopPropagation()
-    this.expandedRow = this.expandedRow === index ? null : index
-  }
-
-  isExpanded(index: number): boolean {
-    return this.expandedRow === index
-  }
-
-  onRowClick(item: any, index: number) {
+  onRowClick(item: any) {
     this.rowClick.emit(item)
   }
 
-  toggleColumnVisibility(column: TableColumn) {
-    column.hidden = !column.hidden
-    this.visibleColumns = this.columns.filter((col) => !col.hidden)
-    this.columnChange.emit(this.columns)
+  onActionClick(action: string, item: any) {
+    this.actionClick.emit({ action, item })
+    this.activeMenu = null
   }
 
-  toggleColumnMenu() {
-    this.columnMenuOpen = !this.columnMenuOpen
-  }
-
-  toggleDropdown(index: number, event: Event) {
+  toggleMenu(index: number, event: Event) {
     event.stopPropagation()
-    this.activeDropdown = this.activeDropdown === index ? null : index
+    this.activeMenu = this.activeMenu === index ? null : index
   }
 
-  closeDropdowns() {
-    this.activeDropdown = null
+  setViewMode(mode: "table" | "grid") {
+    this.viewMode = mode
+    this.viewModeChange.emit(mode)
   }
 
-  executeAction(action: RowAction, item: any, event: Event) {
-    event.stopPropagation()
-    if (typeof action.action === "function") {
-      action.action(item)
+  // Pagination methods
+  onPageChange(page: number) {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+      this.pageChange.emit(page)
     }
-    this.closeDropdowns()
   }
 
-  isActionDisabled(action: RowAction, item: any): boolean {
-    return action.disabled ? action.disabled(item) : false
+  onPageSizeChange(size: number) {
+    this.pageSizeChange.emit(size)
   }
 
-  // Column resizing
-  onResizeStart(event: MouseEvent, column: TableColumn) {
-    event.preventDefault()
-    this.resizingColumn = column.key
-    this.resizeStartX = event.pageX
+  goToFirstPage() {
+    this.onPageChange(1)
+  }
 
-    const headerCell = (event.target as HTMLElement).closest("th")
-    if (headerCell) {
-      this.originalWidth = headerCell.offsetWidth
+  goToPreviousPage() {
+    this.onPageChange(this.currentPage - 1)
+  }
+
+  goToNextPage() {
+    this.onPageChange(this.currentPage + 1)
+  }
+
+  goToLastPage() {
+    this.onPageChange(this.totalPages)
+  }
+
+  getCellValue(item: any, column: TableColumn): any {
+    console.log(item[column.key]);
+
+    return item[column.key]
+  }
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case "متوفر":
+        return "status-available"
+      case "غير متوفر":
+        return "status-unavailable"
+      case "قريباً":
+        return "status-coming-soon"
+      default:
+        return "status-default"
     }
-
-    document.addEventListener("mousemove", this.onResizeMove)
-    document.addEventListener("mouseup", this.onResizeEnd)
   }
 
-  @HostListener("document:mousemove", ["$event"])
-  onResizeMove = (event: MouseEvent) => {
-    if (!this.resizingColumn) return
-
-    const diff = event.pageX - this.resizeStartX
-    const newWidth = Math.max(100, this.originalWidth + diff)
-
-    this.columnWidths[this.resizingColumn] = `${newWidth}px`
+  formatCurrency(value: number): string {
+    return `${value.toFixed(2)} ر.س`
   }
 
-  @HostListener("document:mouseup")
-  onResizeEnd = () => {
-    this.resizingColumn = null
-    document.removeEventListener("mousemove", this.onResizeMove)
-    document.removeEventListener("mouseup", this.onResizeEnd)
+  formatDate(dateString: string): string {
+    const date = new Date(dateString)
+    return date.toLocaleDateString("ar-SA", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
   }
 
-  getColumnWidth(column: TableColumn): string {
-    return this.columnWidths[column.key] || column.width || "auto"
+  getImageColumn(): TableColumn | null {
+    return this.columns.find((col) => col.type === "image") || null
   }
 
-  trackByFn(index: number, item: any): any {
-    return item.id || index
-  }
-
-  trackByColumnFn(index: number, column: TableColumn): string {
-    return column.key
+  getDisplayColumns(): TableColumn[] {
+    return this.columns.filter((col) => col.type !== "image" && col.key !== "name" && col.key !== "description")
   }
 }
