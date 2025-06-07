@@ -72,7 +72,7 @@ export class ProductService {
     if (params.categoryId) httpParams = httpParams.set('categoryId', params.categoryId.toString());
     if (params.status) httpParams = httpParams.set('status', params.status);
     if (params.sortProp) httpParams = httpParams.set('sortProp', params.sortProp);
-    // if (params.sortDirection) httpParams = httpParams.set('sortDirection', params.sortDirection);
+    if (params.sortDirection) httpParams = httpParams.set('sortDirection', params.sortDirection);
     console.log(params);
 
     return this.http.get<PaginatedResponse<Product>>(`${this.baseUrl}/GetAllProducts`, { params: httpParams }).pipe(

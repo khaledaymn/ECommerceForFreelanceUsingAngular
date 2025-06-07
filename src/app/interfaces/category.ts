@@ -39,8 +39,8 @@ export enum SortProp {
 }
 
 export enum SortDirection {
-  Ascending = 'asc',
-  Descending = 'desc'
+  Ascending = 0,
+  Descending = 1
 }
 
 export interface CategoryParams {

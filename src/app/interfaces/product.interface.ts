@@ -48,13 +48,13 @@ export interface ProductMedia {
 }
 
 export enum SortProp {
-  Id = 'id',
-  Name = 'name',
-  Description = 'description',
-  Price = 'price',
-  Status = 'status',
-  CategoryId = 'categoryId',
-  CreatedAt = 'createdAt'
+  Id = 0,
+  Name = 1,
+  Description = 2,
+  Price = 3,
+  Status = 4,
+  CategoryId = 5,
+  CreatedAt = 6
 }
 
 export interface ProductParams {

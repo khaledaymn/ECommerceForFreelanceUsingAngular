@@ -1,4 +1,13 @@
-import { Component, Input, Output, EventEmitter, type OnInit, type OnChanges } from "@angular/core"
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  type OnInit,
+  type OnChanges,
+  ViewChild,
+  type ElementRef,
+} from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
 import { Category } from "../../../../interfaces/category"
@@ -15,6 +24,8 @@ export class CategoryModalComponent implements OnInit, OnChanges {
   @Input() category: Category | null = null
   @Output() close = new EventEmitter<void>()
   @Output() save = new EventEmitter<any>()
+
+  @ViewChild("fileInput") fileInput!: ElementRef<HTMLInputElement>
 
   formData = {
     name: "",
@@ -56,6 +67,10 @@ export class CategoryModalComponent implements OnInit, OnChanges {
     this.isSubmitting = false
   }
 
+  triggerFileInput(): void {
+    this.fileInput.nativeElement.click()
+  }
+
   onImageChange(event: Event): void {
     const input = event.target as HTMLInputElement
     const file = input.files?.[0]
@@ -90,6 +105,9 @@ export class CategoryModalComponent implements OnInit, OnChanges {
     this.formData.image = null
     this.imagePreview = null
     this.imageError = null
+    if (this.fileInput) {
+      this.fileInput.nativeElement.value = ""
+    }
   }
 
   onSubmit(): void {

@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, type OnInit, HostListener } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
+import { SortDirection } from "../../interfaces/category"
 
 export interface TableColumn {
   key: string
@@ -48,7 +49,7 @@ export class DataTableComponent implements OnInit {
   @Output() rowClick = new EventEmitter<any>()
   @Output() actionClick = new EventEmitter<{ action: string; item: any }>()
   @Output() selectionChange = new EventEmitter<any[]>()
-  @Output() sortChange = new EventEmitter<{ column: string; direction: "asc" | "desc" }>()
+  @Output() sortChange = new EventEmitter<{ column: string; direction: 0 | 1 }>()
   @Output() searchChange = new EventEmitter<string>()
   @Output() viewModeChange = new EventEmitter<"table" | "grid">()
   @Output() pageChange = new EventEmitter<number>()
@@ -58,7 +59,7 @@ export class DataTableComponent implements OnInit {
   selectedItems = new Set<any>()
   selectAll = false
   sortColumn = ""
-  sortDirection: "asc" | "desc" = "asc"
+  sortDirection!: SortDirection
   activeMenu: number | null = null
 
   ngOnInit() {
@@ -120,12 +121,12 @@ export class DataTableComponent implements OnInit {
 
   onSort(column: TableColumn, index: number) {
     if (!column.sortable) return
-
+    
     if (this.sortColumn === column.key) {
-      this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc"
+      this.sortDirection = this.sortDirection === 0 ? 1 : 0
     } else {
       this.sortColumn = column.key
-      this.sortDirection = "asc"
+      this.sortDirection = 0
     }
 
     this.sortChange.emit({
@@ -137,7 +138,7 @@ export class DataTableComponent implements OnInit {
   getSortIcon(column: TableColumn): string {
     if (!column.sortable) return ""
     if (this.sortColumn !== column.key) return "unfold_more"
-    return this.sortDirection === "asc" ? "keyboard_arrow_up" : "keyboard_arrow_down"
+    return this.sortDirection === 0 ? "keyboard_arrow_up" : "keyboard_arrow_down"
   }
 
   toggleSelectAll(event: any) {
@@ -176,7 +177,58 @@ export class DataTableComponent implements OnInit {
 
   toggleMenu(index: number, event: Event) {
     event.stopPropagation()
-    this.activeMenu = this.activeMenu === index ? null : index
+
+    if (this.activeMenu === index) {
+      this.activeMenu = null
+      return
+    }
+
+    this.activeMenu = index
+
+    // Position dropdown after DOM update
+    setTimeout(() => {
+      const trigger = event.target as HTMLElement
+      const dropdown = trigger.closest(".actions-menu")?.querySelector(".menu-dropdown") as HTMLElement
+
+      if (dropdown) {
+        this.positionDropdown(trigger, dropdown)
+      }
+    }, 0)
+  }
+
+  private positionDropdown(trigger: HTMLElement, dropdown: HTMLElement) {
+    const triggerRect = trigger.getBoundingClientRect()
+    const dropdownRect = dropdown.getBoundingClientRect()
+    const viewportWidth = window.innerWidth
+    const viewportHeight = window.innerHeight
+
+    // Reset positioning
+    dropdown.style.position = "fixed"
+    dropdown.style.top = ""
+    dropdown.style.left = ""
+    dropdown.style.right = ""
+    dropdown.style.bottom = ""
+
+    // Calculate optimal position
+    let top = triggerRect.bottom + 8
+    let left = triggerRect.right - dropdownRect.width
+
+    // Adjust if dropdown goes off-screen horizontally
+    if (left < 8) {
+      left = triggerRect.left
+    }
+    if (left + dropdownRect.width > viewportWidth - 8) {
+      left = viewportWidth - dropdownRect.width - 8
+    }
+
+    // Adjust if dropdown goes off-screen vertically
+    if (top + dropdownRect.height > viewportHeight - 8) {
+      top = triggerRect.top - dropdownRect.height - 8
+    }
+
+    // Apply calculated position
+    dropdown.style.top = `${top}px`
+    dropdown.style.left = `${left}px`
   }
 
   setViewMode(mode: "table" | "grid") {
@@ -212,8 +264,6 @@ export class DataTableComponent implements OnInit {
   }
 
   getCellValue(item: any, column: TableColumn): any {
-    console.log(item[column.key]);
-
     return item[column.key]
   }
 
@@ -231,12 +281,12 @@ export class DataTableComponent implements OnInit {
   }
 
   formatCurrency(value: number): string {
-    return `${value.toFixed(2)} ر.س`
+    return `${value.toFixed(2)} ريال`
   }
 
   formatDate(dateString: string): string {
     const date = new Date(dateString)
-    return date.toLocaleDateString("ar-SA", {
+    return date.toLocaleDateString("ar", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -249,5 +299,22 @@ export class DataTableComponent implements OnInit {
 
   getDisplayColumns(): TableColumn[] {
     return this.columns.filter((col) => col.type !== "image" && col.key !== "name" && col.key !== "description")
+  }
+
+  // Handle image loading errors
+  onImageError(event: Event) {
+    const img = event.target as HTMLImageElement
+    const placeholder = img.parentElement?.querySelector(".image-placeholder")
+    if (placeholder) {
+      img.style.display = "none";
+      (placeholder as HTMLElement).style.display = "flex";
+    } else {
+      // Create and show placeholder if it doesn't exist
+      const placeholderDiv = document.createElement("div")
+      placeholderDiv.className = "image-placeholder"
+      placeholderDiv.innerHTML = '<i class="material-icons">broken_image</i>'
+      img.style.display = "none"
+      img.parentElement?.appendChild(placeholderDiv)
+    }
   }
 }

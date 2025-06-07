@@ -20,15 +20,18 @@
   (pageChange)="onPageChange($event)"
   (pageSizeChange)="onPageSizeChange($event)"
 >
-  <div slot="title">
+  <div slot="title" class="header-title">
     <h1>إدارة الفئات</h1>
     <p class="header-subtitle">إدارة وتنظيم فئات المنتجات</p>
   </div>
 
   <div slot="actions">
-    <button class="action-btn export-btn" (click)="openAddModal()">
-      <i class="material-icons">add</i>
+    <button class="add-btn category-add-btn" (click)="openAddModal()">
+      <div class="btn-icon">
+        <i class="material-icons">add</i>
+      </div>
       <span class="btn-text">إضافة فئة</span>
+      <div class="btn-shine"></div>
     </button>
   </div>
 </app-data-table>

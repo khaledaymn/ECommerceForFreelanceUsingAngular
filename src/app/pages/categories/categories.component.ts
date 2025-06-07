@@ -37,7 +37,7 @@ export class CategoryManagementComponent implements OnInit {
   // Sorting and filtering
   searchTerm = ""
   sortColumn = "name"
-  sortDirection: "asc" | "desc" = "asc"
+  sortDirection: 0 | 1 = 0
 
   // Modal state
   isModalOpen = false
@@ -78,18 +78,24 @@ export class CategoryManagementComponent implements OnInit {
       pageSize: this.pageSize,
       search: this.searchTerm,
       sortProp: this.sortColumn as any,
-      sortDirection: (this.sortDirection as import("../../interfaces/category").SortDirection) || "asc",
+      sortDirection: (this.sortDirection as import("../../interfaces/category").SortDirection) || 0,
     }
 
     this.categoryService.getAllCategories(params).subscribe({
       next: (response) => {
-        console.log(response.data);
-
         this.categories = response.data
         this.filteredCategories = response.data
         this.totalItems = response.totalCount
         this.totalPages = Math.ceil(response.totalCount / this.pageSize)
         this.loading = false
+        // Ensure imageThumbnailUrl is set if missing
+        this.filteredCategories = this.filteredCategories.map(category => {
+          if (!category.imageThumbnailUrl && category.imageUrl) {
+            return { ...category, imageThumbnailUrl: category.imageUrl }
+          }
+          return category
+        })
+        this.filteredCategories.forEach((data)=> console.log(data));
       },
       error: (error) => {
         console.error("Error loading categories:", error)
@@ -104,7 +110,7 @@ export class CategoryManagementComponent implements OnInit {
     this.loadCategories()
   }
 
-  onSort(event: { column: string; direction: "asc" | "desc" }): void {
+  onSort(event: { column: string; direction: 0 | 1 }): void {
     this.sortColumn = event.column
     this.sortDirection = event.direction
     this.currentPage = 1

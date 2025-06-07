@@ -20,15 +20,18 @@
   (pageChange)="onPageChange($event)"
   (pageSizeChange)="onPageSizeChange($event)"
 >
-  <div slot="title">
+  <div slot="title" class="header-title">
     <h1>إدارة المنتجات</h1>
     <p class="header-subtitle">إدارة وتنظيم جميع المنتجات</p>
   </div>
 
   <div slot="actions">
-    <button class="action-btn export-btn" (click)="openAddModal()">
-      <i class="material-icons">add</i>
+    <button class="add-btn product-add-btn" (click)="openAddModal()">
+      <div class="btn-icon">
+        <i class="material-icons">add_shopping_cart</i>
+      </div>
       <span class="btn-text">إضافة منتج</span>
+      <div class="btn-shine"></div>
     </button>
   </div>
 
@@ -63,7 +66,11 @@
         <div class="filter-option" (click)="onCategoryFilterChange('')">
           <span>جميع الفئات</span>
         </div>
-        <div class="filter-option" *ngFor="let category of categories" (click)="onCategoryFilterChange(category.id.toString())">
+        <div
+          class="filter-option"
+          *ngFor="let category of categories"
+          (click)="onCategoryFilterChange(category.id.toString())"
+        >
           <span>{{ category.name }}</span>
         </div>
       </div>

@@ -42,7 +42,7 @@ export class ProductManagementComponent implements OnInit {
   statusFilter = ""
   categoryFilter = ""
   sortColumn = "name"
-  sortDirection: "asc" | "desc" = "asc"
+  sortDirection: 0 | 1 = 0
   activeFilter: string | null = null
 
   // Modal state
@@ -59,10 +59,10 @@ export class ProductManagementComponent implements OnInit {
   columns: TableColumn[] = [
     { key: "mainImageUrl", title: "الصورة", type: "image", width: "80px", align: "center" },
     { key: "name", title: "اسم المنتج", sortable: true, width: "25%" },
-    { key: "categoryName", title: "الفئة", sortable: true, width: "15%" },
+    { key: "categoryName", title: "الفئة", sortable: false, width: "15%" },
     { key: "price", title: "السعر", type: "currency", sortable: true, width: "12%", align: "left" },
-    { key: "status", title: "الحالة", type: "badge", sortable: true, width: "12%", align: "center" },
-    { key: "createdAt", title: "التاريخ", type: "date", sortable: true, width: "10%", align: "center" },
+    { key: "status", title: "الحالة", type: "badge", sortable: false, width: "12%", align: "center" },
+    { key: "createdAt", title: "التاريخ", type: "date", sortable: false, width: "10%", align: "center" },
   ]
 
   actions: TableAction[] = [
@@ -110,6 +110,7 @@ export class ProductManagementComponent implements OnInit {
       status: this.statusFilter || undefined,
       categoryId: this.categoryFilter ? Number.parseInt(this.categoryFilter) : undefined,
       sortProp: this.sortColumn as any, // Cast to SortProp if compatible
+      sortDirection: this.sortDirection as any // Cast to SortDirection if compatible
     }
 
     this.productService.getAllProducts(params).subscribe({
@@ -133,10 +134,12 @@ export class ProductManagementComponent implements OnInit {
     this.loadProducts()
   }
 
-  onSort(event: { column: string; direction: "asc" | "desc" }): void {
+  onSort(event: { column: string; direction: 0 | 1 }): void {
     this.sortColumn = event.column
     this.sortDirection = event.direction
     this.currentPage = 1
+    console.log(event);
+    
     this.loadProducts()
   }
 

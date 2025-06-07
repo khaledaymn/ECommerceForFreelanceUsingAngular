@@ -11,7 +11,8 @@
         *ngIf="enableViewToggle"
         class="action-btn grid-btn"
         [class.active]="viewMode === 'grid'"
-        (click)="setViewMode('grid')">
+        (click)="setViewMode('grid')"
+      >
         <i class="material-icons">grid_view</i>
         <span class="btn-text">شبكة</span>
       </button>
@@ -19,7 +20,8 @@
         *ngIf="enableViewToggle"
         class="action-btn table-btn"
         [class.active]="viewMode === 'table'"
-        (click)="setViewMode('table')">
+        (click)="setViewMode('table')"
+      >
         <i class="material-icons">table_rows</i>
         <span class="btn-text">جدول</span>
       </button>
@@ -31,17 +33,18 @@
     <div class="search-container" *ngIf="showSearch">
       <div class="search-box">
         <input
+          placeholder="تحديد الكل"
+          title="تحديد الكل"
+          placeholder="تحديد الكل"
+          title="تحديد الكل"
           type="text"
           [(ngModel)]="searchTerm"
           (input)="onSearch()"
           [placeholder]="searchPlaceholder"
           class="search-input"
-          title="بحث"
-          placeholder="بحث"
         />
         <button class="search-btn" (click)="onSearch()">
           <i class="material-icons">search</i>
-          <span class="btn-text">بحث</span>
         </button>
       </div>
     </div>
@@ -61,8 +64,8 @@
               type="checkbox"
               [checked]="selectAll"
               (change)="toggleSelectAll($event)"
-              [title]="'تحديد/إلغاء تحديد الكل'"
-              aria-label="تحديد/إلغاء تحديد الكل"
+              placeholder="تحديد الكل"
+              title="تحديد الكل"
             />
           </th>
           <th
@@ -74,10 +77,9 @@
             (click)="onSort(column, i)"
           >
             {{ column.title }}
-            <i
-              *ngIf="column.sortable"
-              class="material-icons sort-icon"
-            >{{ getSortIcon(column) }}</i>
+            <i *ngIf="column.sortable" class="material-icons sort-icon">{{
+              getSortIcon(column)
+            }}</i>
           </th>
           <th *ngIf="actions.length > 0" class="actions-col">إجراءات</th>
         </tr>
@@ -85,7 +87,14 @@
       <tbody>
         <!-- Loading State -->
         <tr *ngIf="loading">
-          <td [attr.colspan]="columns.length + (selectable ? 1 : 0) + (actions.length > 0 ? 1 : 0)" class="loading-cell">
+          <td
+            [attr.colspan]="
+              columns.length +
+              (selectable ? 1 : 0) +
+              (actions.length > 0 ? 1 : 0)
+            "
+            class="loading-cell"
+          >
             <div class="loading-content">
               <div class="loading-spinner"></div>
               <span>جاري التحميل...</span>
@@ -95,7 +104,14 @@
 
         <!-- Empty State -->
         <tr *ngIf="!loading && data.length === 0">
-          <td [attr.colspan]="columns.length + (selectable ? 1 : 0) + (actions.length > 0 ? 1 : 0)" class="empty-cell">
+          <td
+            [attr.colspan]="
+              columns.length +
+              (selectable ? 1 : 0) +
+              (actions.length > 0 ? 1 : 0)
+            "
+            class="empty-cell"
+          >
             <div class="empty-content">
               <i class="material-icons">inbox</i>
               <span>{{ emptyMessage }}</span>
@@ -127,11 +143,29 @@
           >
             <!-- Image Type -->
             <div *ngIf="column.type === 'image'" class="cell-image">
-              <img
-                [src]="getCellValue(item, column) || '/placeholder.svg'"
-                alt="{{item.name }}|| 'صورة'"
-                class="table-image"
-              />
+              <div class="image-container">
+                <img
+                  *ngIf="
+                    getCellValue(item, column) &&
+                    getCellValue(item, column) !== 'null' &&
+                    getCellValue(item, column) !== ''
+                  "
+                  [src]="getCellValue(item, column)"
+                  alt="{{ item.name }} || 'صورة المنتج'"
+                  class="table-image"
+                  (error)="onImageError($event)"
+                />
+                <div
+                  *ngIf="
+                    !getCellValue(item, column) ||
+                    getCellValue(item, column) === 'null' ||
+                    getCellValue(item, column) === ''
+                  "
+                  class="image-placeholder"
+                >
+                  <i class="material-icons">image</i>
+                </div>
+              </div>
             </div>
 
             <!-- Badge Type -->
@@ -144,18 +178,12 @@
             </span>
 
             <!-- Currency Type -->
-            <span
-              *ngIf="column.type === 'currency'"
-              class="currency-value"
-            >
+            <span *ngIf="column.type === 'currency'" class="currency-value">
               {{ formatCurrency(getCellValue(item, column)) }}
             </span>
 
             <!-- Date Type -->
-            <span
-              *ngIf="column.type === 'date'"
-              class="date-value"
-            >
+            <span *ngIf="column.type === 'date'" class="date-value">
               {{ formatDate(getCellValue(item, column)) }}
             </span>
 
@@ -171,10 +199,7 @@
 
           <td *ngIf="actions.length > 0" class="actions-col">
             <div class="actions-menu" [class.open]="activeMenu === i">
-              <button
-                class="menu-trigger"
-                (click)="toggleMenu(i, $event)"
-              >
+              <button class="menu-trigger" (click)="toggleMenu(i, $event)">
                 <i class="material-icons">more_vert</i>
               </button>
               <div class="menu-dropdown" *ngIf="activeMenu === i">
@@ -229,10 +254,7 @@
         </div>
         <div class="card-actions" *ngIf="actions.length > 0">
           <div class="actions-menu" [class.open]="activeMenu === i">
-            <button
-              class="menu-trigger"
-              (click)="toggleMenu(i, $event)"
-            >
+            <button class="menu-trigger" (click)="toggleMenu(i, $event)">
               <i class="material-icons">more_vert</i>
             </button>
             <div class="menu-dropdown" *ngIf="activeMenu === i">
@@ -254,16 +276,34 @@
         <!-- Default card content -->
         <div class="default-card-content">
           <div class="card-image" *ngIf="getImageColumn()">
-            <img
-              [src]="getCellValue(item, getImageColumn()!) || '/placeholder.svg'"
-              alt="item.name || 'صورة'"
-              class="card-img"
-            />
+            <div class="image-container">
+              <img
+                *ngIf="
+                  getCellValue(item, getImageColumn()!) &&
+                  getCellValue(item, getImageColumn()!) !== 'null' &&
+                  getCellValue(item, getImageColumn()!) !== ''
+                "
+                [src]="getCellValue(item, getImageColumn()!)"
+                alt="{{ item.name }} || 'صورة المنتج'"
+                class="card-img"
+                (error)="onImageError($event)"
+              />
+              <div
+                *ngIf="
+                  !getCellValue(item, getImageColumn()!) ||
+                  getCellValue(item, getImageColumn()!) === 'null' ||
+                  getCellValue(item, getImageColumn()!) === ''
+                "
+                class="image-placeholder card-placeholder"
+              >
+                <i class="material-icons">image</i>
+              </div>
+            </div>
           </div>
 
           <div class="card-info">
-            <h3 class="card-title">{{ item.name || item.title || 'عنصر' }}</h3>
-            <p class="card-description">{{ item.description || '' }}</p>
+            <h3 class="card-title">{{ item.name || item.title || "عنصر" }}</h3>
+            <p class="card-description">{{ item.description || "" }}</p>
 
             <div class="card-details">
               <div
@@ -278,7 +318,6 @@
                     [class]="getStatusClass(getCellValue(item, column))"
                   >
                     {{ getCellValue(item, column) }}
-
                   </span>
                   <span
                     *ngIf="column.type === 'currency'"
@@ -301,7 +340,9 @@
   <!-- Always Visible Pagination -->
   <div class="pagination-container">
     <div class="pagination-info">
-      <span>عرض {{ startItem }} إلى {{ endItem }} من {{ totalItems }} عنصر</span>
+      <span
+        >عرض {{ startItem }} إلى {{ endItem }} من {{ totalItems }} عنصر</span
+      >
     </div>
 
     <div class="pagination-controls">
@@ -332,7 +373,7 @@
           [disabled]="page === -1"
           (click)="page !== -1 && onPageChange(page)"
         >
-          {{ page === -1 ? '...' : page }}
+          {{ page === -1 ? "..." : page }}
         </button>
       </div>
 
@@ -363,7 +404,9 @@
         aria-label="تحديد عدد العناصر لكل صفحة"
         title="تحديد عدد العناصر لكل صفحة"
       >
-        <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }}</option>
+        <option *ngFor="let size of pageSizeOptions" [ngValue]="size">
+          {{ size }}
+        </option>
       </select>
     </div>
   </div>
