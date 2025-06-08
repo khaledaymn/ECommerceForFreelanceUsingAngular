@@ -81,7 +81,7 @@
               getSortIcon(column)
             }}</i>
           </th>
-          <th *ngIf="actions.length > 0" class="actions-col">إجراءات</th>
+          <!-- <th *ngIf="actions.length > 0" class="actions-col">إجراءات</th> -->
         </tr>
       </thead>
       <tbody>
@@ -197,7 +197,7 @@
             </span>
           </td>
 
-          <td *ngIf="actions.length > 0" class="actions-col">
+          <!-- <td *ngIf="actions.length > 0" class="actions-col">
             <div class="actions-menu" [class.open]="activeMenu === i">
               <button class="menu-trigger" (click)="toggleMenu(i, $event)">
                 <i class="material-icons">more_vert</i>
@@ -214,7 +214,7 @@
                 </button>
               </div>
             </div>
-          </td>
+          </td> -->
         </tr>
       </tbody>
     </table>
@@ -241,7 +241,7 @@
       [class.selected]="isSelected(item)"
       (click)="onRowClick(item)"
     >
-      <div class="card-header">
+      <!-- <div class="card-header">
         <div class="card-checkbox" *ngIf="selectable">
           <input
             type="checkbox"
@@ -253,11 +253,11 @@
           />
         </div>
         <div class="card-actions" *ngIf="actions.length > 0">
-          <div class="actions-menu" [class.open]="activeMenu === i">
+           <div class="actions-menu" [class.open]="activeMenu === i">
             <button class="menu-trigger" (click)="toggleMenu(i, $event)">
               <i class="material-icons">more_vert</i>
             </button>
-            <div class="menu-dropdown" *ngIf="activeMenu === i">
+             <div class="menu-dropdown" *ngIf="activeMenu === i">
               <button
                 *ngFor="let action of actions"
                 class="menu-item"
@@ -268,9 +268,9 @@
                 {{ action.label }}
               </button>
             </div>
-          </div>
-        </div>
-      </div>
+          </div> 
+        </div> 
+      </div> -->
 
       <div class="card-content">
         <!-- Default card content -->
