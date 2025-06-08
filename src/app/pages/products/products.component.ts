@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core"
+import { Component, HostListener, OnInit } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
 import { ProductService } from "../../services/product.service"
@@ -9,6 +9,17 @@ import { DataTableComponent, TableAction, TableColumn } from "../../components/d
 import { ProductModalComponent } from "./modals/product-modal/product-modal.component"
 import { ConfirmDialogComponent } from "../../components/confirm-dialog/confirm-dialog.component"
 import { ProductDetailsModalComponent } from "./modals/product-details-modal/product-details-modal.component"
+
+interface AttributeFilter {
+  key: string
+  values: { value: string; count: number }[]
+}
+
+interface PricePreset {
+  label: string
+  min?: number
+  max?: number
+}
 
 @Component({
   selector: "app-product",
@@ -41,9 +52,31 @@ export class ProductManagementComponent implements OnInit {
   searchTerm = ""
   statusFilter = ""
   categoryFilter = ""
+  attributeFilters: Record<string, string[]> = {}
+  priceFilter = { min: null as number | null, max: null as number | null }
   sortColumn = "name"
   sortDirection: 0 | 1 = 0
   activeFilter: string | null = null
+
+  // Filter panel state
+  showFilters = false
+  activeDropdown: string | null = null
+
+  // Filter search terms
+  statusSearchTerm = ""
+  categorySearchTerm = ""
+attributeSearchTerms: Record<string, string> = {}
+
+  // Available attributes for filtering
+  availableAttributes: AttributeFilter[] = []
+
+  // Price presets
+  pricePresets: PricePreset[] = [
+    { label: "أقل من 100 ريال", max: 100 },
+    { label: "100 - 500 ريال", min: 100, max: 500 },
+    { label: "500 - 1000 ريال", min: 500, max: 1000 },
+    { label: "أكثر من 1000 ريال", min: 1000 },
+  ]
 
   // Modal state
   isModalOpen = false
@@ -84,6 +117,54 @@ export class ProductManagementComponent implements OnInit {
     this.loadProducts()
   }
 
+@HostListener("document:click", ["$event"])
+  onDocumentClick(event: Event): void {
+    const target = event.target as HTMLElement
+    if (!target.closest(".searchable-select")) {
+      this.activeDropdown = null
+    }
+  }
+
+  // Filter panel methods
+  toggleFiltersPanel(): void {
+    this.showFilters = !this.showFilters
+    if (!this.showFilters) {
+      this.activeDropdown = null
+    }
+  }
+
+  closeFiltersPanel(): void {
+    this.showFilters = false
+    this.activeDropdown = null
+  }
+
+  toggleDropdown(dropdown: string): void {
+    this.activeDropdown = this.activeDropdown === dropdown ? null : dropdown
+  }
+
+  selectStatus(status: string): void {
+    this.onStatusFilterChange(status)
+    this.activeDropdown = null
+  }
+
+  selectCategory(categoryId: string): void {
+    this.onCategoryFilterChange(categoryId)
+    this.activeDropdown = null
+  }
+
+  applyFilters(): void {
+    this.closeFiltersPanel()
+  }
+
+  getActiveFiltersCount(): number {
+    let count = 0
+    if (this.statusFilter) count++
+    if (this.categoryFilter) count++
+    if (this.priceFilter.min || this.priceFilter.max) count++
+    count += Object.keys(this.attributeFilters).length
+    return count
+  }
+
   loadCategories(): void {
     this.categoryService
       .getAllCategories({
@@ -119,6 +200,7 @@ export class ProductManagementComponent implements OnInit {
         this.filteredProducts = response.data
         this.totalItems = response.totalCount
         this.totalPages = Math.ceil(response.totalCount / this.pageSize)
+        this.extractAvailableAttributes()
         this.loading = false
       },
       error: (error) => {
@@ -127,6 +209,58 @@ export class ProductManagementComponent implements OnInit {
       },
     })
   }
+
+private applyClientSideFilters(products: Product[]): Product[] {
+    let filtered = [...products]
+
+    // Apply price filter
+    if (this.priceFilter.min !== null || this.priceFilter.max !== null) {
+      filtered = filtered.filter((product) => {
+        const price = product.price
+        const minMatch = this.priceFilter.min === null || price >= this.priceFilter.min
+        const maxMatch = this.priceFilter.max === null || price <= this.priceFilter.max
+        return minMatch && maxMatch
+      })
+    }
+
+    return filtered
+  }
+
+  private extractAvailableAttributes(): void {
+    const attributesMap = new Map<string, Map<string, number>>()
+
+    this.products.forEach((product) => {
+      if (product.additionalAttributes) {
+        try {
+          const attributes = JSON.parse(product.additionalAttributes)
+          Object.entries(attributes).forEach(([key, value]) => {
+            if (!attributesMap.has(key)) {
+              attributesMap.set(key, new Map())
+              // Initialize search term for this attribute if not exists
+              if (!this.attributeSearchTerms[key]) {
+                this.attributeSearchTerms[key] = ""
+              }
+            }
+            const valueMap = attributesMap.get(key)!
+            const stringValue = String(value)
+            valueMap.set(stringValue, (valueMap.get(stringValue) || 0) + 1)
+          })
+        } catch (error) {
+          console.error("Error parsing additional attributes:", error)
+        }
+      }
+    })
+
+    this.availableAttributes = Array.from(attributesMap.entries())
+      .map(([key, valueMap]) => ({
+        key,
+        values: Array.from(valueMap.entries())
+          .map(([value, count]) => ({ value, count }))
+          .sort((a, b) => a.value.localeCompare(b.value)),
+      }))
+      .sort((a, b) => a.key.localeCompare(b.key))
+  }
+
 
   onSearch(searchTerm: string): void {
     this.searchTerm = searchTerm
@@ -139,7 +273,7 @@ export class ProductManagementComponent implements OnInit {
     this.sortDirection = event.direction
     this.currentPage = 1
     console.log(event);
-    
+
     this.loadProducts()
   }
 
@@ -190,9 +324,161 @@ export class ProductManagementComponent implements OnInit {
     this.loadProducts()
   }
 
+  getFilteredStatuses(): string[] {
+    const allStatuses = [...new Set(this.products.map((p) => p.status))]
+    if (!this.statusSearchTerm) return allStatuses
+    return allStatuses.filter((status) => status.toLowerCase().includes(this.statusSearchTerm.toLowerCase()))
+  }
+
+  getStatusCount(status: string): number {
+    return this.products.filter((p) => p.status === status).length
+  }
+
+  getTotalProductsCount(): number {
+    return this.products.length
+  }
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case "متوفر":
+        return "status-available"
+      case "غير متوفر":
+        return "status-unavailable"
+      case "قريباً":
+        return "status-coming-soon"
+      default:
+        return "status-default"
+    }
+  }
+
   onCategoryFilterChange(category: string): void {
     this.categoryFilter = category
     this.activeFilter = null
+    this.currentPage = 1
+    this.loadProducts()
+  }
+
+  getFilteredCategories(): Category[] {
+    if (!this.categorySearchTerm) return this.categories
+    return this.categories.filter((category) =>
+      category.name?.toLowerCase().includes(this.categorySearchTerm.toLowerCase()),
+    )
+  }
+
+getCategoryCount(categoryId: number): number {
+  console.log("CatId "+ categoryId + this.products);
+  
+    return this.products.filter((p) => p.categoryId === categoryId).length
+  }
+
+  getCategoryName(categoryId: string): string {
+    const category = this.categories.find((c) => c.id.toString() === categoryId)
+    return category?.name || "غير محدد"
+  }
+
+  // Attribute filter methods
+  getFilteredAttributeValues(attribute: AttributeFilter): { value: string; count: number }[] {
+    const searchTerm = this.attributeSearchTerms[attribute.key] || ""
+    if (!searchTerm) return attribute.values
+    return attribute.values.filter((v) => v.value.toLowerCase().includes(searchTerm.toLowerCase()))
+  }
+
+  toggleAttributeValue(key: string, value: string): void {
+    if (!this.attributeFilters[key]) {
+      this.attributeFilters[key] = []
+    }
+
+    const index = this.attributeFilters[key].indexOf(value)
+    if (index > -1) {
+      this.attributeFilters[key].splice(index, 1)
+      if (this.attributeFilters[key].length === 0) {
+        delete this.attributeFilters[key]
+      }
+    } else {
+      this.attributeFilters[key].push(value)
+    }
+
+    this.currentPage = 1
+    this.loadProducts()
+  }
+
+  isAttributeValueSelected(key: string, value: string): boolean {
+    return this.attributeFilters[key]?.includes(value) || false
+  }
+
+  hasActiveAttributeFilters(): boolean {
+    return Object.keys(this.attributeFilters).length > 0
+  }
+
+  getActiveAttributeFiltersText(): string {
+    const count = Object.values(this.attributeFilters).reduce((sum, values) => sum + values.length, 0)
+    return `${count} فلتر نشط`
+  }
+
+  getActiveAttributeFilters(): { key: string; values: string[] }[] {
+    return Object.entries(this.attributeFilters).map(([key, values]) => ({ key, values }))
+  }
+
+  clearAttributeFilter(key: string): void {
+    delete this.attributeFilters[key]
+    this.currentPage = 1
+    this.loadProducts()
+  }
+
+  clearAllAttributeFilters(): void {
+    this.attributeFilters = {}
+    this.currentPage = 1
+    this.loadProducts()
+  }
+
+  // Price filter methods
+  onPriceFilterChange(): void {
+    this.currentPage = 1
+    this.filteredProducts = this.applyClientSideFilters(this.products)
+  }
+
+  formatPriceRange(): string {
+    if (this.priceFilter.min && this.priceFilter.max) {
+      return `${this.priceFilter.min} - ${this.priceFilter.max} ريال`
+    } else if (this.priceFilter.min) {
+      return `من ${this.priceFilter.min} ريال`
+    } else if (this.priceFilter.max) {
+      return `حتى ${this.priceFilter.max} ريال`
+    }
+    return ""
+  }
+
+  isPricePresetActive(preset: PricePreset): boolean {
+    return this.priceFilter.min === (preset.min || null) && this.priceFilter.max === (preset.max || null)
+  }
+
+  applyPricePreset(preset: PricePreset): void {
+    this.priceFilter.min = preset.min || null
+    this.priceFilter.max = preset.max || null
+    this.onPriceFilterChange()
+  }
+
+  clearPriceFilter(): void {
+    this.priceFilter = { min: null, max: null }
+    this.onPriceFilterChange()
+  }
+
+  // General filter methods
+  hasActiveFilters(): boolean {
+    return !!(
+      this.statusFilter ||
+      this.categoryFilter ||
+      this.hasActiveAttributeFilters() ||
+      this.priceFilter.min ||
+      this.priceFilter.max
+    )
+  }
+
+  clearAllFilters(): void {
+    this.statusFilter = ""
+    this.categoryFilter = ""
+    this.attributeFilters = {}
+    this.priceFilter = { min: null, max: null }
     this.currentPage = 1
     this.loadProducts()
   }

@@ -12,6 +12,7 @@
   [totalPages]="totalPages"
   [totalItems]="totalItems"
   [pageSize]="pageSize"
+  [showFilters]="true"
   (searchChange)="onSearch($event)"
   (sortChange)="onSort($event)"
   (rowClick)="onRowClick($event)"
@@ -36,42 +37,366 @@
   </div>
 
   <div slot="filters">
-    <div class="filter-group">
-      <button class="filter-btn" (click)="toggleFilter('status')">
-        الحالة
-        <i class="material-icons">expand_more</i>
-      </button>
-      <div class="filter-dropdown" *ngIf="activeFilter === 'status'">
-        <div class="filter-option" (click)="onStatusFilterChange('')">
-          <span>جميع الحالات</span>
-        </div>
-        <div class="filter-option" (click)="onStatusFilterChange('متوفر')">
-          <span>متوفر</span>
-        </div>
-        <div class="filter-option" (click)="onStatusFilterChange('غير متوفر')">
-          <span>غير متوفر</span>
-        </div>
-        <div class="filter-option" (click)="onStatusFilterChange('قريباً')">
-          <span>قريباً</span>
-        </div>
+    <!-- Filters Toggle Button -->
+    <button
+      class="filters-toggle-btn"
+      [class.active]="showFilters"
+      (click)="toggleFiltersPanel()"
+    >
+      <div class="btn-icon">
+        <i class="material-icons">tune</i>
       </div>
-    </div>
-
-    <div class="filter-group">
-      <button class="filter-btn" (click)="toggleFilter('category')">
-        الفئة
-        <i class="material-icons">expand_more</i>
-      </button>
-      <div class="filter-dropdown" *ngIf="activeFilter === 'category'">
-        <div class="filter-option" (click)="onCategoryFilterChange('')">
-          <span>جميع الفئات</span>
+      <span class="btn-text">الفلاتر</span>
+      <div class="filter-badge" *ngIf="getActiveFiltersCount() > 0">
+        {{ getActiveFiltersCount() }}
+      </div>
+      <div class="btn-shine"></div>
+    </button>
+     <!-- Filters Panel -->
+    <div class="filters-panel" [class.visible]="showFilters">
+      <div class="filters-overlay" (click)="closeFiltersPanel()"></div>
+      <div class="filters-container">
+        <!-- Panel Header -->
+        <div class="filters-header">
+          <div class="header-content">
+            <div class="header-icon">
+              <i class="material-icons">tune</i>
+            </div>
+            <div class="header-text">
+              <h3>فلترة المنتجات</h3>
+              <p>اختر الفلاتر المناسبة لتصفية المنتجات</p>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button class="clear-all-btn" (click)="clearAllFilters()" *ngIf="hasActiveFilters()">
+              <i class="material-icons">clear_all</i>
+              مسح الكل
+            </button>
+            <button class="close-panel-btn" (click)="closeFiltersPanel()">
+              <i class="material-icons">close</i>
+            </button>
+          </div>
         </div>
-        <div
-          class="filter-option"
-          *ngFor="let category of categories"
-          (click)="onCategoryFilterChange(category.id.toString())"
-        >
-          <span>{{ category.name }}</span>
+
+        <!-- Filters Content -->
+        <div class="filters-content custom-scrollbar">
+          <!-- Active Filters Summary -->
+          <div class="active-filters-summary" *ngIf="hasActiveFilters()">
+            <div class="summary-header">
+              <i class="material-icons">filter_list</i>
+              <span>الفلاتر النشطة ({{ getActiveFiltersCount() }})</span>
+            </div>
+            <div class="active-filters-tags">
+              <!-- Status Filter -->
+              <div class="filter-tag" *ngIf="statusFilter">
+                <div class="tag-icon">
+                  <i class="material-icons">inventory</i>
+                </div>
+                <span class="tag-label">الحالة:</span>
+                <span class="tag-value">{{ statusFilter }}</span>
+                <button class="tag-remove" (click)="onStatusFilterChange('')">
+                  <i class="material-icons">close</i>
+                </button>
+              </div>
+
+              <!-- Category Filter -->
+              <div class="filter-tag" *ngIf="categoryFilter">
+                <div class="tag-icon">
+                  <i class="material-icons">category</i>
+                </div>
+                <span class="tag-label">الفئة:</span>
+                <span class="tag-value">{{ getCategoryName(categoryFilter) }}</span>
+                <button class="tag-remove" (click)="onCategoryFilterChange('')">
+                  <i class="material-icons">close</i>
+                </button>
+              </div>
+
+              <!-- Price Filter -->
+              <div class="filter-tag" *ngIf="priceFilter.min || priceFilter.max">
+                <div class="tag-icon">
+                  <i class="material-icons">attach_money</i>
+                </div>
+                <span class="tag-label">السعر:</span>
+                <span class="tag-value">{{ formatPriceRange() }}</span>
+                <button class="tag-remove" (click)="clearPriceFilter()">
+                  <i class="material-icons">close</i>
+                </button>
+              </div>
+
+              <!-- Attribute Filters -->
+              <div 
+                *ngFor="let attr of getActiveAttributeFilters()"
+                class="filter-tag"
+              >
+                <div class="tag-icon">
+                  <i class="material-icons">tune</i>
+                </div>
+                <span class="tag-label">{{ attr.key }}:</span>
+                <span class="tag-value">{{ attr.values.join(', ') }}</span>
+                <button class="tag-remove" (click)="clearAttributeFilter(attr.key)">
+                  <i class="material-icons">close</i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters Grid -->
+          <div class="filters-grid">
+            <!-- Row 1: Status and Category -->
+            <div class="filter-row">
+              <!-- Status Filter -->
+              <div class="filter-field">
+                <label class="filter-label">
+                  <i class="material-icons">inventory</i>
+                  حالة المنتج
+                </label>
+                <div class="searchable-select" [class.open]="activeDropdown === 'status'">
+                  <div class="select-trigger" (click)="toggleDropdown('status')">
+                    <span class="select-value" *ngIf="statusFilter; else statusPlaceholder">
+                      <div class="status-indicator" [class]="getStatusClass(statusFilter)"></div>
+                      {{ statusFilter }}
+                    </span>
+                    <ng-template #statusPlaceholder>
+                      <span class="select-placeholder">اختر الحالة</span>
+                    </ng-template>
+                    <i class="material-icons expand-icon" [class.rotated]="activeDropdown === 'status'">expand_more</i>
+                  </div>
+                  
+                  <div class="select-dropdown" *ngIf="activeDropdown === 'status'">
+                    <div class="dropdown-search">
+                      <input 
+                        type="text" 
+                        placeholder="البحث في الحالات..."
+                        [(ngModel)]="statusSearchTerm"
+                        class="search-input"
+                        (click)="$event.stopPropagation()"
+                      />
+                      <i class="material-icons">search</i>
+                    </div>
+                    
+                    <div class="dropdown-options">
+                      <div 
+                        class="dropdown-option" 
+                        [class.selected]="statusFilter === ''"
+                        (click)="selectStatus('')"
+                      >
+                        <div class="option-content">
+                          <i class="material-icons">all_inclusive</i>
+                          <span>جميع الحالات</span>
+                        </div>
+                        <!-- <span class="option-count">{{ getTotalProductsCount() }}</span> -->
+                      </div>
+                      
+                      <div 
+                        *ngFor="let status of getFilteredStatuses()"
+                        class="dropdown-option" 
+                        [class.selected]="statusFilter === status"
+                        (click)="selectStatus(status)"
+                      >
+                        <div class="option-content">
+                          <div class="status-indicator" [class]="getStatusClass(status)"></div>
+                          <span>{{ status }}</span>
+                        </div>
+                        <!-- <span class="option-count">{{ getStatusCount(status) }}</span> -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Category Filter -->
+              <div class="filter-field">
+                <label class="filter-label">
+                  <i class="material-icons">category</i>
+                  فئة المنتج
+                </label>
+                <div class="searchable-select" [class.open]="activeDropdown === 'category'">
+                  <div class="select-trigger" (click)="toggleDropdown('category')">
+                    <span class="select-value" *ngIf="categoryFilter; else categoryPlaceholder">
+                      {{ getCategoryName(categoryFilter) }}
+                    </span>
+                    <ng-template #categoryPlaceholder>
+                      <span class="select-placeholder">اختر الفئة</span>
+                    </ng-template>
+                    <i class="material-icons expand-icon" [class.rotated]="activeDropdown === 'category'">expand_more</i>
+                  </div>
+                  
+                  <div class="select-dropdown" *ngIf="activeDropdown === 'category'">
+                    <div class="dropdown-search">
+                      <input 
+                        type="text" 
+                        placeholder="البحث في الفئات..."
+                        [(ngModel)]="categorySearchTerm"
+                        class="search-input"
+                        (click)="$event.stopPropagation()"
+                      />
+                      <i class="material-icons">search</i>
+                    </div>
+                    
+                    <div class="dropdown-options">
+                      <div 
+                        class="dropdown-option" 
+                        [class.selected]="categoryFilter === ''"
+                        (click)="selectCategory('')"
+                      >
+                        <div class="option-content">
+                          <i class="material-icons">all_inclusive</i>
+                          <span>جميع الفئات</span>
+                        </div>
+                        <!-- <span class="option-count">{{ getTotalProductsCount() }}</span> -->
+                      </div>
+                      
+                      <div 
+                        *ngFor="let category of getFilteredCategories()"
+                        class="dropdown-option" 
+                        [class.selected]="categoryFilter === category.id.toString()"
+                        (click)="selectCategory(category.id.toString())"
+                      >
+                        <div class="option-content">
+                          <div class="category-image" *ngIf="category.imageThumbnailUrl">
+                            <img [src]="category.imageThumbnailUrl" [alt]="category.name" />
+                          </div>
+                          <div class="category-placeholder" *ngIf="!category.imageThumbnailUrl">
+                            <i class="material-icons">category</i>
+                          </div>
+                          <span>{{ category.name }}</span>
+                        </div>
+                        <!-- <span class="option-count">{{ getCategoryCount(category.id) }}</span> -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Row 2: Price Range -->
+            <div class="filter-row">
+              <div class="filter-field price-field">
+                <label class="filter-label">
+                  <i class="material-icons">attach_money</i>
+                  نطاق السعر
+                </label>
+                <div class="price-inputs">
+                  <div class="price-input-group">
+                    <input 
+                      type="number" 
+                      [(ngModel)]="priceFilter.min"
+                      (ngModelChange)="onPriceFilterChange()"
+                      placeholder="السعر الأدنى"
+                      min="0"
+                      class="price-input"
+                    />
+                  </div>
+                  <div class="price-separator">
+                    <i class="material-icons">remove</i>
+                  </div>
+                  <div class="price-input-group">
+                    <input 
+                      type="number" 
+                      [(ngModel)]="priceFilter.max"
+                      (ngModelChange)="onPriceFilterChange()"
+                      placeholder="السعر الأعلى"
+                      min="0"
+                      class="price-input"
+                    />
+                  </div>
+                </div>
+                
+                <div class="price-presets">
+                  <button 
+                    *ngFor="let preset of pricePresets"
+                    class="price-preset-btn"
+                    [class.active]="isPricePresetActive(preset)"
+                    (click)="applyPricePreset(preset)"
+                  >
+                    {{ preset.label }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Row 3: Dynamic Attribute Filters -->
+            <div class="filter-row attribute-filters-row" *ngIf="availableAttributes.length > 0">
+              <div class="filter-field attribute-field" *ngFor="let attribute of availableAttributes">
+                <label class="filter-label">
+                  <i class="material-icons">tune</i>
+                  {{ attribute.key }}
+                </label>
+                <div class="searchable-select" [class.open]="activeDropdown === 'attr_' + attribute.key">
+                  <div class="select-trigger" (click)="toggleDropdown('attr_' + attribute.key)">
+                    <span class="select-value" *ngIf="attributeFilters[attribute.key]?.length; else attrPlaceholder">
+                      {{ attributeFilters[attribute.key].length > 1 ? 
+                          attributeFilters[attribute.key].length + ' قيم محددة' : 
+                          attributeFilters[attribute.key][0] }}
+                    </span>
+                    <ng-template #attrPlaceholder>
+                      <span class="select-placeholder">اختر القيمة</span>
+                    </ng-template>
+                    <i class="material-icons expand-icon" [class.rotated]="activeDropdown === 'attr_' + attribute.key">expand_more</i>
+                  </div>
+                  
+                  <div class="select-dropdown" *ngIf="activeDropdown === 'attr_' + attribute.key">
+                    <div class="dropdown-search">
+                      <input 
+                        type="text" 
+                        [placeholder]="'البحث في ' + attribute.key + '...'"
+                        [(ngModel)]="attributeSearchTerms[attribute.key]"
+                        class="search-input"
+                        (click)="$event.stopPropagation()"
+                      />
+                      <i class="material-icons">search</i>
+                    </div>
+                    
+                    <div class="dropdown-options">
+                      <div 
+                        *ngFor="let value of getFilteredAttributeValues(attribute)"
+                        class="dropdown-option attribute-option" 
+                        [class.selected]="isAttributeValueSelected(attribute.key, value.value)"
+                        (click)="toggleAttributeValue(attribute.key, value.value)"
+                      >
+                        <div class="option-content">
+                          <div class="option-checkbox">
+                            <input 
+                              type="checkbox" 
+                              [checked]="isAttributeValueSelected(attribute.key, value.value)"
+                              (click)="$event.stopPropagation()"
+                              (change)="toggleAttributeValue(attribute.key, value.value)"
+                            />
+                          </div>
+                          <span>{{ value.value }}</span>
+                        </div>
+                        <!-- <span class="option-count">{{ value.count }}</span> -->
+                      </div>
+                    </div>
+                    
+                    <!-- Clear attribute button -->
+                    <div class="dropdown-footer" *ngIf="attributeFilters[attribute.key]?.length">
+                      <button class="clear-attribute-btn" (click)="clearAttributeFilter(attribute.key)">
+                        <i class="material-icons">clear</i>
+                        مسح التحديد
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel Footer -->
+        <div class="filters-footer">
+          <div class="footer-info">
+            <span class="results-count">
+              <i class="material-icons">inventory_2</i>
+              {{ filteredProducts.length }} منتج من أصل {{ totalItems }}
+            </span>
+          </div>
+          <div class="footer-actions">
+            <button class="apply-filters-btn" (click)="applyFilters()">
+              <i class="material-icons">check</i>
+              تطبيق الفلاتر
+            </button>
+          </div>
         </div>
       </div>
     </div>
