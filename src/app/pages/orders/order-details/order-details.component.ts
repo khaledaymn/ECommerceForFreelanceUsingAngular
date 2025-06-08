@@ -26,7 +26,7 @@ export class OrderDetailsComponent {
   }
 
   formatDate(date: string): string {
-    return new Date(date).toLocaleDateString("ar-SA", {
+    return new Date(date).toLocaleDateString("ar", {
       year: "numeric",
       month: "short",
       day: "numeric",

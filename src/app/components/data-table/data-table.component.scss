@@ -813,7 +813,7 @@
 }
 
 .menu-dropdown {
-  position: fixed;
+  position: absolute;
   z-index: 99999; // Maximum z-index to ensure it's above everything
   min-width: 200px;
   max-width: 220px;

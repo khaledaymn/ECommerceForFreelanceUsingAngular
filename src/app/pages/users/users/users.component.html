@@ -1,0 +1,44 @@
+
+<div class="users-container">
+  
+
+  <app-data-table
+    [columns]="columns"
+    [data]="users()"
+    [loading]="loading()"
+    [actions]="actions"
+    [showSearch]="true"
+    [showFilters]="true"
+    [selectable]="false"
+    [currentPage]="currentPage()"
+    [totalItems]="totalItems()"
+    [pageSize]="pageSize()"
+    [totalPages]="totalPages()"
+    [pageSizeOptions]="pageSizeOptions"
+    (searchChange)="onSearch($event)"
+    (sortChange)="onSort($event)"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
+    (actionClick)="onActionClick($event)"
+  >
+  <div slot="filters">
+    <select
+      class="is-deleted-filter"
+      [(ngModel)]="filter().isDeleted"
+      (ngModelChange)="onFilterIsDeleted($event)"
+      aria-label="حالة الحذف"
+    >
+      <option [ngValue]="undefined">الكل</option>
+      <option [ngValue]="false">غير محذوف</option>
+      <option [ngValue]="true">محذوف</option>
+    </select>
+  </div>
+    <div slot="title" class="header-title">
+        <h1>إدارة المستخدمين</h1>
+        <p class="header-subtitle">
+            إدارة وتنظيم جميع المستخدمين. يمكنك البحث عن مستخدمين محددين باستخدام الفلاتر.
+        </p>
+      
+    </div>
+  </app-data-table>
+</div>
