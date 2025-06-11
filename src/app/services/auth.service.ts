@@ -1,489 +1,185 @@
-// import { Injectable } from "@angular/core"
-// import { HttpClient } from "@angular/common/http"
-// import { Observable, of, BehaviorSubject, throwError } from "rxjs"
-// import { delay, tap, catchError, map } from "rxjs/operators"
-// import { User, UserCredentials, RegistrationData } from "../interfaces/user.interface"
-// import { ApiResponse } from "../interfaces/api-response.interface"
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { environment } from '../enviroments/enviroment';
+import { ResetPasswordResponse } from '../interfaces/api-response.interface';
 
-// interface LoginResponse {
-//   user: User
-//   token: string
-//   refreshToken: string
-// }
+interface LoginResponse {
+  token: string;
+  user: {
+    id: string;
+    email: string;
+    name?: string;
+    role?: string;
+  };
+}
 
-// @Injectable({
-//   providedIn: "root",
-// })
-// export class AuthService {
-//   private endpoint = "auth"
-//   private apiUrl = "https://api.example.com" // Replace with your actual API URL
-//   private useMockData = true // Set to false when real API is available
-//   private tokenKey = "auth_token"
-//   private refreshTokenKey = "refresh_token"
-//   private userKey = "current_user"
+interface User {
+  id: string;
+  email: string;
+  name?: string;
+  role?: string;
+}
 
-//   private currentUserSubject = new BehaviorSubject<User | null>(this.getUserFromStorage())
-//   currentUser$ = this.currentUserSubject.asObservable()
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  private apiUrl = environment.apiUrl;
+  private tokenKey = 'auth_token';
+  private userSubject = new BehaviorSubject<User | null>(null);
+  public user$ = this.userSubject.asObservable();
 
-//   private loadingSubject = new BehaviorSubject<boolean>(false)
-//   loading$ = this.loadingSubject.asObservable()
+  constructor(private http: HttpClient) {
+    // Initialize user state from stored token on service creation
+    this.loadUserFromToken();
+  }
 
-//   private errorSubject = new BehaviorSubject<string | null>(null)
-//   error$ = this.errorSubject.asObservable()
+  /**
+   * Logs in a user with email and password
+   * @param email User's email
+   * @param password User's password
+   * @returns Observable with user data
+   */
+  login(email: string, password: string): Observable<User> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/Authentication/login`, { email, password })
+      .pipe(
+        tap(response => {
+          // Store token and update user state
+          this.setToken(response.token);
+          this.userSubject.next(response.user);
+        }),
+        map(response => response.user),
+        catchError(this.handleError)
+      );
+  }
 
-//   constructor(private http: HttpClient) {}
+  /**
+   * Logs out the current user
+   */
+  logout(): void {
+    // Clear token and user state
+    this.removeToken();
+    this.userSubject.next(null);
+  }
 
-//   /**
-//    * Get the current authenticated user
-//    */
-//   get currentUser(): User | null {
-//     return this.currentUserSubject.value
-//   }
+  /**
+   * Checks if the user is authenticated
+   * @returns boolean indicating authentication status
+   */
+  isAuthenticated(): boolean {
+    const token = this.getToken();
+    if (!token) {
+      return false;
+    }
+    // Optionally, add token expiration check here
+    return true;
+  }
+ hasRole(role: string): boolean {
+    // Check if the current user's role matches the given role
+    const user = this.getCurrentUser();
+    return user != null && user.role === role;
+  }
+  /**
+   * Gets the current user
+   * @returns Current user or null
+   */
+  getCurrentUser(): User | null {
+    return this.userSubject.value;
+  }
 
-//   /**
-//    * Check if user is authenticated
-//    */
-//   get isAuthenticated(): boolean {
-//     return !!this.getToken() && !!this.currentUser
-//   }
+  /**
+   * Gets the auth token
+   * @returns Token string or null
+   */
+  getToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
 
-//   /**
-//    * Check if user has admin role
-//    */
-//   get isAdmin(): boolean {
-//     return this.currentUser?.role === "admin"
-//   }
+  /**
+   * Stores the auth token
+   * @param token JWT token
+   */
+  private setToken(token: string): void {
+    localStorage.setItem(this.tokenKey, token);
+  }
 
-//   /**
-//    * Check if user has manager role
-//    */
-//   get isManager(): boolean {
-//     return this.currentUser?.role === "manager" || this.currentUser?.role === "admin"
-//   }
+  /**
+   * Removes the auth token
+   */
+  private removeToken(): void {
+    localStorage.removeItem(this.tokenKey);
+  }
 
-//   /**
-//    * Check if user has specific permission
-//    */
-//   hasPermission(permission: string): boolean {
-//     return !!this.currentUser?.permissions?.includes(permission)
-//   }
+  /**
+   * Loads user data from stored token
+   */
+  private loadUserFromToken(): void {
+    const token = this.getToken();
+    if (token) {
+      // Decode token to get user data (assuming JWT)
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const user: User = {
+          id: payload.sub || payload.id,
+          email: payload.email,
+          name: payload.name,
+          role: payload.role
+        };
+        this.userSubject.next(user);
+      } catch (error) {
+        console.error('Failed to decode token:', error);
+        this.removeToken();
+        this.userSubject.next(null);
+      }
+    }
+  }
 
-//   /**
-//    * Login with email and password
-//    */
-//   login(credentials: UserCredentials): Observable<LoginResponse> {
-//     this.loadingSubject.next(true)
-//     this.errorSubject.next(null)
-
-//     if (this.useMockData) {
-//       // Mock successful login
-//       if (credentials.email === "admin@example.com" && credentials.password === "password") {
-//         const response: LoginResponse = {
-//           user: {
-//             id: "user_1",
-//             email: "admin@example.com",
-//             role: "admin",
-//             initials: "من",
-//             lastLogin: new Date(),
-//             permissions: ["all"],
-//             isActive: true,
-//             createdAt: new Date("2023-01-01"),
-//             updatedAt: new Date(),
-//           },
-//           token: "mock-jwt-token",
-//           refreshToken: "mock-refresh-token",
-//         }
-
-//         return of(response).pipe(
-//           delay(800), // Simulate network delay
-//           tap((res) => {
-//             this.setSession(res)
-//             this.loadingSubject.next(false)
-//           }),
-//           catchError(this.handleError.bind(this)),
-//         )
-//       }
-
-//       // Mock sales manager login
-//       if (credentials.email === "manager@example.com" && credentials.password === "password") {
-//         const response: LoginResponse = {
-//           user: {
-//             id: "user_2",
-//             name: "مدير المبيعات",
-//             email: "manager@example.com",
-//             role: "manager",
-//             initials: "مم",
-//             lastLogin: new Date(),
-//             permissions: ["view_dashboard", "manage_orders", "view_customers", "view_products"],
-//             isActive: true,
-//             createdAt: new Date("2023-02-15"),
-//             updatedAt: new Date(),
-//           },
-//           token: "mock-jwt-token",
-//           refreshToken: "mock-refresh-token",
-//         }
-
-//         return of(response).pipe(
-//           delay(800),
-//           tap((res) => {
-//             this.setSession(res)
-//             this.loadingSubject.next(false)
-//           }),
-//           catchError(this.handleError.bind(this)),
-//         )
-//       }
-
-//       // Mock login failure
-//       this.loadingSubject.next(false)
-//       return throwError(() => new Error("بريد إلكتروني أو كلمة مرور غير صحيحة"))
-//     }
-
-//     return this.http.post<ApiResponse<LoginResponse>>(`${this.apiUrl}/${this.endpoint}/login`, credentials).pipe(
-//       map((response) => response.data),
-//       tap((res) => {
-//         this.setSession(res)
-//         this.loadingSubject.next(false)
-//       }),
-//       catchError(this.handleError.bind(this)),
-//     )
-//   }
-
-//   /**
-//    * Register a new user
-//    */
-//   register(userData: RegistrationData): Observable<LoginResponse> {
-//     this.loadingSubject.next(true)
-//     this.errorSubject.next(null)
-
-//     if (this.useMockData) {
-//       // Check if email is already taken
-//       if (userData.email === "admin@example.com" || userData.email === "manager@example.com") {
-//         this.loadingSubject.next(false)
-//         return throwError(() => new Error("البريد الإلكتروني مستخدم بالفعل"))
-//       }
-
-//       // Mock successful registration
-//       const response: LoginResponse = {
-//         user: {
-//           id: `user_${Math.random().toString(36).substr(2, 9)}`,
-//           name: userData.name,
-//           email: userData.email,
-//           role: "customer",
-//           initials: userData.name
-//             .split(" ")
-//             .map((n) => n[0])
-//             .join("")
-//             .substr(0, 2),
-//           lastLogin: new Date(),
-//           permissions: ["view_orders", "view_profile"],
-//           phone: userData.phone,
-//           company: userData.company,
-//           isActive: true,
-//           createdAt: new Date(),
-//           updatedAt: new Date(),
-//         },
-//         token: "mock-jwt-token",
-//         refreshToken: "mock-refresh-token",
-//       }
-
-//       return of(response).pipe(
-//         delay(1000), // Simulate network delay
-//         tap((res) => {
-//           this.setSession(res)
-//           this.loadingSubject.next(false)
-//         }),
-//         catchError(this.handleError.bind(this)),
-//       )
-//     }
-
-//     return this.http.post<ApiResponse<LoginResponse>>(`${this.apiUrl}/${this.endpoint}/register`, userData).pipe(
-//       map((response) => response.data),
-//       tap((res) => {
-//         this.setSession(res)
-//         this.loadingSubject.next(false)
-//       }),
-//       catchError(this.handleError.bind(this)),
-//     )
-//   }
-
-//   /**
-//    * Logout the current user
-//    */
-//   logout(): Observable<void> {
-//     if (this.useMockData) {
-//       this.clearSession()
-//       return of(undefined).pipe(delay(300)) // Simulate network delay
-//     }
-
-//     return this.http.post<ApiResponse<void>>(`${this.apiUrl}/${this.endpoint}/logout`, {}).pipe(
-//       map((response) => response.data),
-//       tap(() => this.clearSession()),
-//       catchError(this.handleError.bind(this)),
-//     )
-//   }
-
-//   /**
-//    * Refresh the authentication token
-//    */
-//   refreshToken(): Observable<{ token: string; refreshToken: string }> {
-//     const refreshToken = this.getRefreshToken()
-
-//     if (this.useMockData) {
-//       if (!refreshToken) {
-//         return throwError(() => new Error("لا يوجد رمز تحديث"))
-//       }
-
-//       const response = {
-//         token: "new-mock-jwt-token",
-//         refreshToken: "new-mock-refresh-token",
-//       }
-
-//       return of(response).pipe(
-//         delay(500), // Simulate network delay
-//         tap((res) => {
-//           localStorage.setItem(this.tokenKey, res.token)
-//           localStorage.setItem(this.refreshTokenKey, res.refreshToken)
-//         }),
-//         catchError(this.handleError.bind(this)),
-//       )
-//     }
-
-//     return this.http
-//       .post<ApiResponse<{ token: string; refreshToken: string }>>(`${this.apiUrl}/${this.endpoint}/refresh-token`, {
-//         refreshToken,
-//       })
-//       .pipe(
-//         map((response) => response.data),
-//         tap((res) => {
-//           localStorage.setItem(this.tokenKey, res.token)
-//           localStorage.setItem(this.refreshTokenKey, res.refreshToken)
-//         }),
-//         catchError(this.handleError.bind(this)),
-//       )
-//   }
-
-//   /**
-//    * Get the current user's profile
-//    */
-//   getProfile(): Observable<User> {
-//     if (this.useMockData) {
-//       const user = this.getUserFromStorage()
-//       if (!user) {
-//         return throwError(() => new Error("المستخدم غير مسجل الدخول"))
-//       }
-
-//       return of(user).pipe(delay(300)) // Simulate network delay
-//     }
-
-//     return this.http.get<ApiResponse<User>>(`${this.apiUrl}/${this.endpoint}/profile`).pipe(
-//       map((response) => response.data),
-//       tap((user) => {
-//         this.setUserInStorage(user)
-//         this.currentUserSubject.next(user)
-//       }),
-//       catchError(this.handleError.bind(this)),
-//     )
-//   }
-
-//   /**
-//    * Update the current user's profile
-//    */
-//   updateProfile(userData: Partial<User>): Observable<User> {
-//     this.loadingSubject.next(true)
-
-//     if (this.useMockData) {
-//       const currentUser = this.getUserFromStorage()
-//       if (!currentUser) {
-//         this.loadingSubject.next(false)
-//         return throwError(() => new Error("المستخدم غير مسجل الدخول"))
-//       }
-
-//       const updatedUser: User = {
-//         ...currentUser,
-//         ...userData,
-//         // updatedAt: new Date(),
-//       }
-
-//       this.setUserInStorage(updatedUser)
-//       this.currentUserSubject.next(updatedUser)
-//       this.loadingSubject.next(false)
-
-//       return of(updatedUser).pipe(delay(500)) // Simulate network delay
-//     }
-
-//     return this.http.put<ApiResponse<User>>(`${this.apiUrl}/${this.endpoint}/profile`, userData).pipe(
-//       map((response) => response.data),
-//       tap((user) => {
-//         this.setUserInStorage(user)
-//         this.currentUserSubject.next(user)
-//         this.loadingSubject.next(false)
-//       }),
-//       catchError(this.handleError.bind(this)),
-//     )
-//   }
-
-//   /**
-//    * Change the current user's password
-//    */
-//   changePassword(data: {
-//     currentPassword: string
-//     newPassword: string
-//     confirmPassword: string
-//   }): Observable<void> {
-//     this.loadingSubject.next(true)
-
-//     if (this.useMockData) {
-//       // Just simulate success
-//       this.loadingSubject.next(false)
-//       return of(undefined).pipe(delay(700)) // Simulate network delay
-//     }
-
-//     return this.http.post<ApiResponse<void>>(`${this.apiUrl}/${this.endpoint}/change-password`, data).pipe(
-//       map((response) => response.data),
-//       tap(() => this.loadingSubject.next(false)),
-//       catchError(this.handleError.bind(this)),
-//     )
-//   }
-
-//   /**
-//    * Request password reset
-//    */
-//   requestPasswordReset(email: string): Observable<void> {
-//     this.loadingSubject.next(true)
-
-//     if (this.useMockData) {
-//       // Simulate success
-//       this.loadingSubject.next(false)
-//       return of(undefined).pipe(delay(800)) // Simulate network delay
-//     }
-
-//     return this.http.post<ApiResponse<void>>(`${this.apiUrl}/${this.endpoint}/forgot-password`, { email }).pipe(
-//       map((response) => response.data),
-//       tap(() => this.loadingSubject.next(false)),
-//       catchError(this.handleError.bind(this)),
-//     )
-//   }
-
-//   /**
-//    * Reset password with token
-//    */
-//   resetPassword(data: { token: string; password: string; passwordConfirmation: string }): Observable<void> {
-//     this.loadingSubject.next(true)
-
-//     if (this.useMockData) {
-//       // Simulate success
-//       this.loadingSubject.next(false)
-//       return of(undefined).pipe(delay(800)) // Simulate network delay
-//     }
-
-//     return this.http.post<ApiResponse<void>>(`${this.apiUrl}/${this.endpoint}/reset-password`, data).pipe(
-//       map((response) => response.data),
-//       tap(() => this.loadingSubject.next(false)),
-//       catchError(this.handleError.bind(this)),
-//     )
-//   }
-
-//   /**
-//    * Get the authentication token
-//    */
-//   getToken(): string | null {
-//     return localStorage.getItem(this.tokenKey)
-//   }
-
-//   /**
-//    * Get the refresh token
-//    */
-//   private getRefreshToken(): string | null {
-//     return localStorage.getItem(this.refreshTokenKey)
-//   }
-
-//   /**
-//    * Set session data after successful authentication
-//    */
-//   private setSession(authResult: LoginResponse): void {
-//     localStorage.setItem(this.tokenKey, authResult.token)
-//     localStorage.setItem(this.refreshTokenKey, authResult.refreshToken)
-//     this.setUserInStorage(authResult.user)
-//     this.currentUserSubject.next(authResult.user)
-//   }
-
-//   /**
-//    * Clear session data on logout
-//    */
-//   private clearSession(): void {
-//     localStorage.removeItem(this.tokenKey)
-//     localStorage.removeItem(this.refreshTokenKey)
-//     localStorage.removeItem(this.userKey)
-//     this.currentUserSubject.next(null)
-//   }
-
-//   /**
-//    * Store user data in local storage
-//    */
-//   private setUserInStorage(user: User): void {
-//     localStorage.setItem(this.userKey, JSON.stringify(user))
-//   }
-
-//   /**
-//    * Get user data from local storage
-//    */
-//   private getUserFromStorage(): User | null {
-//     const userJson = localStorage.getItem(this.userKey)
-//     if (!userJson) {
-//       return null
-//     }
-
-//     try {
-//       return JSON.parse(userJson)
-//     } catch (e) {
-//       console.error("Error parsing user from storage", e)
-//       return null
-//     }
-//   }
-
-//   /**
-//    * Error handler
-//    */
-//   private handleError(error: any) {
-//     this.loadingSubject.next(false)
-//     let errorMessage = "حدث خطأ في الاتصال بالخادم"
-
-//     if (error.error instanceof ErrorEvent) {
-//       // Client-side error
-//       errorMessage = `خطأ: ${error.error.message}`
-//     } else if (error.error && error.error.message) {
-//       // Server-side error with message
-//       errorMessage = error.error.message
-//     } else if (error.status) {
-//       // Server-side error with status
-//       switch (error.status) {
-//         case 401:
-//           errorMessage = "غير مصرح لك بالوصول. يرجى تسجيل الدخول مرة أخرى."
-//           break
-//         case 403:
-//           errorMessage = "ليس لديك صلاحية للوصول إلى هذا المورد."
-//           break
-//         case 404:
-//           errorMessage = "المورد المطلوب غير موجود."
-//           break
-//         case 500:
-//           errorMessage = "حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقًا."
-//           break
-//         default:
-//           errorMessage = `حدث خطأ: ${error.statusText}`
-//       }
-//     } else if (error.message) {
-//       // Error with message property
-//       errorMessage = error.message
-//     }
-
-//     // Set error in subject
-//     this.errorSubject.next(errorMessage)
-
-//     // Log the error for debugging
-//     console.error("API Error:", error)
-
-//     // Return an observable with a user-facing error message
-//     return throwError(() => new Error(errorMessage))
-//   }
-// }
+  
+    /**
+     * Sends a password reset email
+     * @param email User's email
+     * @returns Observable with success message
+     */
+resetPassword(email: string, token: string, password: string): Observable<ResetPasswordResponse> {
+    return this.http.post<ResetPasswordResponse>(
+      `${this.apiUrl}/Authentication/resetPassword`,
+      { email, token, password }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+  
+    /**
+     * Sends a forgot password request
+     * @param email User's email
+     * @returns Observable with success message
+     */
+  forgotPassword(email: string): Observable<any> {
+    // Replace the URL with your actual forgot password endpoint
+    return this.http.post<any>(`${this.apiUrl}/Authentication/forgetPassword`, { email });
+  }
+  /**
+   * Handles HTTP errors
+   * @param error HttpErrorResponse
+   * @returns Observable with error message
+   */
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = 'An error occurred. Please try again.';
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // Server-side error
+      if (error.status === 401) {
+        errorMessage = 'Invalid email or password.';
+      } else if (error.status === 403) {
+        errorMessage = 'Access forbidden.';
+      } else {
+        errorMessage = `Error ${error.status}: ${error.message}`;
+      }
+    }
+    return throwError(() => new Error(errorMessage));
+  }
+}

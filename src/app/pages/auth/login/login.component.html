@@ -38,14 +38,14 @@
         <div class="input-wrapper">
           <span class="material-icons input-icon">lock</span>
           <input
-            [type]="passwordVisible ? 'text' : 'password'"
+            [type]="hidePassword ? 'password' : 'text'"
             id="password"
             formControlName="password"
             placeholder="أدخل كلمة المرور"
             [class.invalid]="password?.invalid && password?.touched"
           />
           <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
-            <span class="material-icons">{{ passwordVisible ? 'visibility_off' : 'visibility' }}</span>
+            <span class="material-icons">{{ hidePassword ? 'visibility' : 'visibility_off' }}</span>
           </button>
         </div>
         <div class="error-message" *ngIf="password?.invalid && password?.touched">
@@ -62,10 +62,10 @@
         <a routerLink="/auth/forgot-password" class="forgot-password">نسيت كلمة المرور؟</a>
       </div>
 
-      <button type="submit" class="login-button" [disabled]="isLoading">
-        <span class="material-icons" *ngIf="isLoading">hourglass_empty</span>
-        <span *ngIf="!isLoading">تسجيل الدخول</span>
-        <span *ngIf="isLoading">جاري التحميل...</span>
+      <button type="submit" class="login-button" [disabled]="loading">
+        <span class="material-icons" *ngIf="loading">hourglass_empty</span>
+        <span *ngIf="!loading">تسجيل الدخول</span>
+        <span *ngIf="loading">جاري التحميل...</span>
       </button>
 
       <div class="register-link">

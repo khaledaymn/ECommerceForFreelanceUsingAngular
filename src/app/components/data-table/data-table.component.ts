@@ -8,7 +8,7 @@ export interface TableColumn {
   title: string
   sortable?: boolean
   width?: string
-  type?: "text" | "image" | "badge" | "currency" | "date" | "actions"
+  type?: "text" | "image" | "badge" | "currency" | "date" | "actions" | "boolean"
   align?: "left" | "center" | "right"
 }
 

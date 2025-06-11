@@ -33,10 +33,6 @@
     <div class="search-container" *ngIf="showSearch">
       <div class="search-box">
         <input
-          placeholder="تحديد الكل"
-          title="تحديد الكل"
-          placeholder="تحديد الكل"
-          title="تحديد الكل"
           type="text"
           [(ngModel)]="searchTerm"
           (input)="onSearch()"
@@ -64,8 +60,6 @@
               type="checkbox"
               [checked]="selectAll"
               (change)="toggleSelectAll($event)"
-              placeholder="تحديد الكل"
-              title="تحديد الكل"
             />
           </th>
           <th
@@ -81,7 +75,6 @@
               getSortIcon(column)
             }}</i>
           </th>
-          <!-- <th *ngIf="actions.length > 0" class="actions-col">إجراءات</th> -->
         </tr>
       </thead>
       <tbody>
@@ -131,8 +124,6 @@
               [checked]="isSelected(item)"
               (change)="toggleItemSelection(item, $event)"
               (click)="$event.stopPropagation()"
-              placeholder="تحديد العنصر"
-              title="تحديد العنصر"
             />
           </td>
 
@@ -187,6 +178,20 @@
               {{ formatDate(getCellValue(item, column)) }}
             </span>
 
+            <!-- Boolean Type -->
+            <span
+              *ngIf="column.type === 'boolean'"
+              class="boolean-badge"
+              [class.true]="getCellValue(item, column)"
+              [class.false]="!getCellValue(item, column)"
+              [attr.aria-label]="getCellValue(item, column) ? 'مفعل' : 'غير مفعل'"
+              title="{{ getCellValue(item, column) ? 'مفعل' : 'غير مفعل' }}"
+            >
+              <i class="material-icons">{{
+                getCellValue(item, column) ? 'cancel':'check_circle'
+              }}</i>
+            </span>
+
             <!-- Text Type (Default) -->
             <span
               *ngIf="!column.type || column.type === 'text'"
@@ -196,25 +201,6 @@
               {{ getCellValue(item, column) }}
             </span>
           </td>
-
-          <!-- <td *ngIf="actions.length > 0" class="actions-col">
-            <div class="actions-menu" [class.open]="activeMenu === i">
-              <button class="menu-trigger" (click)="toggleMenu(i, $event)">
-                <i class="material-icons">more_vert</i>
-              </button>
-              <div class="menu-dropdown" *ngIf="activeMenu === i">
-                <button
-                  *ngFor="let action of actions"
-                  class="menu-item"
-                  [class.danger]="action.type === 'danger'"
-                  (click)="onActionClick(action.action, item)"
-                >
-                  <i class="material-icons">{{ action.icon }}</i>
-                  {{ action.label }}
-                </button>
-              </div>
-            </div>
-          </td> -->
         </tr>
       </tbody>
     </table>
@@ -241,37 +227,6 @@
       [class.selected]="isSelected(item)"
       (click)="onRowClick(item)"
     >
-      <!-- <div class="card-header">
-        <div class="card-checkbox" *ngIf="selectable">
-          <input
-            type="checkbox"
-            [checked]="isSelected(item)"
-            (change)="toggleItemSelection(item, $event)"
-            (click)="$event.stopPropagation()"
-            placeholder="تحديد العنصر"
-            title="تحديد العنصر"
-          />
-        </div>
-        <div class="card-actions" *ngIf="actions.length > 0">
-           <div class="actions-menu" [class.open]="activeMenu === i">
-            <button class="menu-trigger" (click)="toggleMenu(i, $event)">
-              <i class="material-icons">more_vert</i>
-            </button>
-             <div class="menu-dropdown" *ngIf="activeMenu === i">
-              <button
-                *ngFor="let action of actions"
-                class="menu-item"
-                [class.danger]="action.type === 'danger'"
-                (click)="onActionClick(action.action, item)"
-              >
-                <i class="material-icons">{{ action.icon }}</i>
-                {{ action.label }}
-              </button>
-            </div>
-          </div> 
-        </div> 
-      </div> -->
-
       <div class="card-content">
         <!-- Default card content -->
         <div class="default-card-content">
@@ -303,6 +258,7 @@
 
           <div class="card-info">
             <h3 class="card-title">{{ item.name || item.title || "عنصر" }}</h3>
+            <hr />
             <p class="card-description">{{ item.description || "" }}</p>
 
             <div class="card-details">
@@ -324,6 +280,19 @@
                     class="currency-value"
                   >
                     {{ formatCurrency(getCellValue(item, column)) }}
+                  </span>
+                  <span *ngIf="column.type === 'date'" class="date-value">
+                    {{ formatDate(getCellValue(item, column)) }}
+                  </span>
+                  <span
+                    *ngIf="column.type === 'boolean'"
+                    class="boolean-badge"
+                    [class.true]="getCellValue(item, column)"
+                    [class.false]="!getCellValue(item, column)"
+                    [attr.aria-label]="getCellValue(item, column) ? 'مفعل' : 'غير مفعل'"
+                    title="{{ getCellValue(item, column) ? 'مفعل' : 'غير مفعل' }}"
+                  >
+                    
                   </span>
                   <span *ngIf="!column.type || column.type === 'text'">
                     {{ getCellValue(item, column) }}

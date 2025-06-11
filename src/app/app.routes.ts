@@ -59,29 +59,31 @@ export const routes: Routes = [
     loadComponent: () => import("./pages/settings/settings.component").then((m) => m.SettingsComponent),
     // canActivate: [AuthGuard],
   },
-  // {
-    // path: "auth",
-    // children: [
-    //   {
-    //     path: "login",
-    //     loadComponent: () => import("./pages/auth/login/login.component").then((m) => m.LoginComponent),
-    //   },
+  {
+    path: "auth",
+    children: [
+      {
+        path: "login",
+        loadComponent: () => import("./pages/auth/login/login.component").then((m) => m.LoginComponent),
+      },
+   
     //   {
     //     path: "register",
     //     loadComponent: () => import("./pages/auth/register/register.component").then((m) => m.RegisterComponent),
     //   },
-    //   {
-    //     path: "forgot-password",
-    //     loadComponent: () =>
-    //       import("./pages/auth/forgot-password/forgot-password.component").then((m) => m.ForgotPasswordComponent),
-    //   },
-    //   {
-    //     path: "reset-password",
-    //     loadComponent: () =>
-    //       import("./pages/auth/reset-password/reset-password.component").then((m) => m.ResetPasswordComponent),
-    //   },
-    // ],
-  // },
+      {
+        path: "forgot-password",
+        loadComponent: () =>
+          import("./pages/auth/forgot-password/forgot-password.component").then((m) => m.ForgotPasswordComponent),
+      },
+      
+    ],
+  },
+  {
+        path: "reset-password",
+        loadComponent: () =>
+          import("./pages/auth/reset-password/reset-password.component").then((m) => m.ResetPasswordComponent),
+      },
   {
     path: "**",
     redirectTo: "",

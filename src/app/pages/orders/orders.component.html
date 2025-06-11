@@ -1,46 +1,197 @@
-<div class="orders-container">
-  <div class="filters">
-    <select
-      class="status-filter"
-      [(ngModel)]="filter().status"
-      (ngModelChange)="onFilterStatus($event)"
-      aria-label="حالة الطلب"
-    >
-      <option [ngValue]="undefined">الكل</option>
-      <option *ngFor="let status of statusOptions" [ngValue]="status">{{ status }}</option>
-    </select>
-  </div>
 
+<div class="orders-container">
   <app-data-table
     [columns]="columns"
     [data]="orders()"
     [loading]="loading()"
     [actions]="actions"
-    [showSearch]="true"
-    [showFilters]="true"
     [selectable]="false"
-    [currentPage]="currentPage()"
-    [totalItems]="totalItems()"
-    [pageSize]="pageSize()"
-    [pageSizeOptions]="pageSizeOptions"
+    [viewMode]="viewMode"
     [enableViewToggle]="true"
     searchPlaceholder="البحث في الطلبات..."
     emptyMessage="لا توجد الطلبات متاحة"
+    [currentPage]="currentPage()"
     [totalPages]="totalPages()"
+    [totalItems]="totalItems()"
+    [pageSize]="pageSize()"
+    [showFilters]="true"
     (searchChange)="onSearch($event)"
     (sortChange)="onSort($event)"
+    (rowClick)="onRowClick($event)"
+    (actionClick)="onActionClick($event)"
+    (viewModeChange)="onViewModeChange($event)"
     (pageChange)="onPageChange($event)"
     (pageSizeChange)="onPageSizeChange($event)"
-    (actionClick)="onActionClick($event)"
-    (rowClick)="onRowClick($event)"
-    
   >
     <div slot="title" class="header-title">
-      <h1 >قائمة الطلبات</h1>
-      <p class="header-subtitle ">
-        يمكنك إدارة الطلبات من خلال هذه الصفحة. استخدم الفلاتر للبحث عن طلبات محددة.
-      </p>
+      <h1>قائمة الطلبات</h1>
+      <p class="header-subtitle">يمكنك إدارة الطلبات من خلال هذه الصفحة. استخدم الفلاتر للبحث عن طلبات محددة.</p>
+    </div>
+
+    <div slot="filters">
+      <!-- Filters Toggle Button -->
+      <button
+        class="filters-toggle-btn"
+        [class.active]="showFilters"
+        (click)="toggleFiltersPanel()"
+        aria-label="تبديل لوحة الفلاتر"
+      >
+        <div class="btn-icon">
+          <i class="material-icons">tune</i>
+        </div>
+        <span class="btn-text">الفلاتر</span>
+        <div class="filter-badge" *ngIf="getActiveFiltersCount() > 0">
+          {{ getActiveFiltersCount() }}
+        </div>
+        <div class="btn-shine"></div>
+      </button>
+
+      <!-- Filters Panel -->
+      <div class="filters-panel" [class.visible]="showFilters">
+        <div class="filters-overlay" (click)="closeFilterPanel()"></div>
+        <div class="filters-container">
+          <!-- Panel Header -->
+          <div class="filters-header">
+            <div class="header-content">
+              <div class="header-icon">
+                <i class="material-icons">tune</i>
+              </div>
+              <div class="header-text">
+                <h3>فلترة الطلبات</h3>
+                <p>اختر الفلاتر المناسبة لتصفية الطلبات</p>
+              </div>
+            </div>
+            <div class="header-actions">
+              <button class="clear-all-btn" (click)="clearAllFilters()" *ngIf="hasActiveFilters()">
+                <i class="material-icons">clear_all</i>
+                مسح الكل
+              </button>
+              <button class="close-panel-btn" (click)="closeFilterPanel()">
+                <i class="material-icons">close</i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filters Content -->
+          <div class="filters-content custom-scrollbar">
+            <!-- Active Filters Summary -->
+            <div class="active-filters-summary" *ngIf="hasActiveFilters()">
+              <div class="summary-header">
+                <i class="material-icons">filter_list</i>
+                <span>الفلاتر النشطة ({{ getActiveFiltersCount() }})</span>
+              </div>
+              <div class="active-filters-tags">
+                <!-- Status Filter -->
+                <div class="filter-tag" *ngIf="status">
+                  <div class="tag-icon">
+                    <i class="material-icons">inventory</i>
+                  </div>
+                  <span class="tag-label">الحالة:</span>
+                  <span class="tag-value">{{ status }}</span>
+                  <button class="tag-remove" (click)="onstatusChange('')">
+                    <i class="material-icons">close</i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filters Grid -->
+            <div class="filters-grid">
+              <!-- Row 1: Status -->
+              <div class="filter-row">
+                <!-- Status Filter -->
+                <div class="filter-field">
+                  <label class="filter-label">
+                    <i class="material-icons">inventory</i>
+                    حالة الطلب
+                  </label>
+                  <div class="searchable-select" [class.open]="activeDropdown === 'status'">
+                    <div class="select-trigger" (click)="toggleDropdown('status')">
+                      <span class="select-value" *ngIf="status; else statusPlaceholder">
+                        <div class="status-indicator" [class]="getStatusClass(status)"></div>
+                        {{ status }}
+                      </span>
+                      <ng-template #statusPlaceholder>
+                        <span class="select-placeholder">اختر الحالة</span>
+                      </ng-template>
+                      <i class="material-icons expand-icon" [class.rotated]="activeDropdown === 'status'">expand_more</i>
+                    </div>
+                    <div class="select-dropdown" *ngIf="activeDropdown === 'status'">
+                      <div class="dropdown-search">
+                        <input
+                          type="text"
+                          placeholder="البحث في الحالات..."
+                          [(ngModel)]="statusSearchTerm"
+                          class="search-input"
+                          (click)="$event.stopPropagation()"
+                        />
+                        <i class="material-icons">search</i>
+                      </div>
+                      <div class="dropdown-options">
+                        <div
+                          class="dropdown-option"
+                          [class.selected]="status === ''"
+                          (click)="selectStatus('')"
+                        >
+                          <div class="option-content">
+                            <i class="material-icons">all_inclusive</i>
+                            <span>جميع الحالات</span>
+                          </div>
+                        </div>
+                        <div
+                          *ngFor="let status of getFilteredStatuses()"
+                          class="dropdown-option"
+                          [class.selected]="status === status"
+                          (click)="selectStatus(status)"
+                        >
+                          <div class="option-content">
+                            <div class="status-indicator" [class]="getStatusClass(status)"></div>
+                            <span>{{ status }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel Footer -->
+          <div class="filters-footer">
+            <div class="footer-info">
+              <span class="results-count">
+                <i class="material-icons">inventory_2</i>
+                {{ orders().length }} طلب من أصل {{ totalItems() }}
+              </span>
+            </div>
+            <div class="footer-actions">
+              <button class="apply-filters-btn" (click)="applyFilters()">
+                <i class="material-icons">check</i>
+                تطبيق الفلاتر
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </app-data-table>
-</div>
 
+  <app-order-details
+    *ngIf="isDetailsModalOpen"
+    [order]="selectedOrder"
+    [isOpen]="isDetailsModalOpen"
+    (close)="closeDetailsModal()"
+    (updateStatus)="updateOrderStatus($event)"
+  ></app-order-details>
+
+  <!-- Delete Confirmation Dialog -->
+  <app-confirm-dialog
+    *ngIf="deleteConfirm.isOpen"
+    [isOpen]="deleteConfirm.isOpen"
+    [title]="'تأكيد حذف الطلب'"
+    [description]="'هل أنت متأكد من حذف الطلب؟ لا يمكن التراجع عن هذا الإجراء.'"
+    (close)="closeDeleteConfirm()"
+    ></app-confirm-dialog>
+  </div>
+  <!-- (confirm)="confirmDelete($event)" -->

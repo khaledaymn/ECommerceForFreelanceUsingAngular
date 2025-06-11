@@ -1,71 +1,67 @@
-// import { Component,   OnInit } from "@angular/core"
-// import { CommonModule } from "@angular/common"
-// import { RouterLink } from "@angular/router"
-// import {   FormBuilder,   FormGroup, Validators, ReactiveFormsModule } from "@angular/forms"
-// import   { AuthService } from "../../../services/auth.service"
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
+// import { AuthService } from '../../../services/auth.service';
+// import { AuthService } from '../../core/services/auth.service';
 
-// @Component({
-//   selector: "app-forgot-password",
-//   standalone: true,
-//   imports: [CommonModule, ReactiveFormsModule, RouterLink],
-//   templateUrl: "./forgot-password.component.html",
-//   styleUrls: ["./forgot-password.component.scss"],
-// })
-// export class ForgotPasswordComponent implements OnInit {
-//   forgotPasswordForm!: FormGroup
-//   isLoading = false
-//   errorMessage: string | null = null
-//   successMessage: string | null = null
+@Component({
+  selector: 'app-forgot-password',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  templateUrl: './forgot-password.component.html',
+  styleUrls: ['./forgot-password.component.scss'],
+})
+export class ForgotPasswordComponent {
+  forgotPasswordForm: FormGroup;
+  isSubmitted = false;
+  loading = false;
+  errorMessage = '';
+  successMessage = '';
 
-//   constructor(
-//     private fb: FormBuilder,
-//     private authService: AuthService,
-//   ) {}
+  constructor(
+    private formBuilder: FormBuilder,
+    private router: Router,
+    private authService: AuthService // ضيف الـ Service هنا
+  ) {
+    this.forgotPasswordForm = this.formBuilder.group({
+      email: ['', [Validators.required, Validators.email]],
+    });
+  }
+ get email() {
+    return this.forgotPasswordForm.get('email');
+  }
+  onSubmit() {
+    if (this.forgotPasswordForm.valid) {
+      this.loading = true;
+      this.errorMessage = '';
+      this.successMessage = '';
 
-//   ngOnInit(): void {
-//     // Initialize the form
-//     this.forgotPasswordForm = this.fb.group({
-//       email: ["", [Validators.required, Validators.email]],
-//     })
+      const email = this.forgotPasswordForm.get('email')?.value;
 
-//     // Subscribe to loading and error states
-//     this.authService.loading$.subscribe((loading) => {
-//       this.isLoading = loading
-//     })
+      this.authService.forgotPassword(email).subscribe({
+        next: (response) => {
+          this.loading = false;
+          this.isSubmitted = true;
+          this.successMessage =
+            'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني';
+          // this.successMessage = response.message || 'تم إرسال الرابط بنجاح';
+        },
+        error: (err) => {
+          this.loading = false;
+          this.errorMessage = err.error?.message || 'حدث خطأ، حاول مرة أخرى';
+        },
+      });
+    }
+  }
 
-//     this.authService.error$.subscribe((error) => {
-//       this.errorMessage = error
-//       this.successMessage = null
-//     })
-//   }
-
-//   onSubmit(): void {
-//     if (this.forgotPasswordForm.invalid) {
-//       // Mark all fields as touched to trigger validation messages
-//       Object.keys(this.forgotPasswordForm.controls).forEach((key) => {
-//         const control = this.forgotPasswordForm.get(key)
-//         control?.markAsTouched()
-//       })
-//       return
-//     }
-
-//     const email = this.forgotPasswordForm.get("email")?.value
-
-//     this.authService.requestPasswordReset(email).subscribe({
-//       next: () => {
-//         this.successMessage = "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني"
-//         this.errorMessage = null
-//         this.forgotPasswordForm.reset()
-//       },
-//       error: (error) => {
-//         this.errorMessage = error.message
-//         this.successMessage = null
-//       },
-//     })
-//   }
-
-//   // Helper methods for form validation
-//   get email() {
-//     return this.forgotPasswordForm.get("email")
-//   }
-// }
+  backToLogin() {
+    this.router.navigate(['/login']);
+  }
+}
