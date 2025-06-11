@@ -1,0 +1,119 @@
+<div class="user-edit">
+  <div class="user-edit-content">
+    <div class="user-edit-header">
+      <h2>تعديل بيانات المستخدم</h2>
+      <button class="close-btn" (click)="onClose()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <form [formGroup]="userForm" (ngSubmit)="onSave()">
+      <div class="form-group">
+        <label for="fName">الاسم الأول *</label>
+        <input
+          id="fName"
+          formControlName="fName"
+          [ngClass]="{
+            invalid:
+              userForm.get('fName')?.invalid && userForm.get('fName')?.touched
+          }"
+        />
+        <div
+          class="error"
+          *ngIf="
+            userForm.get('fName')?.invalid && userForm.get('fName')?.touched
+          "
+        >
+          الاسم الأول مطلوب ويجب ألا يتجاوز 50 حرفًا.
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="lName">الاسم الأخير *</label>
+        <input
+          id="lName"
+          formControlName="lName"
+          [ngClass]="{
+            invalid:
+              userForm.get('lName')?.invalid && userForm.get('lName')?.touched
+          }"
+        />
+        <div
+          class="error"
+          *ngIf="
+            userForm.get('lName')?.invalid && userForm.get('lName')?.touched
+          "
+        >
+          الاسم الأخير مطلوب ويجب ألا يتجاوز 50 حرفًا.
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="email">البريد الإلكتروني *</label>
+        <input
+          id="email"
+          formControlName="email"
+          [ngClass]="{
+            invalid:
+              userForm.get('email')?.invalid && userForm.get('email')?.touched
+          }"
+        />
+        <div
+          class="error"
+          *ngIf="
+            userForm.get('email')?.invalid && userForm.get('email')?.touched
+          "
+        >
+          يرجى إدخال بريد إلكتروني صالح.
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="phoneNumber">رقم الهاتف</label>
+        <input
+          id="phoneNumber"
+          formControlName="phoneNumber"
+          [ngClass]="{
+            invalid:
+              userForm.get('phoneNumber')?.invalid &&
+              userForm.get('phoneNumber')?.touched
+          }"
+        />
+        <div
+          class="error"
+          *ngIf="
+            userForm.get('phoneNumber')?.invalid &&
+            userForm.get('phoneNumber')?.touched
+          "
+        >
+          يجب ألا يتجاوز رقم الهاتف 20 حرفًا.
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="address">العنوان</label>
+        <textarea
+          id="address"
+          formControlName="address"
+          [ngClass]="{
+            invalid:
+              userForm.get('address')?.invalid &&
+              userForm.get('address')?.touched
+          }"
+        ></textarea>
+        <div
+          class="error"
+          *ngIf="
+            userForm.get('address')?.invalid && userForm.get('address')?.touched
+          "
+        >
+          يجب ألا يتجاوز العنوان 500 حرف.
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="cancel-btn" (click)="onClose()">
+          إلغاء
+        </button>
+        <button type="submit" class="save-btn" [disabled]="userForm.invalid">
+          حفظ
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

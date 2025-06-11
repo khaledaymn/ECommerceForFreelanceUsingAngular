@@ -1,77 +1,85 @@
-import { Component,   OnInit } from "@angular/core"
-import { CommonModule } from "@angular/common"
-import {   Router, RouterLink } from "@angular/router"
-import {   FormBuilder,   FormGroup, Validators, ReactiveFormsModule } from "@angular/forms"
-import   { AuthService } from "../../../services/auth.service"
+import { Component, OnInit } from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
+import { CommonModule } from '@angular/common';
+
 
 @Component({
-  selector: "app-login",
+  selector: 'app-login-form',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: "./login.component.html",
-  styleUrls: ["./login.component.scss"],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+   
+    RouterLink,
+  ],
 })
 export class LoginComponent implements OnInit {
-  loginForm!: FormGroup
-  isLoading = false
-  errorMessage: string | null = null
-  passwordVisible = false
+  loginForm!: FormGroup;
+  loading = false;
+  returnUrl = '/';
+  hidePassword = true;
+  errorMessage = '';
 
   constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
+    private formBuilder: FormBuilder,
+    private route: ActivatedRoute,
     private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    // Initialize the form
-    this.loginForm = this.fb.group({
-      email: ["", [Validators.required, Validators.email]],
-      password: ["", [Validators.required, Validators.minLength(6)]],
+    this.loginForm = this.formBuilder.group({
+      email: ['', [Validators.required, Validators.email]], // Changed to email with email validator
+      password: ['', Validators.required],
       rememberMe: [false],
-    })
+    });
 
-    // Subscribe to loading and error states
-    this.authService.loading$.subscribe((loading) => {
-      this.isLoading = loading
-    })
+    // Get return url from route parameters or default to '/'
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
 
-    this.authService.error$.subscribe((error) => {
-      this.errorMessage = error
-    })
+    // Redirect if already logged in
+    // if (this.authService.isLoggedIn()) {
+    //   this.router.navigate([this.returnUrl]);
+    // }
   }
-
+get password() {
+  return this.loginForm.get('password');
+}
+get email() {
+  return this.loginForm.get('email');
+}
   onSubmit(): void {
     if (this.loginForm.invalid) {
-      // Mark all fields as touched to trigger validation messages
-      Object.keys(this.loginForm.controls).forEach((key) => {
-        const control = this.loginForm.get(key)
-        control?.markAsTouched()
-      })
-      return
+      return;
     }
-
-    this.authService.login(this.loginForm.value).subscribe({
-      next: () => {
-        // Navigate to dashboard on successful login
-        this.router.navigate(["/"])
+    this.loading = true;
+    this.errorMessage = '';
+    const loginRequest = {
+      email: this.loginForm.controls['email'].value,
+      password: this.loginForm.controls['password'].value,
+    };
+    this.authService.login(loginRequest.email,loginRequest.password).subscribe({
+      next: (response) => {
+        this.loading = false;
+        this.router.navigate([this.returnUrl]);
       },
       error: (error) => {
-        this.errorMessage = error.message
+        this.errorMessage = error.message || 'Login failed';
+        this.loading = false;
       },
-    })
+    });
   }
 
   togglePasswordVisibility(): void {
-    this.passwordVisible = !this.passwordVisible
-  }
-
-  // Helper methods for form validation
-  get email() {
-    return this.loginForm.get("email")
-  }
-
-  get password() {
-    return this.loginForm.get("password")
+    this.hidePassword = !this.hidePassword;
   }
 }

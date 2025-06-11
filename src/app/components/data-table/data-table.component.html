@@ -186,7 +186,21 @@
             <span *ngIf="column.type === 'date'" class="date-value">
               {{ formatDate(getCellValue(item, column)) }}
             </span>
-
+            <!-- Boolean Type -->
+            <span
+              *ngIf="column.type === 'boolean'"
+              class="boolean-badge"
+              [class.true]="getCellValue(item, column)"
+              [class.false]="!getCellValue(item, column)"
+              [attr.aria-label]="
+                getCellValue(item, column) ? 'مفعل' : 'غير مفعل'
+              "
+              title="{{ getCellValue(item, column) ? 'مفعل' : 'غير مفعل' }}"
+            >
+              <i class="material-icons">{{
+                getCellValue(item, column) ? "cancel" : "check_circle"
+              }}</i>
+            </span>
             <!-- Text Type (Default) -->
             <span
               *ngIf="!column.type || column.type === 'text'"
@@ -303,7 +317,7 @@
 
           <div class="card-info">
             <h3 class="card-title">{{ item.name || item.title || "عنصر" }}</h3>
-            <hr>
+            <hr />
             <p class="card-description">{{ item.description || "" }}</p>
 
             <div class="card-details">
@@ -329,7 +343,7 @@
                   <span *ngIf="!column.type || column.type === 'text'">
                     {{ getCellValue(item, column) }}
                   </span>
-                   <span *ngIf="column.type === 'date'" class="date-value">
+                  <span *ngIf="column.type === 'date'" class="date-value">
                     {{ formatDate(getCellValue(item, column)) }}
                   </span>
                 </span>

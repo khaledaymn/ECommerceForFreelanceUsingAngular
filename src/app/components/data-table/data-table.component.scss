@@ -548,6 +548,39 @@
   font-size: 13px;
   direction: ltr;
 }
+.boolean-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &.false {
+    // background-color: #dcfce7;
+    // color: #166534;
+    .material-icons {
+      color: #166534;
+      // font-size: 14px;
+    }
+  }
+
+  &.true {
+    // background-color: #fee2e2;
+    // color: #991b1b;
+    .material-icons {
+      color: #991b1b;
+      // font-size: 16px;
+
+    }
+  }
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
 
 .status-badge {
   padding: 4px 8px;
@@ -763,7 +796,7 @@
   border: 1px solid #e5e7eb;
   transition: all 0.2s ease;
   margin-right: 10px;
-  
+
   &:hover {
     background: #f1f5f9;
     border-color: #d1d5db;

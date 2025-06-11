@@ -1,122 +1,104 @@
-import { Component,   OnInit } from "@angular/core"
-import { CommonModule } from "@angular/common"
-import {   ActivatedRoute,   Router, RouterLink } from "@angular/router"
-import {   FormBuilder,   FormGroup, Validators, ReactiveFormsModule } from "@angular/forms"
-import   { AuthService } from "../../../services/auth.service"
+import { Component, OnInit } from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ValidationErrors,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { RouterModule, ActivatedRoute } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
-  selector: "app-reset-password",
+  selector: 'app-reset-password',
+  templateUrl: './reset-password.component.html',
+  styleUrls: ['./reset-password.component.scss'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: "./reset-password.component.html",
-  styleUrls: ["./reset-password.component.scss"],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+  ],
 })
 export class ResetPasswordComponent implements OnInit {
-  resetPasswordForm!: FormGroup
-  isLoading = false
-  errorMessage: string | null = null
-  successMessage: string | null = null
-  token: string | null = null
-  passwordVisible = false
-  confirmPasswordVisible = false
+  resetPasswordForm: FormGroup;
+  passwordVisible: boolean = false;
+  confirmPasswordVisible: boolean = false;
+  loading: boolean = false;
+  email: string | null = null;
+  token: string | null = null;
+  successMessage: string | null = null;
+  errorMessage: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private route: ActivatedRoute,
-    private router: Router,
-  ) {}
-
-  ngOnInit(): void {
-    // Get token from route params
-    this.token = this.route.snapshot.queryParamMap.get("token")
-
-    if (!this.token) {
-      this.errorMessage = "رمز إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية"
-    }
-
-    // Initialize the form
+    private route: ActivatedRoute
+  ) {
+    // Initialize form with 'passwordConfirmation' to match template
     this.resetPasswordForm = this.fb.group(
       {
-        password: ["", [Validators.required, Validators.minLength(8)]],
-        passwordConfirmation: ["", [Validators.required]],
+        password: ['', [Validators.required, Validators.minLength(8)]],
+        passwordConfirmation: ['', [Validators.required]],
       },
-      {
-        validators: this.passwordMatchValidator,
-      },
-    )
-
-    // Subscribe to loading and error states
-    this.authService.loading$.subscribe((loading) => {
-      this.isLoading = loading
-    })
-
-    this.authService.error$.subscribe((error) => {
-      this.errorMessage = error
-      this.successMessage = null
-    })
+      { validators: this.passwordsMatchValidator }
+    );
   }
 
-  // Custom validator to check if password and confirmation match
-  passwordMatchValidator(form: FormGroup) {
-    const password = form.get("password")?.value
-    const confirmPassword = form.get("passwordConfirmation")?.value
+  ngOnInit(): void {
+    // Extract email and token from query parameters
+    this.route.queryParams.subscribe((params) => {
+      this.email = params['email'] || null;
+      this.token = params['token'] || null;
+    });
+  }
 
-    if (password !== confirmPassword) {
-      form.get("passwordConfirmation")?.setErrors({ passwordMismatch: true })
-      return { passwordMismatch: true }
+  togglePasswordVisibility(field: string): void {
+    if (field === 'password') {
+      this.passwordVisible = !this.passwordVisible;
+    } else if (field === 'passwordConfirmation') {
+      this.confirmPasswordVisible = !this.confirmPasswordVisible;
     }
-
-    return null
   }
 
-  onSubmit(): void {
-    if (this.resetPasswordForm.invalid || !this.token) {
-      // Mark all fields as touched to trigger validation messages
-      Object.keys(this.resetPasswordForm.controls).forEach((key) => {
-        const control = this.resetPasswordForm.get(key)
-        control?.markAsTouched()
-      })
-      return
-    }
-
-    const data = {
-      token: this.token,
-      password: this.resetPasswordForm.get("password")?.value,
-      passwordConfirmation: this.resetPasswordForm.get("passwordConfirmation")?.value,
-    }
-
-    this.authService.resetPassword(data).subscribe({
-      next: () => {
-        this.successMessage = "تم إعادة تعيين كلمة المرور بنجاح"
-        this.errorMessage = null
-
-        // Redirect to login after 3 seconds
-        setTimeout(() => {
-          this.router.navigate(["/auth/login"])
-        }, 3000)
-      },
-      error: (error) => {
-        this.errorMessage = error.message
-        this.successMessage = null
-      },
-    })
+  passwordsMatchValidator(form: FormGroup): ValidationErrors | null {
+    const password = form.get('password')?.value;
+    const passwordConfirmation = form.get('passwordConfirmation')?.value;
+    return password === passwordConfirmation ? null : { passwordMismatch: true };
   }
 
-  togglePasswordVisibility(): void {
-    this.passwordVisible = !this.passwordVisible
-  }
-
-  toggleConfirmPasswordVisibility(): void {
-    this.confirmPasswordVisible = !this.confirmPasswordVisible
-  }
-
-  // Helper methods for form validation
   get password() {
-    return this.resetPasswordForm.get("password")
+    return this.resetPasswordForm.get('password');
   }
 
   get passwordConfirmation() {
-    return this.resetPasswordForm.get("passwordConfirmation")
+    return this.resetPasswordForm.get('passwordConfirmation');
+  }
+
+  onSubmit(): void {
+    if (this.resetPasswordForm.valid && this.email && this.token) {
+      this.loading = true;
+      this.errorMessage = null;
+      this.successMessage = null;
+
+      const { password } = this.resetPasswordForm.value;
+
+      this.authService
+        .resetPassword(this.email, this.token, password)
+        .subscribe({
+          next: () => {
+            this.loading = false;
+            this.successMessage = 'تم إعادة تعيين كلمة المرور بنجاح!';
+            this.resetPasswordForm.reset();
+          },
+          error: (err) => {
+            this.loading = false;
+            this.errorMessage = err.message || 'فشل في إعادة تعيين كلمة المرور. حاول مرة أخرى.';
+          },
+        });
+    } else {
+      this.errorMessage = 'الرجاء ملء النموذج بشكل صحيح أو تحقق من البريد الإلكتروني ورمز التحقق.';
+    }
   }
 }

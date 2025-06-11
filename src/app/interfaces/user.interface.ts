@@ -1,40 +1,35 @@
 export interface User {
-  id: string
-  name: string
-  email: string
-  role: "admin" | "manager" | "sales" | "support" | "customer"
-  avatar?: string
-  initials?: string
-  lastLogin?: Date
-  permissions?: string[]
-  phone?: string
-  company?: string
-  position?: string
-  isActive: boolean
-  createdAt: Date
-  updatedAt: Date
+  id: string;
+  fName: string;
+  lName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  isDeleted: boolean;
 }
 
-export interface UserCredentials {
-  email: string
-  password: string
-  rememberMe?: boolean
+export interface UsersResponse {
+  data: User[];
+  totalCount: number;
+  pageIndex: number;
+  pageSize: number;
 }
 
-export interface RegistrationData {
-  name: string
-  email: string
-  password: string
-  passwordConfirmation: string
-  phone?: string
-  company?: string
-  acceptTerms: boolean
+export interface UsersFilter {
+  pageIndex: number;
+  pageSize: number;
+  search?: string;
+  sortProp?: number;
+  sortDirection?: 0 | 1;
+  isDeleted?: boolean;
+  isBlocked?: boolean;
 }
 
-export interface AuthState {
-  user: User | null
-  token: string | null
-  isAuthenticated: boolean
-  isLoading: boolean
-  error: string | null
+export interface UserDTO {
+  id: string;
+  fName: string;
+  lName: string;
+  email: string;
+  phoneNumber?: string;
+  address?: string;
 }

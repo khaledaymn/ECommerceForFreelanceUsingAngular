@@ -5,7 +5,7 @@ import {
   HttpParams,
 } from '@angular/common/http';
 import { catchError, Observable, retry, throwError } from 'rxjs';
-import { environment } from '../enviroments/enviroment';
+// import { environment } from '../enviroments/enviroment';
 import {
   CreateProduct,
   Product,
@@ -14,6 +14,7 @@ import {
 } from '../interfaces/product.interface';
 import { PaginatedResponse, Result } from '../interfaces/category';
 import { ApiError } from './category.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',

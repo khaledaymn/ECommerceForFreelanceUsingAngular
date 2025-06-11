@@ -1,418 +1,365 @@
-import { Component, OnInit, HostListener, OnChanges } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { FormControl } from "@angular/forms";
-import { debounceTime, distinctUntilChanged } from "rxjs/operators";
-import { OrderService } from "../../services/order.service";
-import { Order, OrderStatus, OrdersFilter } from "../../interfaces/order.interface";
-import { OrderDetailsComponent } from "./order-details/order-details.component";
-import { OrderStatusBadgeComponent } from "./order-status-badge/order-status-badge.component";
-import { PaginationComponent } from "../../components/pagination/pagination.component";
+import {
+  Component,
+  OnInit,
+  HostListener,
+  signal,
+  computed,
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import {
+  DataTableComponent,
+  TableColumn,
+  TableAction,
+} from '../../components/data-table/data-table.component';
+import { OrderService } from '../../services/order.service';
+import { Router } from '@angular/router';
+import {
+  Order,
+  OrdersResponse,
+  OrdersFilter,
+  OrderStatus,
+} from '../../interfaces/order.interface';
+import { OrderDetailsComponent } from './order-details/order-details.component';
+import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: "app-orders",
+  selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, OrderDetailsComponent, OrderStatusBadgeComponent],
-  templateUrl: "./orders.component.html",
-  styleUrls: ["./orders.component.scss"],
+  imports: [
+    CommonModule,
+    FormsModule,
+    DataTableComponent,
+    OrderDetailsComponent,
+    ConfirmDialogComponent,
+  ],
+  templateUrl: './orders.component.html',
+  styleUrls: ['./orders.component.scss'],
 })
-export class OrdersComponent implements OnInit,OnChanges  {
-  orders: Order[] = [];
-  isLoading = false;
-  error: string | null = null;
+export class OrdersComponent implements OnInit {
+  columns: TableColumn[] = [
+    { key: 'orderID', title: 'رقم الطلب', sortable: true, width: '10%' },
+    { key: 'name', title: 'اسم العميل', sortable: true, width: '20%' },
+    {
+      key: 'orderDate',
+      title: 'تاريخ الطلب',
+      type: 'date',
+      sortable: true,
+      width: '15%',
+    },
+    {
+      key: 'totalAmount',
+      title: 'المبلغ الإجمالي',
+      type: 'currency',
+      sortable: true,
+      width: '15%',
+    },
+    {
+      key: 'status',
+      title: 'الحالة',
+      type: 'badge',
+      sortable: true,
+      width: '15%',
+    },
+  ];
 
-  // View mode
-  viewMode: "table" | "grid" = "table";
+  actions: TableAction[] = [
+    { label: 'عرض التفاصيل', icon: 'visibility', action: 'view' },
+    { label: 'تحديث الحالة', icon: 'edit', action: 'update' },
+    { label: 'حذف', icon: 'delete', action: 'delete', type: 'danger' },
+  ];
 
-  // Pagination
-  totalCount = 0;
-  pageSize = 10;
-  pageIndex = 1;
+  orders = signal<Order[]>([]);
+  totalItems = signal<number>(0);
+  currentPage = signal<number>(1);
+  pageSize = signal<number>(10);
   pageSizeOptions = [5, 10, 25, 50];
+  totalPagesSignal = computed(() => {
+    return Math.ceil(this.totalItems() / this.pageSize()) || 1;
+  });
+  loading = signal<boolean>(true);
+  filter = signal<OrdersFilter>({
+    pageIndex: 1,
+    pageSize: 10,
+    search: '',
+    userId: '',
+    status: undefined,
+    sortProp: undefined,
+    sortDirection: undefined,
+  });
 
-  // Filtering
-  searchControl = new FormControl("");
-  selectedStatus: OrderStatus | "" = "";
-  activeFilter: string | null = null;
+  viewMode: 'table' | 'grid' = 'table';
 
-  // Sorting
-  sortProp = 0; // 0: productName, 1: totalAmount, 2: status
-  sortDirection = 0; // 0: descending, 1: ascending
+  statusOptions: OrderStatus[] = [
+    'Pending',
+    'Processing',
+    'Shipped',
+    'Delivered',
+    'Cancelled',
+  ];
+  isModalOpen = false;
+  isDetailsModalOpen = false;
+  editingOrder: Order | null = null;
+  selectedOrder!: Order;
+  deleteConfirm: { isOpen: boolean; OrderId: number | null } = {
+    isOpen: false,
+    OrderId: null,
+  };
 
-  // Selection
-  selectedOrders = new Set<number>();
-  selectAll = false;
+  // Filter state
+  showFilters = false;
+  activeDropdown = '';
+  status: OrderStatus | string = '';
+  statusSearchTerm = '';
 
-  // Menu
-  activeMenu: number | null = null;
+  constructor(private orderService: OrderService, private router: Router) {}
 
-  // Selected order for details
-  selectedOrder: Order | null = null;
-  showDetails = false;
-
-  // Status options
-  statusOptions: OrderStatus[] = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
-
-  // Mobile detection
-  isMobile = false;
-
-  constructor(private orderService: OrderService) {
-    this.checkMobile();
+  ngOnInit() {
+    this.loadOrders();
   }
 
-  @HostListener("window:resize", ["$event"])
-  onResize(event: any) {
-    this.checkMobile();
-  }
-
-  @HostListener("document:click", ["$event"])
-  onDocumentClick(event: Event) {
-    // Close active menu when clicking outside
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;
-    if (!target.closest(".actions-menu")) {
-      this.activeMenu = null;
-    }
-
-    // Close active filter when clicking outside
-    if (!target.closest(".filter-group")) {
-      this.activeFilter = null;
+    if (!target.closest('.searchable-select')) {
+      this.activeDropdown = '';
     }
   }
 
-  checkMobile() {
-    this.isMobile = window.innerWidth < 768;
-    if (this.isMobile) {
-      this.viewMode = "grid";
-    }
-  }
-
-  ngOnInit(): void {
-    this.loadOrders();
-
-    // Setup search with debounce
-    this.searchControl.valueChanges.pipe(debounceTime(500), distinctUntilChanged()).subscribe((value) => {
-      this.pageIndex = 1; // Reset to first page on new search
-      this.loadOrders();
-    });
-  }
-  ngOnChanges(): void {
-    // Handle any changes if needed
-    this.loadOrders();
-  }
-  loadOrders(): void {
-    this.isLoading = true;
-    this.error = null;
-
-    const filter: OrdersFilter = {
-      pageIndex: this.pageIndex || 1, // Default to 1 if not provided
-      pageSize: this.pageSize || 10, // Default to 10 if not provided
-      search: this.searchControl.value || undefined,
-      status: this.selectedStatus || undefined,
-      sortProp: this.sortProp,
-      sortDirection: this.sortDirection,
-    };
-
-    this.orderService.getOrders(filter).subscribe({
-      next: (response) => {
-        this.orders = response?.data ?? [];
-        this.totalCount = response?.totalCount ?? 0;
-        this.pageSize = response?.pageSize ?? 10; // Default to 10 if not provided
-        this.pageIndex = response?.pageIndex ?? 1; // Default to 1 if not provided
-        this.isLoading = false;
-        console.log("filter loaded:", filter);
-        console.log("Orders loaded:", this.orders);
-        console.log("Total count:", this.totalCount);
-        console.log("Page size:", this.pageSize);
-        console.log("Page index:", this.pageIndex);
-
-        // Clear selections when data changes
-        this.selectedOrders.clear();
-        this.selectAll = false;
+  loadOrders() {
+    this.loading.set(true);
+    const currentFilter = this.filter();
+    console.log('Loading orders with filter:', currentFilter);
+    this.orderService.getOrders(currentFilter).subscribe({
+      next: (response: OrdersResponse) => {
+        this.orders.set(response.data);
+        this.totalItems.set(response.totalCount);
+        this.pageSize.set(response.pageSize);
+        this.currentPage.set(response.pageIndex || 1);
+        this.loading.set(false);
       },
       error: (err) => {
-        console.error("Error loading orders", err);
-        this.error = "حدث خطأ أثناء تحميل الطلبات. يرجى المحاولة مرة أخرى.";
-        this.isLoading = false;
+        console.error('Error fetching orders:', err);
+        this.loading.set(false);
       },
     });
   }
 
-  setViewMode(mode: "table" | "grid"): void {
-    this.viewMode = mode;
-  }
-
-  toggleFilter(filterType: string): void {
-    this.activeFilter = this.activeFilter === filterType ? null : filterType;
-  }
-
-  selectStatus(status: OrderStatus | ""): void {
-    this.selectedStatus = status;
-    this.activeFilter = null;
-    this.pageIndex = 2;
+  onSearch(searchTerm: string) {
+    this.filter.update((f) => ({ ...f, search: searchTerm, pageIndex: 1 }));
     this.loadOrders();
   }
 
-  toggleMenu(index: number, event: Event): void {
-    event.stopPropagation();
-    this.activeMenu = this.activeMenu === index ? null : index;
+  onViewModeChange(viewMode: 'table' | 'grid'): void {
+    this.viewMode = viewMode;
   }
 
-  toggleSelectAll(event: any): void {
-    this.selectAll = event.target.checked;
-    if (this.selectAll) {
-      this.orders.forEach((order) => this.selectedOrders.add(order.orderID));
-    } else {
-      this.selectedOrders.clear();
-    }
-  }
-
-  toggleOrderSelection(orderId: number, event: any): void {
-    if (event.target.checked) {
-      this.selectedOrders.add(orderId);
-    } else {
-      this.selectedOrders.delete(orderId);
-    }
-
-    // Update select all checkbox
-    this.selectAll = this.selectedOrders.size === this.orders.length;
-  }
-
-  onPageChange(newPageIndex: number): void {
-    if (newPageIndex >= 1 && newPageIndex <= this.totalPages && newPageIndex !== this.pageIndex) {
-      this.pageIndex = newPageIndex;
-      console.log("Changing to page:", newPageIndex);
-      this.loadOrders();
-
-      // Scroll to top of container when changing pages
-      const container = document.querySelector(".orders-container");
-      if (container) {
-        container.scrollTop = 0;
-      }
-    }
-  }
-
-  onPageSizeChange(newPageSize: number): void {
-    if (newPageSize !== this.pageSize) {
-      this.pageSize = newPageSize;
-      // this.pageIndex = 1; // Reset to first page when changing page size
-      this.loadOrders();
-    }
-  }
-
-  onSort(prop: number): void {
-    if (this.sortProp === prop) {
-      // Toggle direction if same property
-      this.sortDirection = this.sortDirection === 0 ? 1 : 0;
-    } else {
-      // Default to descending for new sort property
-      this.sortProp = prop;
-      this.sortDirection = 0;
-    }
-    this.pageIndex = 1; // Reset to first page
+  onSort(event: { column: string; direction: 0 | 1 }) {
+    const sortPropMap: { [key: string]: number } = {
+      orderID: 0,
+      name: 1,
+      orderDate: 2,
+      totalAmount: 3,
+      status: 4,
+    };
+    this.filter.update((f) => ({
+      ...f,
+      sortProp: sortPropMap[event.column],
+      sortDirection: event.direction,
+      pageIndex: 1,
+    }));
     this.loadOrders();
   }
 
-  getSortIcon(prop: number): string {
-    if (this.sortProp !== prop) return "unfold_more";
-    return this.sortDirection === 0 ? "arrow_downward" : "arrow_upward";
+  onPageChange(page: number) {
+    this.filter.update((f) => ({ ...f, pageIndex: page }));
+    this.loadOrders();
   }
 
-  viewOrderDetails(order: Order): void {
-    this.selectedOrder = order;
-    this.showDetails = true;
-    this.activeMenu = null;
+  onPageSizeChange(size: number) {
+    this.filter.update((f) => ({ ...f, pageSize: size, pageIndex: 1 }));
+    this.loadOrders();
   }
 
-  editOrder(order: Order): void {
-    // Implement edit functionality
-    console.log("Edit order:", order);
-    alert(`تعديل الطلب رقم #${order.orderID}`);
-    this.activeMenu = null;
+  onActionClick(event: { action: string; item: Order }) {
+    switch (event.action) {
+      case 'view':
+        this.viewDetails(event.item);
+        break;
+      case 'update':
+        this.openEditModal(event.item);
+        break;
+      case 'delete':
+        this.openDeleteConfirm(event.item);
+        break;
+    }
   }
 
-  duplicateOrder(order: Order): void {
-    // Implement duplicate functionality
-    console.log("Duplicate order:", order);
-    alert(`نسخ الطلب رقم #${order.orderID}`);
-    this.activeMenu = null;
+  openEditModal(order: Order): void {
+    this.editingOrder = { ...order };
+    this.isModalOpen = true;
   }
 
-  closeDetails(): void {
-    this.showDetails = false;
-    this.selectedOrder = null;
+  closeModal(): void {
+    this.isModalOpen = false;
+    this.editingOrder = null;
   }
 
-  updateOrderStatus(orderId: number, status: OrderStatus): void {
-    this.isLoading = true;
-
-    this.orderService.updateOrderStatus(orderId, status).subscribe({
+  deleteOrder(orderId: number) {
+    this.orderService.deleteOrder(orderId).subscribe({
       next: () => {
-        // Update the order in the list
-        const index = this.orders.findIndex(( o) => o.orderID === orderId);
-        if (index !== -1) {
-          this.orders[index].status = status;
-        }
-        this.isLoading = false;
+        this.loadOrders();
+        alert('تم حذف الطلب بنجاح');
       },
-      error: (err) => {
-        console.error("Error updating order status", err);
-        this.error = "حدث خطأ أثناء تحديث حالة الطلب. يرجى المحاولة مرة أخرى.";
-        this.isLoading = false;
+      error: (err: any) => {
+        console.error('Error deleting order:', err);
+        alert('فشل حذف الطلب');
       },
     });
   }
 
-  deleteOrder(orderId: number): void {
-    if (confirm("هل أنت متأكد من رغبتك في حذف هذا الطلب؟")) {
-      this.isLoading = true;
-
-      this.orderService.deleteOrder(orderId).subscribe({
-        next: () => {
-          // Remove the order from the list
-          this.orders = this.orders.filter((o) => o.orderID !== orderId);
-          this.selectedOrders.delete(orderId);
-          this.totalCount--;
-          this.isLoading = false;
-          alert("تم حذف الطلب بنجاح");
-        },
-        error: (err) => {
-          console.error("Error deleting order", err);
-          this.error = "حدث خطأ أثناء حذف الطلب. يرجى المحاولة مرة أخرى.";
-          this.isLoading = false;
-        },
-      });
+  // Filter panel methods
+  toggleFiltersPanel(): void {
+    this.showFilters = !this.showFilters;
+    if (!this.showFilters) {
+      this.activeDropdown = '';
     }
-    this.activeMenu = null;
   }
 
-  // Format date in Arabic
-  formatArabicDate(date: string): string {
-    const dateObj = new Date(date);
-    const day = dateObj.getDate().toString().padStart(2, "0");
-    const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
-    const year = dateObj.getFullYear();
-    return `${day}/${month}/${year}`;
+  closeFilterPanel(): void {
+    this.showFilters = false;
+    this.activeDropdown = '';
   }
 
-  getStatusLabel(status: OrderStatus): string {
-    const statusLabels: Record<OrderStatus, string> = {
-      Pending: "قيد الانتظار",
-      Processing: "قيد المعالجة",
-      Shipped: "تم الشحن",
-      Delivered: "تم التسليم",
-      Cancelled: "ملغي",
+  toggleDropdown(dropdown: string): void {
+    this.activeDropdown = this.activeDropdown === dropdown ? '' : dropdown;
+  }
+
+  selectStatus(status: string): void {
+    this.onstatusChange(status as OrderStatus | '');
+    this.activeDropdown = '';
+  }
+
+  onstatusChange(orderStatus: OrderStatus | string): void {
+    this.status = orderStatus;
+    const validStatus = this.statusOptions.includes(orderStatus as OrderStatus)
+      ? (orderStatus as OrderStatus)
+      : undefined;
+    this.filter.update((f) => ({ ...f, status: validStatus, pageIndex: 1 }));
+    this.loadOrders();
+  }
+
+  getFilteredStatuses(): string[] {
+    const allStatuses = this.statusOptions;
+    if (!this.statusSearchTerm) {
+      return allStatuses;
+    }
+    return allStatuses.filter((status) =>
+      status.toLowerCase().includes(this.statusSearchTerm.toLowerCase())
+    );
+  }
+
+  getStatusClass(status: string): string {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'status-Pending';
+      case 'processing':
+        return 'status-Processing';
+      case 'shipped':
+        return 'status-Shipping';
+      case 'delivered':
+        return 'status-Delivered';
+      case 'canceled':
+        return 'status-Canceled';
+      default:
+        return 'status-default';
+    }
+  }
+
+  getActiveFiltersCount(): number {
+    return this.status ? 1 : 0;
+  }
+
+  hasActiveFilters(): boolean {
+    return !!this.status;
+  }
+
+  clearAllFilters(): void {
+    this.status = '';
+    this.statusSearchTerm = '';
+    this.filter.update((f) => ({ ...f, status: undefined, pageIndex: 1 }));
+    this.loadOrders();
+  }
+
+  applyFilters(): void {
+    this.closeFilterPanel();
+    this.loadOrders();
+  }
+
+  totalPages(): number {
+    return Math.ceil(this.totalItems() / this.pageSize()) || 1;
+  }
+
+  onRowClick(order: Order): void {
+    this.viewDetails(order);
+    console.log('Row clicked:', order);
+  }
+
+  // Details modal
+  viewDetails(order: Order): void {
+    this.selectedOrder = { ...order };
+    this.isDetailsModalOpen = true;
+    console.log('Viewing details for order:', order);
+  }
+
+  closeDetailsModal(): void {
+    this.isDetailsModalOpen = false;
+    this.selectedOrder = null as any; // Reset selectedOrder
+  }
+
+  openEditModalFromDetails(order: Order): void {
+    this.editingOrder = { ...order };
+    this.isModalOpen = true;
+  }
+
+  // Delete management
+  openDeleteConfirm(order: Order): void {
+    this.deleteConfirm = {
+      isOpen: true,
+      OrderId: order.orderID,
     };
-    return statusLabels[status] || status;
   }
 
-  getProductName(order: Order): string {
-    return order.orderItems[0]?.productName || "منتج غير محدد";
-  }
-  getUserName(order: Order): string {
-    return order?.name || "منتج غير محدد";
+  closeDeleteConfirm(): void {
+    this.deleteConfirm = {
+      isOpen: false,
+      OrderId: null,
+    };
   }
 
-  getProductDescription(order: Order): string {
-    const itemsCount = order.orderItems.length;
-    if (itemsCount === 1) {
-      return "عنصر واحد";
-    } else if (itemsCount === 2) {
-      return "عنصران";
-    } else if (itemsCount <= 10) {
-      return `${itemsCount} عناصر`;
-    } else {
-      return `${itemsCount} عنصراً`;
+  // confirmDelete(orderId: string | number | null): void {
+  //   if (orderId && typeof orderId === 'number') {
+  //     this.deleteOrder(orderId);
+  //   }
+  //   this.closeDeleteConfirm();
+  // }
+  confirmDelete(event: string | number | null) {
+    // your delete logic here
+    if (event !== null && event !== undefined) {
+      this.deleteOrder(Number(event));
     }
+    this.closeDeleteConfirm();
   }
-
-  // Calculate total pages
-  get totalPages(): number {
-    return Math.ceil(this.totalCount /this.pageSize);
-  }
-
-  // Generate page numbers array for pagination
-  get pageNumbers(): number[] {
-    const totalPages = this.totalPages;
-    const current = this.pageIndex;
-    const pages: number[] = [];
-
-    if (totalPages <= 10) {
-      // Show all pages if 10 or fewer
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // Always show first page
-      pages.push(1);
-
-      // Show ellipsis if current page is not near the beginning
-      if (current > 3) {
-        pages.push(-1); // Ellipsis
-      }
-
-      // Show pages around current page
-      const start = Math.max(2, current - 2);
-      const end = Math.min(totalPages - 1, current + 2);
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-
-      // Show ellipsis if current page is not near the end
-      if (current < totalPages - 2) {
-        pages.push(-1); // Ellipsis
-      }
-
-      // Always show last page
-      if (totalPages > 1) {
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
-  }
-
-  // Pagination helpers
-  get startItem(): number {
-    return (this.pageIndex - 1) * this.pageSize + 1;
-  }
-
-  get endItem(): number {
-    return Math.min(this.pageIndex * this.pageSize, this.totalCount);
-  }
-
-  get hasPrevious(): boolean {
-    return this.pageIndex > 1;
-  }
-
-  get hasNext(): boolean {
-    return this.pageIndex < this.totalPages;
-  }
-
-  goToFirstPage(): void {
-    if (this.pageIndex !== 1) {
-      this.pageIndex = 1;
-      this.loadOrders();
-    }
-  }
-
-  goToPreviousPage(): void {
-    if (this.hasPrevious) {
-      this.pageIndex--;
-      this.loadOrders();
-    }
-  }
-
-  goToNextPage(): void {
-    if (this.hasNext) {
-      this.pageIndex++;
-      this.loadOrders();
-    }
-  }
-
-  goToLastPage(): void {
-    if (this.pageIndex !== this.totalPages) {
-      this.pageIndex = this.totalPages;
-      this.loadOrders();
-    }
+  updateOrderStatus(event: { orderId: number; status: OrderStatus }): void {
+    this.orderService.updateOrderStatus(event.orderId, event.status).subscribe({
+      next: () => {
+        this.loadOrders();
+        alert('Order status updated successfully');
+      },
+      error: (err: any) => {
+        console.error('Error updating order status:', err);
+        alert('Failed to update order status');
+      },
+    });
   }
 }

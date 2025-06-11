@@ -1,0 +1,55 @@
+<div class="user-details">
+  <div class="user-details-content">
+    <div class="user-details-header">
+      <h2>تفاصيل المستخدم</h2>
+      <button class="close-btn" (click)="onClose()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <div class="user-info">
+      <div class="info-group">
+        <div class="info-label">الاسم الأول:</div>
+        <div class="info-value">{{ user.fName }}</div>
+      </div>
+      <div class="info-group">
+        <div class="info-label">الاسم الأخير:</div>
+        <div class="info-value">{{ user.lName }}</div>
+      </div>
+      <div class="info-group">
+        <div class="info-label">البريد الإلكتروني:</div>
+        <div class="info-value">{{ user.email }}</div>
+      </div>
+      <div class="info-group">
+        <div class="info-label">رقم الهاتف:</div>
+        <div class="info-value">{{ user.phoneNumber || "غير متوفر" }}</div>
+      </div>
+      <div class="info-group">
+        <div class="info-label">العنوان:</div>
+        <div class="info-value">{{ user.address || "غير متوفر" }}</div>
+      </div>
+      <div class="info-group">
+        <div class="info-label">حالة المستخدم:</div>
+        <div class="info-value">
+          <div [ngClass]="user.isDeleted ? 'status-blocked' : 'status-active'">
+            {{ user.isDeleted ? "محظور" : "نشط" }}
+          </div>
+        </div>
+      </div>
+      <!-- <div class="info-group">
+        <button class="edit-btn" (click)="onEdit()">
+          <span class="material-icons">edit</span> تعديل البيانات
+        </button>
+      </div> -->
+
+      <div class="info-group">
+        <button class="block-btn" (click)="onBlockUser()">
+          <span class="material-icons">{{
+            user.isDeleted ? "cancel" : "block"
+          }}</span>
+          {{ user.isDeleted ? "إلغاء الحظر" : "حظر المستخدم" }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

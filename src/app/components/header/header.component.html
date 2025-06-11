@@ -8,22 +8,26 @@
       <span class="material-icons">storefront</span>
       عرض المتجر
     </button>
-    
+
     <div class="user-dropdown" *ngIf="currentUser">
       <button class="user-avatar" (click)="toggleDropdown()">
-        <span>{{ currentUser.initials }}</span>
+        <span>{{ currentUser.fName }}</span>
       </button>
-      
-      <div class="dropdown-menu" *ngIf="isDropdownOpen" (mouseleave)="closeDropdown()">
+
+      <div
+        class="dropdown-menu"
+        *ngIf="isDropdownOpen"
+        (mouseleave)="closeDropdown()"
+      >
         <div class="dropdown-header">
           <div class="user-info">
-            <p class="user-name">{{ currentUser.name }}</p>
+            <p class="user-name">{{ currentUser.fName }}</p>
             <p class="user-email">{{ currentUser.email }}</p>
           </div>
         </div>
-        
+
         <div class="dropdown-divider"></div>
-        
+
         <ul class="dropdown-list">
           <li>
             <a routerLink="/settings/profile">
@@ -38,7 +42,7 @@
             </a>
           </li>
           <li>
-            <button class="logout-btn" (click)="logout()">
+            <button class="logout-btn">
               <span class="material-icons">logout</span>
               تسجيل الخروج
             </button>
@@ -46,7 +50,7 @@
         </ul>
       </div>
     </div>
-    
+
     <a routerLink="/auth/login" class="login-btn" *ngIf="!currentUser">
       <span class="material-icons">login</span>
       تسجيل الدخول

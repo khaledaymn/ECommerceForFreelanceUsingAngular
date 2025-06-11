@@ -1,0 +1,220 @@
+<div class="users-wrapper">
+  <app-data-table
+    [columns]="columns"
+    [data]="users()"
+    [loading]="loading()"
+    [actions]="actions"
+    [selectable]="false"
+    [viewMode]="viewMode"
+    [enableViewToggle]="true"
+    searchPlaceholder="البحث في المستخدمين..."
+    emptyMessage="لا توجد مستخدمين متاحين"
+    [currentPage]="currentPage()"
+    [totalPages]="totalPages()"
+    [totalItems]="totalItems()"
+    [pageSize]="pageSize()"
+    [showFilters]="true"
+    (searchChange)="onSearch($event)"
+    (sortChange)="onSort($event)"
+    (rowClick)="onRowClick($event)"
+    (actionClick)="onActionClick($event)"
+    (viewModeChange)="onViewModeChange($event)"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
+  >
+    <div slot="title" class="header-title">
+      <h1>إدارة المستخدمين</h1>
+      <p class="header-subtitle">
+        يمكنك إدارة المستخدمين من خلال هذه الصفحة. استخدم الفلاتر للبحث عن
+        مستخدمين محددين.
+      </p>
+    </div>
+
+    <div slot="filters">
+      <!-- Filter Toggle Button -->
+      <button
+        class="filter-toggle"
+        [class.active]="showFilters"
+        (click)="toggleFilters()"
+        aria-label="تبديل الفلاتر"
+      >
+        <span class="toggle-icon material-icons">tune</span>
+        <span class="toggle-text">الفلاتر</span>
+        <span class="badge" *ngIf="getActiveFiltersCount() > 0">{{
+          getActiveFiltersCount()
+        }}</span>
+        <span class="shine"></span>
+      </button>
+
+      <!-- Filter Panel -->
+      <div class="filter-panel" [class.open]="showFilters">
+        <div class="overlay" (click)="closeFilters()"></div>
+        <div class="panel">
+          <!-- Header -->
+          <div class="panel-header">
+            <div class="header-content">
+              <span class="header-icon material-icons">tune</span>
+              <div class="header-text">
+                <h3>فلترة المستخدمين</h3>
+                <p>اختر الفلاتر لتصفية المستخدمين</p>
+              </div>
+            </div>
+            <div class="header-actions">
+              <button
+                class="clear-btn"
+                (click)="clearFilters()"
+                *ngIf="hasActiveFilters()"
+              >
+                <span class="material-icons">clear_all</span> مسح الكل
+              </button>
+              <!-- <button class="close-btn"
+              (click)="deleteUser()"
+
+              >
+                <span class="material-icons">close</span>
+              </button> -->
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="panel-content custom-scrollbar">
+            <!-- Active Filters -->
+            <div class="active-filters" *ngIf="hasActiveFilters()">
+              <div class="active-header">
+                <span class="material-icons">filter_list</span>
+                <span>الفلاتر النشطة ({{ getActiveFiltersCount() }})</span>
+              </div>
+              <div class="filter-tags">
+                <div class="filter-tag" *ngIf="isBlockedFilter !== undefined">
+                  <span class="tag-icon material-icons">block</span>
+                  <span class="tag-label">حالة الحظر:</span>
+                  <span class="tag-value">{{
+                    isBlockedFilter ? "محظور" : "غير محظور"
+                  }}</span>
+                  <button
+                    class="tag-clear"
+                    (click)="onIsDeletedFilterChange(undefined)"
+                  >
+                    <span class="material-icons">close</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters">
+              <!-- Is Deleted Filter -->
+              <div class="filter">
+                <label class="filter-label">
+                  <span class="material-icons">delete</span> حالة الحظر
+                </label>
+                <div
+                  class="status-filter"
+                  [class.open]="activeDropdown === 'isDeleted'"
+                >
+                  <div
+                    class="select-trigger"
+                    (click)="toggleDropdown('isDeleted')"
+                  >
+                    <span
+                      class="select-value"
+                      *ngIf="isDeletedFilter !== undefined; else placeholder"
+                    >
+                      <span
+                        class="status-dot"
+                        [class]="getIsDeletedClass(isDeletedFilter)"
+                      ></span>
+                      {{ isDeletedFilter ? "محظور" : "غير محظور" }}
+                    </span>
+                    <ng-template #placeholder>
+                      <span class="select-placeholder">اختر حالة الحظر</span>
+                    </ng-template>
+                    <span
+                      class="material-icons arrow"
+                      [class.rotated]="activeDropdown === 'isDeleted'"
+                      >expand_more</span
+                    >
+                  </div>
+                  <div
+                    class="select-dropdown"
+                    *ngIf="activeDropdown === 'isDeleted'"
+                  >
+                    <div class="search-box">
+                      <input
+                        type="text"
+                        placeholder="البحث في حالات الحظر..."
+                        [(ngModel)]="isDeletedSearchTerm"
+                        (click)="$event.stopPropagation()"
+                      />
+                      <span class="material-icons">search</span>
+                    </div>
+                    <div class="options">
+                      <div
+                        class="option"
+                        [class.selected]="isDeletedFilter === undefined"
+                        (click)="selectIsDeleted(undefined)"
+                      >
+                        <span class="material-icons">all_inclusive</span> جميع
+                        حالات الحظر
+                      </div>
+                      <div
+                        *ngFor="let option of getFilteredIsDeletedOptions()"
+                        class="option"
+                        [class.selected]="isDeletedFilter === option.value"
+                        (click)="selectIsDeleted(option.value)"
+                      >
+                        <span
+                          class="status-dot"
+                          [class]="getIsDeletedClass(option.value)"
+                        ></span>
+                        {{ option.label }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="panel-footer">
+            <span class="results">
+              <span class="material-icons">person</span>
+              {{ users().length }} مستخدم من أصل {{ totalItems() }}
+            </span>
+            <button class="apply-btn" (click)="applyFilters()">
+              <span class="material-icons">check</span> تطبيق الفلاتر
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-data-table>
+
+  <app-user-details
+    *ngIf="isDetailsModalOpen"
+    [user]="selectedUser!"
+    [isOpen]="isDetailsModalOpen"
+    (close)="closeDetailsModal()"
+    (updateUser)="
+      toggleBlock(selectedUser!.id, selectedUser?.isDeleted ?? false)
+    "
+  ></app-user-details>
+
+  <app-user-edit
+    *ngIf="isEditModalOpen"
+    [user]="editingUser!"
+    [isOpen]="isEditModalOpen"
+    (close)="closeEditModal()"
+    (save)="saveUser($event)"
+  ></app-user-edit>
+
+  <app-confirm-dialog
+    *ngIf="confirmDialog.isOpen"
+    [isOpen]="confirmDialog.isOpen"
+    [title]="confirmDialog.title"
+    [description]="confirmDialog.description"
+    (close)="closeConfirmDialog()"
+    (confirm)="confirmAction($event)"
+  ></app-confirm-dialog>
+</div>
