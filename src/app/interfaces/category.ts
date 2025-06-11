@@ -2,8 +2,8 @@ export interface Category {
   id: number;
   name?: string | null;
   description?: string | null;
-  imageUrl?: string | null;
-  imageThumbnailUrl?: string | null;
+  imageURL?: string | null;
+  imageThumbnailURL?: string | null;
   imagePublicId: string;
 }
 

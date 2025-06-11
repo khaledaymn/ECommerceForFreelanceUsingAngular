@@ -1,195 +1,202 @@
-<div *ngIf="isOpen" class="fixed inset-0 z-50 overflow-y-auto">
-  <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-    <!-- Background overlay -->
-    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="onClose()"></div>
+<div class="modal-overlay" *ngIf="isOpen" (click)="onClose()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="header-content">
+        <div class="header-icon">
+          <i class="material-icons">inventory_2</i>
+        </div>
+        <div class="header-text">
+          <h2 class="modal-title">تفاصيل المنتج</h2>
+          <p class="modal-subtitle">عرض جميع معلومات المنتج</p>
+        </div>
+      </div>
+      <button class="close-button" (click)="onClose()">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
 
-    <!-- Modal panel -->
-    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full max-h-[90vh] overflow-y-auto" dir="rtl">
-      <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-xl font-semibold text-gray-900 text-right">تفاصيل المنتج</h3>
-          <button
-            type="button"
-            class="text-gray-400 hover:text-gray-600 focus:outline-none"
-            (click)="onClose()"
-            title="إغلاق"
-            aria-label="إغلاق"
-          >
-            <i class="bi bi-x text-2xl"></i>
-          </button>
+    <!-- Modal Body -->
+    <div class="modal-body">
+      <div class="product-details" *ngIf="product">
+        <!-- Product Images Section -->
+        <div class="images-section">
+          <!-- Main Image -->
+          <div class="main-image-container" *ngIf="product.mainImageURL">
+            <div class="image-wrapper">
+              <img
+                [src]="product.mainImageURL"
+                alt="{{product.name}}"
+                class="main-image"
+                (click)="openImageZoom(product.mainImageURL)"
+                (error)="onImageError($event)"
+              />
+              <div class="image-overlay">
+                <button class="zoom-button" (click)="openImageZoom(product.mainImageURL)">
+                  <i class="material-icons">zoom_in</i>
+                </button>
+              </div>
+            </div>
+            <div class="image-label">الصورة الرئيسية</div>
+          </div>
+
+          <!-- Additional Images -->
+          <div class="additional-images" *ngIf="product.productImages && product.productImages.length > 0">
+            <div class="section-title">
+              <i class="material-icons">photo_library</i>
+              <span>الصور الإضافية ({{ product.productImages.length }})</span>
+            </div>
+            <div class="images-grid">
+              <div
+                *ngFor="let image of product.productImages; let i = index"
+                class="image-item"
+                (click)="image.mediaURL && openImageZoom(image.mediaURL!)"
+              >
+                <div class="image-container">
+                  <img
+                    [src]="image.mediaURL"
+                    alt="'صورة إضافية ' + {{(i + 1)}}"
+                    class="additional-image"
+                    (error)="onImageError($event)"
+                  />
+                  <div class="image-overlay">
+                    <button class="zoom-button">
+                      <i class="material-icons">zoom_in</i>
+                    </button>
+                  </div>
+                  <div class="media-type-badge" *ngIf="image.mediaType === 'video'">
+                    <i class="material-icons">play_circle</i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- No Images Placeholder -->
+          <div class="no-images-placeholder" *ngIf="!product.mainImageURL && (!product.productImages || product.productImages.length === 0)">
+            <div class="placeholder-content">
+              <i class="material-icons">image_not_supported</i>
+              <span>لا توجد صور متاحة</span>
+            </div>
+          </div>
         </div>
 
-        <div *ngIf="product" class="space-y-6">
-          <!-- Product Images -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Main Image -->
-            <div class="text-center" *ngIf="product.mainImageUrl">
-              <img
-                [src]="product.mainImageUrl"
-                alt="{{product.name}}"
-                class="mx-auto h-64 w-full object-cover rounded-lg shadow-md"
-              />
-              <p class="text-sm text-gray-500 mt-2">الصورة الرئيسية</p>
+        <!-- Product Information Section -->
+        <div class="info-section">
+          <!-- Basic Information -->
+          <div class="info-group">
+            <div class="group-header">
+              <i class="material-icons">info</i>
+              <h3>المعلومات الأساسية</h3>
             </div>
-
-            <!-- Additional Images -->
-            <div *ngIf="product.productImages && product.productImages.length > 0">
-              <h4 class="text-lg font-medium text-gray-900 mb-3 text-right">صور إضافية</h4>
-              <div class="grid grid-cols-2 gap-2">
-                <div *ngFor="let image of product.productImages" class="relative">
-                  <img
-                    [src]="image.url || '/assets/placeholder.svg'"
-                    alt="'صورة إضافية'"
-                    class="w-full h-24 object-cover rounded-lg shadow-sm"
-                  />
-                  <span *ngIf="image.mediaType === 'video'"
-                        class="absolute top-1 left-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
-                    فيديو
+            <div class="info-grid">
+              <div class="info-item">
+                <label class="info-label">اسم المنتج</label>
+                <div class="info-value">{{ product.name || 'غير محدد' }}</div>
+              </div>
+              <div class="info-item">
+                <label class="info-label">الفئة</label>
+                <div class="info-value">{{ getCategoryName(product.categoryId) }}</div>
+              </div>
+              <div class="info-item">
+                <label class="info-label">السعر</label>
+                <div class="info-value price-value">{{ formatPrice(product.price) }}</div>
+              </div>
+              <div class="info-item">
+                <label class="info-label">الحالة</label>
+                <div class="info-value">
+                  <span class="status-badge" [class]="getStatusClass(product.status)">
+                    {{ getStatusText(product.status) }}
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Basic Information -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Name -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 text-right mb-2">
-                اسم المنتج
-              </label>
-              <div class="bg-gray-50 px-3 py-2 rounded-md text-right font-semibold">
-                {{ product.name }}
-              </div>
-            </div>
-
-            <!-- ID -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 text-right mb-2">
-                رقم المنتج
-              </label>
-              <div class="bg-gray-50 px-3 py-2 rounded-md text-right">
-                #{{ product.id }}
-              </div>
-            </div>
-
-            <!-- Price -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 text-right mb-2">
-                السعر
-              </label>
-              <div class="bg-gray-50 px-3 py-2 rounded-md text-right">
-                <span class="text-lg font-bold text-green-600">{{ product.price.toFixed(2) }} ر.س</span>
-              </div>
-            </div>
-
-            <!-- Status -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 text-right mb-2">
-                الحالة
-              </label>
-              <div class="bg-gray-50 px-3 py-2 rounded-md text-right">
-                <span [ngClass]="getStatusClass(product.status)" class="px-2 py-1 rounded-full text-xs">
-                  {{ product.status }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Category -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 text-right mb-2">
-                الفئة
-              </label>
-              <div class="bg-gray-50 px-3 py-2 rounded-md text-right">
-                {{ product.categoryName || 'غير محدد' }}
-              </div>
-            </div>
-
-            <!-- Created Date -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 text-right mb-2">
-                تاريخ الإنشاء
-              </label>
-              <div class="bg-gray-50 px-3 py-2 rounded-md text-right">
-                {{ formatDate(product.createdAt) }}
-              </div>
-            </div>
-          </div>
-
           <!-- Description -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 text-right mb-2">
-              الوصف
-            </label>
-            <div class="bg-gray-50 px-3 py-2 rounded-md text-right min-h-[80px]">
-              {{ product.description || 'لا يوجد وصف متاح' }}
+          <div class="info-group" *ngIf="product.description">
+            <div class="group-header">
+              <i class="material-icons">description</i>
+              <h3>الوصف</h3>
+            </div>
+            <div class="description-content">
+              {{ product.description }}
             </div>
           </div>
 
           <!-- Additional Attributes -->
-          <div *ngIf="getAdditionalAttributes().length > 0">
-            <label class="block text-sm font-medium text-gray-700 text-right mb-2">
-              خصائص إضافية
-            </label>
-            <div class="bg-gray-50 rounded-md p-4">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div *ngFor="let attr of getAdditionalAttributes()"
-                     class="flex justify-between items-center p-2 bg-white rounded border">
-                  <span class="text-gray-600">{{ attr.value }}</span>
-                  <span class="font-medium text-gray-900">{{ attr.key }}</span>
+          <div class="info-group" *ngIf="getAdditionalAttributes().length > 0">
+            <div class="group-header">
+              <i class="material-icons">tune</i>
+              <h3>خصائص إضافية</h3>
+            </div>
+            <div class="attributes-grid">
+              <div
+                *ngFor="let attr of getAdditionalAttributes()"
+                class="attribute-item"
+              >
+                <label class="attribute-label">{{ attr.key }}</label>
+                <div class="attribute-value">{{ attr.value }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metadata -->
+          <div class="info-group">
+            <div class="group-header">
+              <i class="material-icons">schedule</i>
+              <h3>معلومات النظام</h3>
+            </div>
+            <div class="metadata-grid">
+              <div class="metadata-item">
+                <label class="metadata-label">تاريخ الإنشاء</label>
+                <div class="metadata-value">{{ formatDate(product.createdAt) }}</div>
+              </div>
+              <!-- <div class="metadata-item">
+                <label class="metadata-label">آخر تحديث</label>
+                <div class="metadata-value">{{ formatDate(product.updatedAt) }}</div>
+              </div> -->
+              <!-- <div class="metadata-item">
+                <label class="metadata-label">معرف المنتج</label>
+                <div class="metadata-value">
+                  <span class="id-value">#{{ product.id }}</span>
+                  <button class="copy-button" (click)="copyToClipboard(product.id.toString())">
+                    <i class="material-icons">content_copy</i>
+                  </button>
                 </div>
-              </div>
+              </div> -->
             </div>
           </div>
-
-          <!-- Image Information -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6" *ngIf="product.mainImageUrl">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 text-right mb-2">
-                رابط الصورة الرئيسية
-              </label>
-              <div class="bg-gray-50 px-3 py-2 rounded-md text-right break-all text-sm">
-                {{ product.mainImageUrl }}
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 text-right mb-2">
-                معرف الصورة
-              </label>
-              <div class="bg-gray-50 px-3 py-2 rounded-md text-right">
-                {{ product.imagePublicId || 'غير محدد' }}
-              </div>
-            </div>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex justify-end space-x-3 pt-4 border-t">
-            <button
-              type="button"
-              class="px-4 py-2 bg-yellow-400 text-black rounded-md hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-              (click)="onEdit()"
-            >
-              <i class="bi bi-pencil me-2"></i>
-              تعديل
-            </button>
-            <button
-              type="button"
-              class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-              (click)="onDelete()"
-            >
-              <i class="bi bi-trash me-2"></i>
-              حذف
-            </button>
-          </div>
-        </div>
-
-        <!-- Loading State -->
-        <div *ngIf="!product" class="text-center py-8">
-          <i class="bi bi-arrow-clockwise animate-spin text-4xl text-gray-400"></i>
-          <p class="mt-2 text-gray-500">جاري التحميل...</p>
         </div>
       </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <div class="footer-actions">
+        <button class="action-button secondary-button" (click)="onClose()">
+          <i class="material-icons">close</i>
+          <span>إغلاق</span>
+        </button>
+        <button class="action-button edit-button" (click)="onEdit()">
+          <i class="material-icons">edit</i>
+          <span>تعديل</span>
+        </button>
+        <button class="action-button danger-button" (click)="onDelete()">
+          <i class="material-icons">delete</i>
+          <span>حذف</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Zoom Modal -->
+  <div class="zoom-modal" *ngIf="showImageZoom" (click)="closeImageZoom()">
+    <div class="zoom-container">
+      <img [src]="zoomedImageUrl" alt="{{product?.name}}" class="zoomed-image" />
+      <button class="zoom-close-button" (click)="closeImageZoom()">
+        <i class="material-icons">close</i>
+      </button>
     </div>
   </div>
 </div>

@@ -42,7 +42,6 @@ private readonly errorMessages: Record<string, string> = {
       .set('sortProp', params.sortProp ?? '')
       .set('sortDirection', params.sortDirection??'');
 
-      console.log(params);
 
     return this.http.get<PaginatedResponse<Category>>(`${this.baseUrl}/GetAllCategories`, { params: httpParams }).pipe(
       retry({ count: this.maxRetries, delay: 1000 }),

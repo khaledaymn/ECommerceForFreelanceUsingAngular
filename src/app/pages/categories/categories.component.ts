@@ -51,8 +51,8 @@ export class CategoryManagementComponent implements OnInit {
 
   // Table configuration
   columns: TableColumn[] = [
-    { key: "imageThumbnailUrl", title: "الصورة", type: "image", width: "80px", align: "center" },
-    { key: "name", title: "اسم الفئة", sortable: true, width: "30%" },
+    { key: "imageThumbnailURL", title: "الصورة", type: "image", width: "20%", align: "center" },
+    { key: "name", title: "اسم الفئة", sortable: true, width: "10%" },
     { key: "description", title: "الوصف", width: "50%" },
   ]
 
@@ -88,14 +88,14 @@ export class CategoryManagementComponent implements OnInit {
         this.totalItems = response.totalCount
         this.totalPages = Math.ceil(response.totalCount / this.pageSize)
         this.loading = false
-        // Ensure imageThumbnailUrl is set if missing
+        // Ensure imageThumbnailURL is set if missing
         this.filteredCategories = this.filteredCategories.map(category => {
-          if (!category.imageThumbnailUrl && category.imageUrl) {
-            return { ...category, imageThumbnailUrl: category.imageUrl }
+          if (!category.imageThumbnailURL && category.imageURL) {
+            return { ...category, imageThumbnailURL: category.imageURL }
           }
           return category
         })
-        this.filteredCategories.forEach((data)=> console.log(data));
+        // this.filteredCategories.forEach((data)=> console.log(data));
       },
       error: (error) => {
         console.error("Error loading categories:", error)
@@ -233,7 +233,13 @@ export class CategoryManagementComponent implements OnInit {
       })
     }
   }
-
+  getCategoryName(){
+    if (this.deleteConfirm.categoryId) {
+    const category = this.categories.find(cat => cat.id === this.deleteConfirm.categoryId);
+    return category?.name ?? '';
+    }
+    return '';
+  }
   // Details modal
   viewDetails(category: Category): void {
     this.selectedCategory = { ...category }

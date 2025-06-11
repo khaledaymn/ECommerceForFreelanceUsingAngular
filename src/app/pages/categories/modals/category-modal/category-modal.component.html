@@ -1,122 +1,181 @@
-<div *ngIf="isOpen" class="fixed inset-0 z-50 overflow-y-auto">
-  <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-    <!-- Background overlay -->
-    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="onClose()"></div>
+<div *ngIf="isOpen" class="modal-overlay" (click)="onClose()">
+  <div class="modal-container" (click)="$event.stopPropagation()" dir="rtl">
+    <form (ngSubmit)="onSubmit()" #categoryForm="ngForm" class="modal-form">
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="header-content">
+          <div class="header-icon">
+            <i class="material-icons">{{ category ? 'edit' : 'add' }}</i>
+          </div>
+          <div class="header-text">
+            <h2 class="modal-title">{{ category ? 'تعديل الفئة' : 'إضافة فئة جديدة' }}</h2>
+            <p class="modal-subtitle">{{ category ? 'قم بتعديل بيانات الفئة' : 'أضف فئة جديدة لتنظيم المنتجات' }}</p>
+          </div>
+        </div>
+        <button type="button" class="close-btn" (click)="onClose()">
+          <i class="material-icons">close</i>
+        </button>
+      </div>
 
-    <!-- Modal panel -->
-    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full" dir="rtl">
-      <form (ngSubmit)="onSubmit()" #categoryForm="ngForm">
-        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-          <div class="sm:flex sm:items-start">
-            <div class="w-full">
-              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4 text-right">
-                {{ category ? 'تعديل الفئة' : 'إضافة فئة جديدة' }}
-              </h3>
-
-              <!-- Name Field -->
-              <div class="mb-4">
-                <label for="name" class="block text-sm font-medium text-gray-700 text-right mb-2">
-                  اسم الفئة *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  [(ngModel)]="formData.name"
-                  required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-right"
-                  placeholder="أدخل اسم الفئة"
-                  dir="rtl"
-                  #nameField="ngModel"
-                />
-                <div *ngIf="nameField.invalid && nameField.touched" class="text-red-600 text-sm mt-1 text-right">
-                  اسم الفئة مطلوب
-                </div>
-              </div>
-
-              <!-- Description Field -->
-              <div class="mb-4">
-                <label for="description" class="block text-sm font-medium text-gray-700 text-right mb-2">
-                  الوصف
-                </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  [(ngModel)]="formData.description"
-                  rows="3"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-right"
-                  placeholder="أدخل وصف الفئة"
-                  dir="rtl"
-                ></textarea>
-              </div>
-
-              <!-- Image Upload -->
-              <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 text-right mb-2">
-                  صورة الفئة
-                </label>
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                  <div *ngIf="imagePreview; else uploadArea" class="relative">
-                    <img
-                      [src]="imagePreview"
-                      alt="Preview"
-                      class="w-full h-32 object-cover rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      class="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700"
-                      (click)="removeImage()"
-                      title="إزالة الصورة"
-                      aria-label="إزالة الصورة"
-                    >
-                      <i class="bi bi-x"></i>
-                    </button>
-                  </div>
-                  <ng-template #uploadArea>
-                    <div class="text-center">
-                      <i class="bi bi-cloud-upload text-gray-400 text-4xl"></i>
-                      <div class="mt-2">
-                        <label for="image-upload" class="cursor-pointer text-blue-600 hover:text-blue-800">
-                          اضغط لرفع صورة
-                          <input
-                            id="image-upload"
-                            type="file"
-                            class="hidden"
-                            accept="image/*"
-                            (change)="onImageChange($event)"
-                          />
-                        </label>
-                      </div>
-                      <p class="text-xs text-gray-500 mt-1">PNG, JPG, JPEG, WebP, SVG (حد أقصى 3MB)</p>
-                    </div>
-                  </ng-template>
-                </div>
-                <div *ngIf="imageError" class="text-red-600 text-sm mt-1 text-right">
-                  {{ imageError }}
-                </div>
-              </div>
-            </div>
+      <!-- Body -->
+      <div class="modal-body">
+        <!-- Name Field -->
+        <div class="form-group">
+          <label for="name" class="form-label required">
+            <i class="material-icons">label</i>
+            اسم الفئة
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            [(ngModel)]="formData.name"
+            required
+            class="form-input"
+            placeholder="أدخل اسم الفئة"
+            dir="rtl"
+            #nameField="ngModel"
+            (focus)="onInputFocus($event)"
+            (blur)="onInputBlur($event)"
+          />
+          <div *ngIf="nameField.invalid && nameField.touched" class="error-message">
+            <i class="material-icons">error</i>
+            اسم الفئة مطلوب
           </div>
         </div>
 
-        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-          <button
-            type="submit"
-            [disabled]="categoryForm.invalid || isSubmitting"
-            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-yellow-400 text-base font-medium text-black hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <i *ngIf="isSubmitting" class="bi bi-arrow-clockwise animate-spin me-2"></i>
-            {{ category ? 'تحديث' : 'إضافة' }}
-          </button>
-          <button
-            type="button"
-            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-            (click)="onClose()"
-          >
-            إلغاء
-          </button>
+        <!-- Description Field -->
+        <div class="form-group">
+          <label for="description" class="form-label">
+            <i class="material-icons">description</i>
+            الوصف
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            [(ngModel)]="formData.description"
+            rows="3"
+            class="form-textarea"
+            placeholder="أدخل وصف الفئة (اختياري)"
+            dir="rtl"
+            (focus)="onInputFocus($event)"
+            (blur)="onInputBlur($event)"
+          ></textarea>
         </div>
-      </form>
-    </div>
+
+        <!-- Image Upload -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="material-icons">image</i>
+            صورة الفئة
+          </label>
+          
+          <div class="upload-container">
+            <!-- Image Preview Area -->
+            <div *ngIf="hasImageToDisplay(); else uploadArea" 
+                 class="image-preview"
+                 [class.editing-preview]="isExistingImage()"
+                 [class.new-image-preview]="!isExistingImage()">
+              <img 
+                [src]="getImageSource()" 
+                alt="معاينة الصورة" 
+                class="preview-image"
+                (error)="onImageError($event)"
+                (load)="imageError = null"
+              />
+              
+              <!-- Existing Image Badge -->
+              <div *ngIf="isExistingImage()" class="existing-image-badge">
+                <i class="material-icons">check_circle</i>
+                <span>صورة موجودة</span>
+              </div>
+              
+              <!-- New Image Badge -->
+              <div *ngIf="!isExistingImage() && formData.image" class="new-image-badge">
+                <i class="material-icons">add_circle</i>
+                <span>صورة جديدة</span>
+              </div>
+              
+              <!-- Image Overlay Controls -->
+              <div class="image-overlay">
+                <button type="button" class="overlay-btn change-btn" (click)="triggerFileInput()">
+                  <i class="material-icons">edit</i>
+                  {{ isExistingImage() ? 'تغيير' : 'تعديل' }}
+                </button>
+                <button type="button" class="overlay-btn remove-btn" (click)="removeImage()">
+                  <i class="material-icons">delete</i>
+                  حذف
+                </button>
+              </div>
+            </div>
+            
+            <!-- Upload Area (shown when no image) -->
+            <ng-template #uploadArea>
+              <div 
+                class="upload-area" 
+                [class.drag-over]="dragOver"
+                (click)="triggerFileInput()"
+              >
+                <div class="upload-content">
+                  <div class="upload-icon">
+                    <i class="material-icons">cloud_upload</i>
+                  </div>
+                  <h3 class="upload-title">اختر صورة للفئة</h3>
+                  <p class="upload-subtitle">اسحب الصورة هنا أو اضغط للاختيار</p>
+                  <div class="upload-specs">
+                    <span class="spec-item">PNG, JPG, JPEG, WebP, SVG</span>
+                    <span class="spec-divider">•</span>
+                    <span class="spec-item">حد أقصى 3MB</span>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+            
+            <!-- Hidden File Input -->
+            <input
+              #fileInput
+              type="file"
+              class="file-input"
+              accept="image/*"
+              (change)="onImageChange($event)"
+              title="اختر صورة للفئة"
+              placeholder="اختر صورة للفئة"
+            />
+          </div>
+          
+          <!-- Error Message -->
+          <div *ngIf="imageError" class="error-message">
+            <i class="material-icons">error</i>
+            {{ imageError }}
+          </div>
+          
+          <!-- Image Info (for debugging in development) -->
+          <div *ngIf="isEditingMode && category" class="image-debug-info" style="display: none;">
+            <small>Debug - Image URL: {{ category.imageURL || 'None' }}</small><br>
+            <small>Debug - Thumbnail URL: {{ category.imageThumbnailURL || 'None' }}</small><br>
+            <small>Debug - Has Existing: {{ hasExistingImage }}</small><br>
+            <small>Debug - Preview: {{ imagePreview ? 'Set' : 'None' }}</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="onClose()">
+          <i class="material-icons">close</i>
+          إلغاء
+        </button>
+        <button
+          type="submit"
+          [disabled]="categoryForm.invalid || isSubmitting"
+          class="btn btn-primary"
+          [class.loading]="isSubmitting"
+        >
+          <i *ngIf="isSubmitting" class="material-icons spinning">refresh</i>
+          <i *ngIf="!isSubmitting" class="material-icons">{{ category ? 'save' : 'add' }}</i>
+          <span class="btn-text">{{ category ? 'حفظ التغييرات' : 'إضافة الفئة' }}</span>
+        </button>
+      </div>
+    </form>
   </div>
 </div>

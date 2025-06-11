@@ -60,9 +60,9 @@
   *ngIf="deleteConfirm.isOpen"
   [isOpen]="deleteConfirm.isOpen"
   title="تأكيد الحذف"
-  message="هل أنت متأكد من حذف هذه الفئة؟ لا يمكن التراجع عن هذا الإجراء."
+  [description]="'هل أنت متأكد من حذف الفئة ' + getCategoryName() + '؟ لا يمكن التراجع عن هذا الإجراء.'"
   confirmText="حذف"
   cancelText="إلغاء"
   (confirm)="confirmDelete()"
-  (cancel)="closeDeleteConfirm()"
+  (close)="closeDeleteConfirm()"
 />

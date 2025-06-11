@@ -484,18 +484,32 @@ tr:hover {
   overflow: hidden;
   min-width: 140px;
 
+  // &:hover {
+  //   transform: translateY(-2px);
+  //   background: linear-gradient(135deg, #F5C518 0%, #e6b400 100%);
+  //   color: #1f2937;
+  //   border-color: #F5C518;
+  //   box-shadow: 0 8px 25px rgba(245, 197, 24, 0.4);
+  // }
+
+  // &:active {
+  //   transform: translateY(0);
+  //   background: linear-gradient(135deg, #e6b400 0%, #d4a300 100%);
+  //   box-shadow: 0 4px 12px rgba(245, 197, 24, 0.3);
+  // }
+
   &:hover {
     transform: translateY(-2px);
-    background: linear-gradient(135deg, #F5C518 0%, #e6b400 100%);
-    color: #1f2937;
+    background: linear-gradient(135deg, #F5C518 0%, #F5C518 100%);
+    color: #000;
     border-color: #F5C518;
-    box-shadow: 0 8px 25px rgba(245, 197, 24, 0.4);
+    // box-shadow: 0 8px 25px #F5C518;
   }
 
   &:active {
     transform: translateY(0);
-    background: linear-gradient(135deg, #e6b400 0%, #d4a300 100%);
-    box-shadow: 0 4px 12px rgba(245, 197, 24, 0.3);
+    background: linear-gradient(135deg, #F5C518 0%, #F5C518 100%);
+    // box-shadow: 0 4px 12px #F5C518;
   }
 
   .btn-icon {

@@ -125,6 +125,7 @@ export class ProductService {
     if (product.imagesToDelete) {
       product.imagesToDelete.forEach((url, index) => formData.append(`imagesToDelete[${index}]`, url));
     }
+    console.log(product);
 
     return this.http.put<Result>(`${this.baseUrl}/Update`, formData).pipe(
       retry({ count: this.maxRetries, delay: 1000 }),

@@ -4,7 +4,7 @@ import { FormsModule } from "@angular/forms"
 import { ProductService } from "../../services/product.service"
 import { CategoryService } from "../../services/category.service"
 import { Product, ProductParams } from "../../interfaces/product.interface"
-import { Category } from "../../interfaces/category"
+import { Category, CategoryParams } from "../../interfaces/category"
 import { DataTableComponent, TableAction, TableColumn } from "../../components/data-table/data-table.component"
 import { ProductModalComponent } from "./modals/product-modal/product-modal.component"
 import { ConfirmDialogComponent } from "../../components/confirm-dialog/confirm-dialog.component"
@@ -90,9 +90,9 @@ attributeSearchTerms: Record<string, string> = {}
 
   // Table configuration
   columns: TableColumn[] = [
-    { key: "mainImageUrl", title: "الصورة", type: "image", width: "80px", align: "center" },
-    { key: "name", title: "اسم المنتج", sortable: true, width: "25%" },
-    { key: "categoryName", title: "الفئة", sortable: false, width: "15%" },
+    { key: "mainImageURL", title: "الصورة", type: "image", width: "15%", align: "center" },
+    { key: "name", title: "اسم المنتج", sortable: true, width: "20%" },
+    { key: "categoryName", title: "الفئة", sortable: false, width: "10%" },
     { key: "price", title: "السعر", type: "currency", sortable: true, width: "12%", align: "left" },
     { key: "status", title: "الحالة", type: "badge", sortable: false, width: "12%", align: "center" },
     { key: "createdAt", title: "التاريخ", type: "date", sortable: false, width: "10%", align: "center" },
@@ -165,22 +165,25 @@ attributeSearchTerms: Record<string, string> = {}
     return count
   }
 
-  loadCategories(): void {
-    this.categoryService
-      .getAllCategories({
-        pageIndex: 1,
-        pageSize: 100,
-      })
-      .subscribe({
-        next: (response) => {
-          this.categories = response.data
-        },
-        error: (error) => {
-          console.error("Error loading categories:", error)
-        },
-      })
-  }
+ loadCategories(): void {
+    this.loading = true
 
+    const params: CategoryParams = {
+      pageIndex: 1,
+      pageSize: 100,
+    }
+
+    this.categoryService.getAllCategories(params).subscribe({
+      next: (response) => {
+        this.categories = response.data
+      //  this.categories.forEach((data)=> console.log(data));
+      },
+      error: (error) => {
+        console.error("Error loading categories:", error)
+        this.loading = false
+      },
+    })
+  }
   loadProducts(): void {
     this.loading = true
 
@@ -367,7 +370,7 @@ private applyClientSideFilters(products: Product[]): Product[] {
 
 getCategoryCount(categoryId: number): number {
   console.log("CatId "+ categoryId + this.products);
-  
+
     return this.products.filter((p) => p.categoryId === categoryId).length
   }
 
@@ -500,6 +503,7 @@ getCategoryCount(categoryId: number): number {
 
   saveProduct(productData: any): void {
     if (this.editingProduct) {
+
       // Update existing product
       this.productService
         .updateProduct({
@@ -512,6 +516,7 @@ getCategoryCount(categoryId: number): number {
           mainImage: productData.mainImage,
           additionalImages: productData.additionalImages,
           imagesToDelete: productData.imagesToDelete,
+          
         })
         .subscribe({
           next: () => {

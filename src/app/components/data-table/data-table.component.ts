@@ -121,7 +121,7 @@ export class DataTableComponent implements OnInit {
 
   onSort(column: TableColumn, index: number) {
     if (!column.sortable) return
-    
+
     if (this.sortColumn === column.key) {
       this.sortDirection = this.sortDirection === 0 ? 1 : 0
     } else {

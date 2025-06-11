@@ -1,8 +1,26 @@
-import { Component, Input, Output, EventEmitter, type OnInit, type OnChanges } from "@angular/core"
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  ViewChild,
+  ElementRef,
+  Renderer2,
+} from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
-import { Product } from "../../../../interfaces/models"
+import { Product } from "../../../../interfaces/product.interface"
 import { Category } from "../../../../interfaces/category"
+
+interface ImagePreview {
+  url: string
+  isExisting: boolean
+  isVideo: boolean
+  file?: File
+}
 
 @Component({
   selector: "app-product-modal",
@@ -18,6 +36,9 @@ export class ProductModalComponent implements OnInit, OnChanges {
   @Output() close = new EventEmitter<void>()
   @Output() save = new EventEmitter<any>()
 
+  @ViewChild("mainImageInput") mainImageInput!: ElementRef<HTMLInputElement>
+  @ViewChild("additionalImagesInput") additionalImagesInput!: ElementRef<HTMLInputElement>
+
   formData = {
     name: "",
     description: "",
@@ -30,24 +51,40 @@ export class ProductModalComponent implements OnInit, OnChanges {
   }
 
   mainImagePreview: string | null = null
-  additionalImagePreviews: string[] = []
+  additionalImagePreviews: ImagePreview[] = []
   mainImageError: string | null = null
   additionalImagesError: string | null = null
   isSubmitting = false
+  isEditingMode = false
+  hasExistingMainImage = false
 
+  dragOver = false
   newAttribute = { key: "", value: "" }
+
+  constructor(private renderer: Renderer2) {}
 
   ngOnInit(): void {
     this.resetForm()
   }
 
-  ngOnChanges(): void {
-    if (this.isOpen) {
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes["isOpen"] && this.isOpen) {
+      this.resetForm()
+    }
+
+    if (changes["product"]) {
       this.resetForm()
     }
   }
 
+  trackByAttributeKey(index: number, item: { key: string; value: string }): string {
+    return item.key
+  }
+
   resetForm(): void {
+    this.isEditingMode = !!this.product
+    this.hasExistingMainImage = false
+
     if (this.product) {
       this.formData = {
         name: this.product.name || "",
@@ -57,10 +94,18 @@ export class ProductModalComponent implements OnInit, OnChanges {
         categoryId: this.product.categoryId?.toString() || "",
         mainImage: null,
         additionalImages: [],
-        additionalAttributes: this.product.additionalAttributes ? JSON.parse(this.product.additionalAttributes) : {},
+        additionalAttributes: this.product.additionalAttributes
+          ? typeof this.product.additionalAttributes === "string"
+            ? JSON.parse(this.product.additionalAttributes)
+            : this.product.additionalAttributes
+          : {},
       }
-      this.mainImagePreview = this.product.mainImageUrl || null
-      this.additionalImagePreviews = this.product.productImages?.map((img) => img.url || "") || []
+
+      // Handle existing main image
+      this.setExistingMainImagePreview()
+
+      // Handle existing additional images
+      this.setExistingAdditionalImagePreviews()
     } else {
       this.formData = {
         name: "",
@@ -74,11 +119,55 @@ export class ProductModalComponent implements OnInit, OnChanges {
       }
       this.mainImagePreview = null
       this.additionalImagePreviews = []
+      this.hasExistingMainImage = false
     }
+
     this.mainImageError = null
     this.additionalImagesError = null
     this.isSubmitting = false
     this.newAttribute = { key: "", value: "" }
+
+    // Reset file inputs
+    if (this.mainImageInput) {
+      this.mainImageInput.nativeElement.value = ""
+    }
+    if (this.additionalImagesInput) {
+      this.additionalImagesInput.nativeElement.value = ""
+    }
+  }
+
+  private setExistingMainImagePreview(): void {
+    if (this.product?.mainImageURL && this.product.mainImageURL !== "null" && this.product.mainImageURL.trim() !== "") {
+      this.mainImagePreview = this.product.mainImageURL
+      this.hasExistingMainImage = true
+    } else {
+      this.mainImagePreview = null
+      this.hasExistingMainImage = false
+    }
+  }
+
+  private setExistingAdditionalImagePreviews(): void {
+    this.additionalImagePreviews = []
+
+    if (this.product?.productImages && this.product.productImages.length > 0) {
+      this.product.productImages.forEach((image) => {
+        if (image.mediaURL && image.mediaURL !== "null" && image.mediaURL.trim() !== "") {
+          this.additionalImagePreviews.push({
+            url: image.mediaURL,
+            isExisting: true,
+            isVideo: image.mediaType=== "video",
+          })
+        }
+      })
+    }
+  }
+
+  triggerMainImageInput(): void {
+    this.mainImageInput.nativeElement.click()
+  }
+
+  triggerAdditionalImagesInput(): void {
+    this.additionalImagesInput.nativeElement.click()
   }
 
   onMainImageChange(event: Event): void {
@@ -86,16 +175,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
     const file = input.files?.[0]
 
     if (file) {
-      if (!this.validateImageFile(file)) return
-
-      this.formData.mainImage = file
-      this.mainImageError = null
-
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        this.mainImagePreview = e.target?.result as string
-      }
-      reader.readAsDataURL(file)
+      this.handleMainImageFile(file)
     }
   }
 
@@ -103,33 +183,107 @@ export class ProductModalComponent implements OnInit, OnChanges {
     const input = event.target as HTMLInputElement
     const files = Array.from(input.files || [])
 
-    const validFiles = files.filter((file) => this.validateMediaFile(file))
+    files.forEach((file) => {
+      if (this.validateMediaFile(file)) {
+        this.handleAdditionalImageFile(file)
+      }
+    })
 
-    if (validFiles.length !== files.length) {
-      this.additionalImagesError = "بعض الملفات غير صالحة"
-      return
+    // Reset input
+    input.value = ""
+  }
+
+  onMainImageDrop(event: DragEvent): void {
+    event.preventDefault()
+    event.stopPropagation()
+    this.dragOver = false
+
+    const files = event.dataTransfer?.files
+    if (files && files.length > 0) {
+      const file = files[0]
+      this.handleMainImageFile(file)
     }
+  }
 
-    this.formData.additionalImages = [...this.formData.additionalImages, ...validFiles]
+  onDragOver(event: DragEvent): void {
+    event.preventDefault()
+    event.stopPropagation()
+    this.dragOver = true
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault()
+    event.stopPropagation()
+    this.dragOver = false
+  }
+
+  handleMainImageFile(file: File): void {
+    if (!this.validateImageFile(file)) return
+
+    this.formData.mainImage = file
+    this.hasExistingMainImage = false
+    this.mainImageError = null
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      this.mainImagePreview = e.target?.result as string
+      this.showSuccessFeedback()
+    }
+    reader.readAsDataURL(file)
+  }
+
+  handleAdditionalImageFile(file: File): void {
+    this.formData.additionalImages.push(file)
     this.additionalImagesError = null
 
-    validFiles.forEach((file) => {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        this.additionalImagePreviews.push(e.target?.result as string)
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      this.additionalImagePreviews.push({
+        url: e.target?.result as string,
+        isExisting: false,
+        isVideo: file.type.startsWith("video/"),
+        file: file,
+      })
+    }
+    reader.readAsDataURL(file)
+  }
+
+  removeMainImage(): void {
+    this.formData.mainImage = null
+    this.mainImagePreview = null
+    this.hasExistingMainImage = false
+    this.mainImageError = null
+
+    if (this.mainImageInput) {
+      this.mainImageInput.nativeElement.value = ""
+    }
+  }
+
+  removeAdditionalImage(index: number): void {
+    const preview = this.additionalImagePreviews[index]
+
+    // Remove from preview array
+    this.additionalImagePreviews.splice(index, 1)
+
+    // If it's a new file, remove from formData.additionalImages
+    if (!preview.isExisting && preview.file) {
+      const fileIndex = this.formData.additionalImages.indexOf(preview.file)
+      if (fileIndex > -1) {
+        this.formData.additionalImages.splice(fileIndex, 1)
       }
-      reader.readAsDataURL(file)
-    })
+    }
   }
 
   validateImageFile(file: File): boolean {
     const allowedTypes = ["image/png", "image/jpg", "image/jpeg", "image/webp", "image/svg+xml"]
     if (!allowedTypes.includes(file.type)) {
       this.mainImageError = "نوع الملف غير مدعوم للصورة الرئيسية"
+      this.showErrorFeedback()
       return false
     }
     if (file.size > 3 * 1024 * 1024) {
       this.mainImageError = "حجم الصورة يجب أن يكون أقل من 3 ميجابايت"
+      this.showErrorFeedback()
       return false
     }
     return true
@@ -140,22 +294,45 @@ export class ProductModalComponent implements OnInit, OnChanges {
     const videoTypes = ["video/mp4", "video/webm", "video/mov", "video/mkv"]
 
     if (imageTypes.includes(file.type)) {
-      return file.size <= 3 * 1024 * 1024 // 3MB for images
+      if (file.size > 3 * 1024 * 1024) {
+        this.additionalImagesError = "حجم الصورة يجب أن يكون أقل من 3 ميجابايت"
+        return false
+      }
+      return true
     } else if (videoTypes.includes(file.type)) {
-      return file.size <= 10 * 1024 * 1024 // 10MB for videos
+      if (file.size > 10 * 1024 * 1024) {
+        this.additionalImagesError = "حجم الفيديو يجب أن يكون أقل من 10 ميجابايت"
+        return false
+      }
+      return true
     }
+
+    this.additionalImagesError = "نوع الملف غير مدعوم"
     return false
   }
 
-  removeMainImage(): void {
-    this.formData.mainImage = null
-    this.mainImagePreview = null
-    this.mainImageError = null
+  private showErrorFeedback(): void {
+    const uploadArea = document.querySelector(".upload-area")
+    if (uploadArea) {
+      uploadArea.classList.add("error-state")
+      setTimeout(() => {
+        uploadArea.classList.remove("error-state")
+      }, 2000)
+    }
   }
 
-  removeAdditionalImage(index: number): void {
-    this.formData.additionalImages.splice(index, 1)
-    this.additionalImagePreviews.splice(index, 1)
+  private showSuccessFeedback(): void {
+    const imagePreview = document.querySelector(".image-preview")
+    if (imagePreview) {
+      imagePreview.classList.add("success-state")
+      setTimeout(() => {
+        imagePreview.classList.remove("success-state")
+      }, 1000)
+    }
+  }
+
+  isExistingMainImage(): boolean {
+    return this.isEditingMode && this.hasExistingMainImage && !this.formData.mainImage
   }
 
   getAttributesArray(): { key: string; value: string }[] {
@@ -166,14 +343,42 @@ export class ProductModalComponent implements OnInit, OnChanges {
   }
 
   addAttribute(): void {
-    if (this.newAttribute.key && this.newAttribute.value) {
-      this.formData.additionalAttributes[this.newAttribute.key] = this.newAttribute.value
+    if (this.newAttribute.key.trim() && this.newAttribute.value.trim()) {
+      // Check if key already exists
+      if (this.formData.additionalAttributes.hasOwnProperty(this.newAttribute.key.trim())) {
+        // Update existing attribute
+        this.formData.additionalAttributes[this.newAttribute.key.trim()] = this.newAttribute.value.trim()
+      } else {
+        // Add new attribute
+        this.formData.additionalAttributes[this.newAttribute.key.trim()] = this.newAttribute.value.trim()
+      }
+
+      // Reset the form
       this.newAttribute = { key: "", value: "" }
+
+      // Clear any previous errors
+      this.additionalImagesError = null
     }
   }
 
   removeAttribute(key: string): void {
-    delete this.formData.additionalAttributes[key]
+    if (this.formData.additionalAttributes.hasOwnProperty(key)) {
+      delete this.formData.additionalAttributes[key]
+    }
+  }
+
+  onInputFocus(event: FocusEvent): void {
+    const parent = (event.target as HTMLElement).closest(".form-group")
+    if (parent) {
+      this.renderer.addClass(parent, "focused")
+    }
+  }
+
+  onInputBlur(event: FocusEvent): void {
+    const parent = (event.target as HTMLElement).closest(".form-group")
+    if (parent) {
+      this.renderer.removeClass(parent, "focused")
+    }
   }
 
   onSubmit(): void {
@@ -185,9 +390,11 @@ export class ProductModalComponent implements OnInit, OnChanges {
       ...this.formData,
       price: Number(this.formData.price),
       categoryId: Number(this.formData.categoryId),
+      additionalAttributes: JSON.stringify(this.formData.additionalAttributes),
+      removeExistingMainImage: this.isEditingMode && !this.hasExistingMainImage && !this.formData.mainImage,
     }
+    console.log(submitData);
 
-    // Simulate API call delay
     setTimeout(() => {
       this.save.emit(submitData)
       this.isSubmitting = false

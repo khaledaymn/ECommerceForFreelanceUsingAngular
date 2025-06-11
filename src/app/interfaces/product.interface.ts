@@ -31,7 +31,7 @@ export interface Product {
   additionalAttributes?: string | null; // JSON string
   price: number;
   status: string;
-  mainImageUrl?: string | null;
+  mainImageURL?: string | null;
   imagePublicId?: string | null;
   categoryId: number;
   categoryName?: string | null;
@@ -41,9 +41,9 @@ export interface Product {
 
 export interface ProductMedia {
   id?: number;
-  url?: string | null; // URL for image or video
-  thumbnailUrl?: string | null; // Thumbnail for images or videos (if applicable)
-  publicId?: string | null;
+  mediaURL?: string | null; // URL for image or video
+  imageThumbnailURL?: string | null; // Thumbnail for images or videos (if applicable)
+  mediaPublicId?: string | null;
   mediaType?: 'image' | 'video' | null; // Added to distinguish media type
 }
 
