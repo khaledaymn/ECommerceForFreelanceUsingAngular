@@ -1,4 +1,4 @@
-import { SortDirection } from "./category";
+import { SortDirection } from './category';
 
 export interface CreateProduct {
   name: string;
@@ -15,7 +15,7 @@ export interface UpdateProduct {
   id: number;
   name?: string | null;
   description?: string | null;
-  additionalAttributes?: Record<string, string> | null;
+  additionalAttributes?: Record<string, string> | string;
   price?: number | null;
   status?: string | null;
   categoryId?: number | null;
@@ -54,7 +54,7 @@ export enum SortProp {
   Price = 3,
   Status = 4,
   CategoryId = 5,
-  CreatedAt = 6
+  CreatedAt = 6,
 }
 
 export interface ProductParams {
