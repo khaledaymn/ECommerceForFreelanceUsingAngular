@@ -4,7 +4,8 @@ export interface CreateProduct {
   name: string;
   description?: string | null;
   additionalAttributes?: Record<string, string> | null;
-  price: number;
+  brand: string; // Corrected typo from "brabd" to "brand"
+  model: string; // Corrected typo from "modle" to "model"
   status?: string | null;
   categoryId: number;
   mainImage?: File | null; // Image only (png, jpg, jpeg, webp, svg)
@@ -16,7 +17,8 @@ export interface UpdateProduct {
   name?: string | null;
   description?: string | null;
   additionalAttributes?: Record<string, string> | string;
-  price?: number | null;
+  brand?: string | null;
+  model?: string | null;
   status?: string | null;
   categoryId?: number | null;
   mainImage?: File | null; // Image only
@@ -29,14 +31,15 @@ export interface Product {
   name: string;
   description: string;
   additionalAttributes?: string | null; // JSON string
-  price: number;
   status: string;
+  brand: string; // Corrected typo from "brabd" to "brand"
+  model: string; // Corrected typo from "modle" to "model"
   mainImageURL?: string | null;
   imagePublicId?: string | null;
   categoryId: number;
   categoryName?: string | null;
   createdAt: string; // ISO date string
-  productImages: ProductMedia[]; // Array of image or video media
+  productMedia: ProductMedia[]; // Array of image or video media
 }
 
 export interface ProductMedia {

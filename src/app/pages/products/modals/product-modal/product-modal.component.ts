@@ -9,6 +9,7 @@ import {
   ViewChild,
   ElementRef,
   Renderer2,
+  model,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -44,7 +45,8 @@ export class ProductModalComponent implements OnInit, OnChanges {
     id: null as number | null,
     name: '',
     description: '',
-    price: 0,
+    brand: '',
+    model: '',
     status: 'متوفر',
     categoryId: '',
     mainImage: null as File | null,
@@ -95,7 +97,8 @@ export class ProductModalComponent implements OnInit, OnChanges {
         id: this.product.id || null,
         name: this.product.name || '',
         description: this.product.description || '',
-        price: this.product.price || 0,
+        brand: this.product.brand || '',
+        model: this.product.model || '',
         status: this.product.status || 'متوفر',
         categoryId: this.product.categoryId?.toString() || '',
         mainImage: null,
@@ -117,7 +120,8 @@ export class ProductModalComponent implements OnInit, OnChanges {
         id: null,
         name: '',
         description: '',
-        price: 0,
+        brand: '',
+        model: '',
         status: 'متوفر',
         categoryId: '',
         mainImage: null,
@@ -160,8 +164,8 @@ export class ProductModalComponent implements OnInit, OnChanges {
   private setExistingAdditionalImagePreviews(): void {
     this.additionalImagePreviews = [];
 
-    if (this.product?.productImages && this.product.productImages.length > 0) {
-      this.product.productImages.forEach((image) => {
+    if (this.product?.productMedia && this.product.productMedia.length > 0) {
+      this.product.productMedia.forEach((image) => {
         if (
           image.mediaURL &&
           image.mediaURL !== 'null' &&
@@ -469,7 +473,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
     const submitData = {
       ...this.formData,
       id: this.product?.id || 0, // Ensure id is included and not overwritten
-      price: Number(this.formData.price),
+
       categoryId: Number(this.formData.categoryId),
       additionalAttributes: this.formData.additionalAttributes, // Pass as object, let service handle JSON
       removeExistingMainImage:
@@ -483,10 +487,8 @@ export class ProductModalComponent implements OnInit, OnChanges {
 
     console.log('Submitting product data:', submitData);
 
-    setTimeout(() => {
-      this.save.emit(submitData);
-      this.isSubmitting = false;
-    }, 500);
+    this.isSubmitting = false;
+    this.save.emit(submitData);
   }
 
   onClose(): void {

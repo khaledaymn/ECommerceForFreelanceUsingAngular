@@ -118,19 +118,6 @@
               </div>
 
               <!-- Price Filter -->
-              <div
-                class="filter-tag"
-                *ngIf="priceFilter.min || priceFilter.max"
-              >
-                <div class="tag-icon">
-                  <i class="material-icons">attach_money</i>
-                </div>
-                <span class="tag-label">السعر:</span>
-                <span class="tag-value">{{ formatPriceRange() }}</span>
-                <button class="tag-remove" (click)="clearPriceFilter()">
-                  <i class="material-icons">close</i>
-                </button>
-              </div>
 
               <!-- Attribute Filters -->
               <div
@@ -331,50 +318,6 @@
             </div>
 
             <!-- Row 2: Price Range -->
-            <div class="filter-row">
-              <div class="filter-field price-field">
-                <label class="filter-label">
-                  <i class="material-icons">attach_money</i>
-                  نطاق السعر
-                </label>
-                <div class="price-inputs">
-                  <div class="price-input-group">
-                    <input
-                      type="number"
-                      [(ngModel)]="priceFilter.min"
-                      (ngModelChange)="onPriceFilterChange()"
-                      placeholder="السعر الأدنى"
-                      min="0"
-                      class="price-input"
-                    />
-                  </div>
-                  <div class="price-separator">
-                    <i class="material-icons">remove</i>
-                  </div>
-                  <div class="price-input-group">
-                    <input
-                      type="number"
-                      [(ngModel)]="priceFilter.max"
-                      (ngModelChange)="onPriceFilterChange()"
-                      placeholder="السعر الأعلى"
-                      min="0"
-                      class="price-input"
-                    />
-                  </div>
-                </div>
-
-                <div class="price-presets">
-                  <button
-                    *ngFor="let preset of pricePresets"
-                    class="price-preset-btn"
-                    [class.active]="isPricePresetActive(preset)"
-                    (click)="applyPricePreset(preset)"
-                  >
-                    {{ preset.label }}
-                  </button>
-                </div>
-              </div>
-            </div>
 
             <!-- Row 3: Dynamic Attribute Filters -->
             <div

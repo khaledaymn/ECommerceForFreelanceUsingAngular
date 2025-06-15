@@ -1,36 +1,33 @@
-// import { Injectable } from "@angular/core"
-// import   { Router, CanActivateFn, ActivatedRouteSnapshot } from "@angular/router"
-// import   { AuthService } from "../services/auth.service"
+// import { Injectable, inject } from '@angular/core';
+// import { CanActivateFn, Router, ActivatedRouteSnapshot } from '@angular/router';
+// import { AuthService } from '../services/auth.service';
 
 // @Injectable({
-//   providedIn: "root",
+//   providedIn: 'root',
 // })
 // export class RoleGuard {
-//   constructor(
-//     private authService: AuthService,
-//     private router: Router,
-//   ) {}
+//   private authService = inject(AuthService);
+//   private router = inject(Router);
 
-//   canActivate: CanActivateFn = (route: ActivatedRouteSnapshot) => {
-//     // Get the required roles from the route data
-//     const requiredRoles = route.data["roles"] as string[]
+//   // canActivate: CanActivateFn = (route: ActivatedRouteSnapshot) => {
+//   //   const requiredRole = route.data['role'] as string;
+//   //   const storedRole = this.authService.getRoles();
 
-//     if (
-//       this.authService.isAuthenticated &&
-//       requiredRoles &&
-//       requiredRoles.some((role) => this.authService.currentUser?.role === role)
-//     ) {
-//       return true
-//     }
+//   //   if (!this.authService.isAuthenticated()) {
+//   //     this.router.navigate(['/login']);
+//   //     return false;
+//   //   }
 
-//     // If user is authenticated but doesn't have the required role, redirect to dashboard
-//     if (this.authService.isAuthenticated) {
-//       this.router.navigate(["/"])
-//       return false
-//     }
+//   //   if (storedRole && this.authService.hasRole(requiredRole)) {
+//   //     return true;
+//   //   }
 
-//     // If user is not authenticated, redirect to login
-//     this.router.navigate(["/auth/login"])
-//     return false
-//   }
+//   //   // Redirect based on stored role
+//   //   if (storedRole === 'Admin') {
+//   //     this.router.navigate(['/admin/dashboard']);
+//   //     return false;
+//   //   }
+//   //   this.router.navigate(['/user/dashboard']);
+//   //   return false;
+//   // };
 // }

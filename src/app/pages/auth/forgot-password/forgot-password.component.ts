@@ -8,8 +8,7 @@ import {
 } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
-// import { AuthService } from '../../../services/auth.service';
-// import { AuthService } from '../../core/services/auth.service';
+
 
 @Component({
   selector: 'app-forgot-password',
@@ -34,7 +33,7 @@ export class ForgotPasswordComponent {
       email: ['', [Validators.required, Validators.email]],
     });
   }
- get email() {
+  get email() {
     return this.forgotPasswordForm.get('email');
   }
   onSubmit() {
@@ -51,7 +50,9 @@ export class ForgotPasswordComponent {
           this.isSubmitted = true;
           this.successMessage =
             'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني';
-          // this.successMessage = response.message || 'تم إرسال الرابط بنجاح';
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 7000); // إعادة التوجيه بعد 7 ثوانٍ
         },
         error: (err) => {
           this.loading = false;

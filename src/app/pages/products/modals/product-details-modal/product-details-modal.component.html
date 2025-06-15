@@ -26,13 +26,16 @@
             <div class="image-wrapper">
               <img
                 [src]="product.mainImageURL"
-                alt="{{product.name}}"
+                alt="{{ product.name }}"
                 class="main-image"
                 (click)="openImageZoom(product.mainImageURL)"
                 (error)="onImageError($event)"
               />
               <div class="image-overlay">
-                <button class="zoom-button" (click)="openImageZoom(product.mainImageURL)">
+                <button
+                  class="zoom-button"
+                  (click)="openImageZoom(product.mainImageURL)"
+                >
                   <i class="material-icons">zoom_in</i>
                 </button>
               </div>
@@ -41,21 +44,24 @@
           </div>
 
           <!-- Additional Images -->
-          <div class="additional-images" *ngIf="product.productImages && product.productImages.length > 0">
+          <div
+            class="additional-images"
+            *ngIf="product.productMedia && product.productMedia.length > 0"
+          >
             <div class="section-title">
               <i class="material-icons">photo_library</i>
-              <span>الصور الإضافية ({{ product.productImages.length }})</span>
+              <span>الصور الإضافية ({{ product.productMedia.length }})</span>
             </div>
             <div class="images-grid">
               <div
-                *ngFor="let image of product.productImages; let i = index"
+                *ngFor="let image of product.productMedia; let i = index"
                 class="image-item"
                 (click)="image.mediaURL && openImageZoom(image.mediaURL!)"
               >
                 <div class="image-container">
                   <img
                     [src]="image.mediaURL"
-                    alt="'صورة إضافية ' + {{(i + 1)}}"
+                    alt="'صورة إضافية ' + {{ i + 1 }}"
                     class="additional-image"
                     (error)="onImageError($event)"
                   />
@@ -64,7 +70,10 @@
                       <i class="material-icons">zoom_in</i>
                     </button>
                   </div>
-                  <div class="media-type-badge" *ngIf="image.mediaType === 'video'">
+                  <div
+                    class="media-type-badge"
+                    *ngIf="image.mediaType === 'video'"
+                  >
                     <i class="material-icons">play_circle</i>
                   </div>
                 </div>
@@ -73,7 +82,13 @@
           </div>
 
           <!-- No Images Placeholder -->
-          <div class="no-images-placeholder" *ngIf="!product.mainImageURL && (!product.productImages || product.productImages.length === 0)">
+          <div
+            class="no-images-placeholder"
+            *ngIf="
+              !product.mainImageURL &&
+              (!product.productMedia || product.productMedia.length === 0)
+            "
+          >
             <div class="placeholder-content">
               <i class="material-icons">image_not_supported</i>
               <span>لا توجد صور متاحة</span>
@@ -92,20 +107,29 @@
             <div class="info-grid">
               <div class="info-item">
                 <label class="info-label">اسم المنتج</label>
-                <div class="info-value">{{ product.name || 'غير محدد' }}</div>
+                <div class="info-value">{{ product.name || "غير محدد" }}</div>
               </div>
               <div class="info-item">
                 <label class="info-label">الفئة</label>
-                <div class="info-value">{{ getCategoryName(product.categoryId) }}</div>
+                <div class="info-value">
+                  {{ getCategoryName(product.categoryId) }}
+                </div>
               </div>
               <div class="info-item">
-                <label class="info-label">السعر</label>
-                <div class="info-value price-value">{{ formatPrice(product.price) }}</div>
+                <label class="info-label">العلامة التجارية</label>
+                <div class="info-value price-value">{{ product.brand }}</div>
+              </div>
+              <div class="info-item">
+                <label class="info-label">الموديل</label>
+                <div class="info-value price-value">{{ product.model }}</div>
               </div>
               <div class="info-item">
                 <label class="info-label">الحالة</label>
                 <div class="info-value">
-                  <span class="status-badge" [class]="getStatusClass(product.status)">
+                  <span
+                    class="status-badge"
+                    [class]="getStatusClass(product.status)"
+                  >
                     {{ getStatusText(product.status) }}
                   </span>
                 </div>
@@ -150,7 +174,9 @@
             <div class="metadata-grid">
               <div class="metadata-item">
                 <label class="metadata-label">تاريخ الإنشاء</label>
-                <div class="metadata-value">{{ formatDate(product.createdAt) }}</div>
+                <div class="metadata-value">
+                  {{ formatDate(product.createdAt) }}
+                </div>
               </div>
               <!-- <div class="metadata-item">
                 <label class="metadata-label">آخر تحديث</label>
@@ -193,7 +219,11 @@
   <!-- Image Zoom Modal -->
   <div class="zoom-modal" *ngIf="showImageZoom" (click)="closeImageZoom()">
     <div class="zoom-container">
-      <img [src]="zoomedImageUrl" alt="{{product?.name}}" class="zoomed-image" />
+      <img
+        [src]="zoomedImageUrl"
+        alt="{{ product?.name }}"
+        class="zoomed-image"
+      />
       <button class="zoom-close-button" (click)="closeImageZoom()">
         <i class="material-icons">close</i>
       </button>

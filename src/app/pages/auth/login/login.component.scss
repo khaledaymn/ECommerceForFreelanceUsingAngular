@@ -3,13 +3,15 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f9fafb;
+  // background-color: #f9fafb;
+  background-image:  radial-gradient(circle, #ffffff, #f5efce);
   padding: 20px;
+  font-size: 20px;
 }
 
 .login-card {
   width: 100%;
-  max-width: 450px;
+  max-width: 600px;
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -29,9 +31,8 @@
 }
 
 .logo-icon {
-  width: 40px;
-  height: 40px;
-  background-color: #F5C518;
+  width: 150px;
+  height: 150px;
   color: #000000;
   border-radius: 4px;
   display: flex;
@@ -167,8 +168,8 @@ input.invalid {
 }
 
 .forgot-password {
-  color: #F5C518;
-  font-size: 14px;
+  color: #e9b702;
+  font-size: 16px;
   text-decoration: none;
 }
 
@@ -272,7 +273,7 @@ input.invalid {
   .login-card {
     padding: 24px;
   }
-  
+
   .social-login {
     flex-direction: column;
     gap: 8px;

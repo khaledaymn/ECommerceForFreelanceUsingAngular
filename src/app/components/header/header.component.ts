@@ -18,7 +18,7 @@ export class HeaderComponent implements OnInit {
   constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit() {
-    this.authService.getCurrentUser();
+    this.authService.getToken();
   }
 
   toggleDropdown() {
@@ -29,14 +29,7 @@ export class HeaderComponent implements OnInit {
     this.isDropdownOpen = false;
   }
 
-  // logout() {
-  //   this.authService.logout()({
-  //     next: () => {
-  //       this.router.navigate(["/auth/login"])
-  //     },
-  //     error: (error) => {
-  //       console.error("Error logging out", error)
-  //     },
-  //   })
-  // }
+  logout() {
+    this.authService.logout();
+  }
 }

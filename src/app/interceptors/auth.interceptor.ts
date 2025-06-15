@@ -49,49 +49,49 @@
 //     });
 //   }
 
-//   // private handle401Error(request: HttpRequest<any>, next: HttpHandler) {
-//   //   if (!this.isRefreshing) {
-//   //     this.isRefreshing = true;
-//   //     this.refreshTokenSubject.next(null);
+//   private handle401Error(request: HttpRequest<any>, next: HttpHandler) {
+//     if (!this.isRefreshing) {
+//       this.isRefreshing = true;
+//       this.refreshTokenSubject.next(null);
 
-//   //     return this.authService.refreshToken().pipe(
-//   //       switchMap((token: any) => {
-//   //         this.isRefreshing = false;
-//   //         this.refreshTokenSubject.next(token);
-//   //         return next.handle(this.addToken(request, token.token));
-//   //       }),
-//   //       catchError((error) => {
-//   //         this.isRefreshing = false;
+//       return this.authService.refreshToken().pipe(
+//         switchMap((token: any) => {
+//           this.isRefreshing = false;
+//           this.refreshTokenSubject.next(token);
+//           return next.handle(this.addToken(request, token.token));
+//         }),
+//         catchError((error) => {
+//           this.isRefreshing = false;
 
-//   //         // If refresh token fails, logout user
-//   //         this.authService.logout();
-//   //         return throwError(() => error);
-//   //       })
-//   //     );
-//   //   }
+//           // If refresh token fails, logout user
+//           this.authService.logout();
+//           return throwError(() => error);
+//         })
+//       );
+//     }
 
-//   //   return this.refreshTokenSubject.pipe(
-//   //     filter((token) => token != null),
-//   //     take(1),
-//   //     switchMap((token) => {
-//   //       return next.handle(this.addToken(request, token.token));
-//   //     })
-//   //   );
-//   // }
-//   // import { HttpInterceptorFn } from '@angular/common/http';
-//   // import { inject } from '@angular/core';
-//   // import { AuthService } from '../services/auth.service';
-//   // // import { AuthService } from '../services/auth.service';
+//     return this.refreshTokenSubject.pipe(
+//       filter((token) => token != null),
+//       take(1),
+//       switchMap((token) => {
+//         return next.handle(this.addToken(request, token.token));
+//       })
+//     );
+//   }
+import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { AuthService } from '../services/auth.service';
+// import { AuthService } from '../services/auth.service';
 
-//   // export const authInterceptor: HttpInterceptorFn = (req, next) => {
-//   //   const authService = inject(AuthService);
-//   //   const token = authService.getToken();
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
+  const token = authService.getToken();
 
-//   //   if (token) {
-//   //     const authReq = req.clone({
-//   //       setHeaders: { Authorization: `Bearer ${token}` },
-//   //     });
-//   //     return next(authReq);
-//   //   }
-//   //   return next(req);
-// }
+  if (token) {
+    const authReq = req.clone({
+      setHeaders: { Authorization: `Bearer ${token}` },
+    });
+    return next(authReq);
+  }
+  return next(req);
+};

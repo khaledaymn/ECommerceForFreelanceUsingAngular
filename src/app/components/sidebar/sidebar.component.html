@@ -1,27 +1,31 @@
 <aside class="sidebar" [class.collapsed]="isCollapsed">
   <div class="sidebar-header">
     <div class="logo">
-      <div class="logo-icon">CT</div>
-      <span class="logo-text" *ngIf="!isCollapsed">كات تراك</span>
+      <!-- <div class="logo-icon">ع</div> -->
+      <span class="logo-text" *ngIf="!isCollapsed">العوفي</span>
     </div>
     <button class="toggle-btn" (click)="toggleSidebar()">
       <span class="material-icons">
-        {{ isCollapsed ? 'menu' : 'menu_open' }}
+        {{ isCollapsed ? "menu" : "menu_open" }}
       </span>
     </button>
   </div>
-  
+
   <nav class="sidebar-nav">
     <ul>
       <li *ngFor="let item of menuItems">
-        <a [routerLink]="item.route" routerLinkActive="active" [title]="item.label">
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [title]="item.label"
+        >
           <span class="material-icons icon">{{ item.icon }}</span>
           <span class="label" *ngIf="!isCollapsed">{{ item.label }}</span>
         </a>
       </li>
     </ul>
   </nav>
-  
+
   <div class="sidebar-footer">
     <a routerLink="/settings" routerLinkActive="active" title="الإعدادات">
       <span class="material-icons icon">settings</span>

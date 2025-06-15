@@ -7,7 +7,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 
 @Component({
@@ -15,11 +15,7 @@ import { AuthService } from '../../../services/auth.service';
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterModule,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
 })
 export class ResetPasswordComponent implements OnInit {
   resetPasswordForm: FormGroup;
@@ -34,7 +30,8 @@ export class ResetPasswordComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) {
     // Initialize form with 'passwordConfirmation' to match template
     this.resetPasswordForm = this.fb.group(
@@ -52,6 +49,8 @@ export class ResetPasswordComponent implements OnInit {
       this.email = params['email'] || null;
       this.token = params['token'] || null;
     });
+    console.log('Email:', this.email);
+    console.log('Token:', this.token);
   }
 
   togglePasswordVisibility(field: string): void {
@@ -65,7 +64,9 @@ export class ResetPasswordComponent implements OnInit {
   passwordsMatchValidator(form: FormGroup): ValidationErrors | null {
     const password = form.get('password')?.value;
     const passwordConfirmation = form.get('passwordConfirmation')?.value;
-    return password === passwordConfirmation ? null : { passwordMismatch: true };
+    return password === passwordConfirmation
+      ? null
+      : { passwordMismatch: true };
   }
 
   get password() {
@@ -94,11 +95,13 @@ export class ResetPasswordComponent implements OnInit {
           },
           error: (err) => {
             this.loading = false;
-            this.errorMessage = err.message || 'فشل في إعادة تعيين كلمة المرور. حاول مرة أخرى.';
+            this.errorMessage =
+              err.message || 'فشل في إعادة تعيين كلمة المرور. حاول مرة أخرى.';
           },
         });
     } else {
-      this.errorMessage = 'الرجاء ملء النموذج بشكل صحيح أو تحقق من البريد الإلكتروني ورمز التحقق.';
+      this.errorMessage =
+        'الرجاء ملء النموذج بشكل صحيح أو تحقق من البريد الإلكتروني ورمز التحقق.';
     }
   }
 }

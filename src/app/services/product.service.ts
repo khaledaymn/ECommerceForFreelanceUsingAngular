@@ -5,7 +5,6 @@ import {
   HttpParams,
 } from '@angular/common/http';
 import { catchError, Observable, retry, throwError } from 'rxjs';
-// import { environment } from '../enviroments/enviroment';
 import {
   CreateProduct,
   Product,
@@ -74,7 +73,8 @@ export class ProductService {
         JSON.stringify(product.additionalAttributes)
       );
     }
-    formData.append('price', product.price.toString());
+    if (product.brand) formData.append('brand', product.brand);
+    if (product.model) formData.append('model', product.model);
     if (product.status) formData.append('status', product.status);
     formData.append('categoryId', product.categoryId.toString());
     if (product.mainImage) formData.append('mainImage', product.mainImage);
@@ -85,7 +85,7 @@ export class ProductService {
     }
 
     return this.http.post<Result>(`${this.baseUrl}/Create`, formData).pipe(
-      retry({ count: this.maxRetries, delay: 1000 }),
+      retry({ count: this.maxRetries }),
       catchError((error) =>
         this.handleError(error, 'createProduct', { name: product.name })
       )
@@ -119,7 +119,7 @@ export class ProductService {
         params: httpParams,
       })
       .pipe(
-        retry({ count: this.maxRetries, delay: 1000 }),
+        retry({ count: this.maxRetries }),
         catchError((error) =>
           this.handleError(error, 'getAllProducts', {
             search: params.search,
@@ -144,7 +144,7 @@ export class ProductService {
     }
 
     return this.http.get<Product>(`${this.baseUrl}/GetById/${id}`).pipe(
-      retry({ count: this.maxRetries, delay: 1000 }),
+      retry({ count: this.maxRetries }),
       catchError((error) => this.handleError(error, 'readProductById', { id }))
     );
   }
@@ -208,7 +208,7 @@ export class ProductService {
   //   console.log(product);
 
   //   return this.http.put<Result>(`${this.baseUrl}/Update`, formData).pipe(
-  //     retry({ count: this.maxRetries, delay: 1000 }),
+  //     retry({ count: this.maxRetries  }),
   //     catchError((error) =>
   //       this.handleError(error, 'updateProduct', { id: product.id })
   //     )
@@ -271,7 +271,7 @@ export class ProductService {
 
   //   // Send PUT request with query params (no body)
   //   return this.http.put<Result>(`${this.baseUrl}/Update`, { params }).pipe(
-  //     retry({ count: this.maxRetries, delay: 1000 }),
+  //     retry({ count: this.maxRetries  }),
   //     catchError((error) =>
   //       this.handleError(error, 'updateProduct', { id: product.id })
   //     )
@@ -301,12 +301,7 @@ export class ProductService {
       .set('Id', product.id.toString())
       .set('Name', product.name ?? '')
       .set('Description', product.description ?? '')
-      .set(
-        'Price',
-        product.price !== null && product.price !== undefined
-          ? product.price.toString()
-          : ''
-      )
+
       .set('Status', product.status ?? '')
       .set(
         'CategoryId',
@@ -343,7 +338,7 @@ export class ProductService {
     return this.http
       .put<Result>(`${this.baseUrl}/Update`, null, { params })
       .pipe(
-        retry({ count: this.maxRetries, delay: 1000 }),
+        retry({ count: this.maxRetries }),
         catchError((error) =>
           this.handleError(error, 'updateProduct', { id: product.id })
         )
@@ -362,7 +357,7 @@ export class ProductService {
     }
 
     return this.http.delete<Result>(`${this.baseUrl}/Delete/${id}`).pipe(
-      retry({ count: this.maxRetries, delay: 1000 }),
+      retry({ count: this.maxRetries }),
       catchError((error) => this.handleError(error, 'deleteProduct', { id }))
     );
   }

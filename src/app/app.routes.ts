@@ -1,206 +1,55 @@
-// import type { Routes } from "@angular/router"
-// import { AuthGuard } from "./guards/auth.guard"
-// import { RoleGuard } from "./guards/role.guard"
-// import { OrdersComponent } from "./pages/orders/orders.component"
-// import { OrderDetailsComponent } from "./pages/orders/order-details/order-details.component"
-// import { OrderStatusBadgeComponent } from "./pages/orders/order-status-badge/order-status-badge.component"
-
-// export const routes: Routes = [
-//   {
-//     path: "",
-//     loadComponent: () => import("./pages/dashboard/dashboard.component").then((m) => m.DashboardComponent),
-//     canActivate: [AuthGuard],
-//   },
-//   {
-//     path: "categories",
-//     loadComponent: () => import("./pages/categories/categories.component").then((m) => m.CategoryManagementComponent),
-
-//   },
-//   {
-//     path: "products",
-//     loadComponent: () => import("./pages/products/products.component").then((m) => m.ProductManagementComponent),
-//     canActivate: [AuthGuard],
-//   },
-//   {
-//     path: "orders",
-//     component:OrdersComponent,
-//     canActivate: [AuthGuard],
-//   },
-//   {
-//     path: "order",
-//     component:OrderDetailsComponent,
-//     canActivate: [AuthGuard],
-//   },
-//   {
-//     path: "or",
-//     component:OrderStatusBadgeComponent,
-//     canActivate: [AuthGuard],
-//   },
-//   {
-//     path: "customers",
-//     loadComponent: () => import("./pages/customers/customers.component").then((m) => m.CustomersComponent),
-//     canActivate: [RoleGuard],
-//     data: { roles: ["admin", "manager", "sales"] },
-//   },
-//   {
-//     path: "inventory",
-//     loadComponent: () => import("./pages/inventory/inventory.component").then((m) => m.InventoryComponent),
-//     canActivate: [RoleGuard],
-//     data: { roles: ["admin", "manager"] },
-//   },
-//   {
-//     path: "analytics",
-//     loadComponent: () => import("./pages/analytics/analytics.component").then((m) => m.AnalyticsComponent),
-//     canActivate: [RoleGuard],
-//     data: { roles: ["admin", "manager"] },
-//   },
-//   {
-//     path: "settings",
-//     loadComponent: () => import("./pages/settings/settings.component").then((m) => m.SettingsComponent),
-//     canActivate: [AuthGuard],
-//   },
-//   {
-//     path: "auth",
-//     children: [
-//       {
-//         path: "login",
-//         loadComponent: () => import("./pages/auth/login/login.component").then((m) => m.LoginComponent),
-//       },
-//       {
-//         path: "register",
-//         loadComponent: () => import("./pages/auth/register/register.component").then((m) => m.RegisterComponent),
-//       },
-//       {
-//         path: "forgot-password",
-//         loadComponent: () =>
-//           import("./pages/auth/forgot-password/forgot-password.component").then((m) => m.ForgotPasswordComponent),
-//       },
-//       {
-//         path: "reset-password",
-//         loadComponent: () =>
-//           import("./pages/auth/reset-password/reset-password.component").then((m) => m.ResetPasswordComponent),
-//       },
-//     ],
-//   },
-//   {
-//     path: "**",
-//     redirectTo: "",
-//   },
-// ]
-import type { Routes } from '@angular/router';
-// import { AuthGuard } from "./guards/auth.guard"
-// import { RoleGuard } from "./guards/role.guard"
+import { Routes } from '@angular/router';
+import { LoginComponent } from './pages/auth/login/login.component';
+import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './pages/auth/reset-password/reset-password.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { CategoryManagementComponent } from './pages/categories/categories.component';
+import { ProductManagementComponent } from './pages/products/products.component';
 import { OrdersComponent } from './pages/orders/orders.component';
 import { OrderDetailsComponent } from './pages/orders/order-details/order-details.component';
-import { OrderStatusBadgeComponent } from './pages/orders/order-status-badge/order-status-badge.component';
+import { UsersComponent } from './pages/users/users/users.component';
+import { InventoryComponent } from './pages/inventory/inventory.component';
+import { AnalyticsComponent } from './pages/analytics/analytics.component';
+import { SettingsComponent } from './pages/settings/settings.component';
 
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./pages/dashboard/dashboard.component').then(
-        (m) => m.DashboardComponent
-      ),
-    // canActivate: [AuthGuard],
+    redirectTo: '/login', // or '/admin/dashboard' if authenticated
+    pathMatch: 'full',
   },
   {
-    path: 'categories',
-    loadComponent: () =>
-      import('./pages/categories/categories.component').then(
-        (m) => m.CategoryManagementComponent
-      ),
+    path: 'login',
+    component: LoginComponent,
   },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
   {
-    path: 'products',
-    loadComponent: () =>
-      import('./pages/products/products.component').then(
-        (m) => m.ProductManagementComponent
-      ),
-    // canActivate: [AuthGuard],
-  },
-  {
-    path: 'orders',
-    component: OrdersComponent,
-    // canActivate: [AuthGuard],
-  },
-  {
-    path: 'order',
-    component: OrderDetailsComponent,
-    // canActivate: [AuthGuard],
-  },
-  {
-    path: 'or',
-    component: OrderStatusBadgeComponent,
-    // canActivate: [AuthGuard],
-  },
-  {
-    path: 'customers',
-    loadComponent: () =>
-      import('./pages/users/users/users.component').then(
-        (m) => m.UsersComponent
-      ),
-    // canActivate: [RoleGuard],
-    // data: { roles: ["admin", "manager", "sales"] },
-  },
-  {
-    path: 'inventory',
-    loadComponent: () =>
-      import('./pages/inventory/inventory.component').then(
-        (m) => m.InventoryComponent
-      ),
-    // canActivate: [RoleGuard],
-    // data: { roles: ["admin", "manager"] },
-  },
-  {
-    path: 'analytics',
-    loadComponent: () =>
-      import('./pages/analytics/analytics.component').then(
-        (m) => m.AnalyticsComponent
-      ),
-    // canActivate: [RoleGuard],
-    // data: { roles: ["admin", "manager"] },
-  },
-  {
-    path: 'settings',
-    loadComponent: () =>
-      import('./pages/settings/settings.component').then(
-        (m) => m.SettingsComponent
-      ),
-    // canActivate: [AuthGuard],
-  },
-  {
-    path: 'auth',
+    path: 'admin',
+    data: { role: 'Admin' },
     children: [
-      {
-        path: 'login',
-        loadComponent: () =>
-          import('./pages/auth/login/login.component').then(
-            (m) => m.LoginComponent
-          ),
-      },
-
-      //   {
-      //     path: "register",
-      //     loadComponent: () => import("./pages/auth/register/register.component").then((m) => m.RegisterComponent),
-      //   },
-      {
-        path: 'forgot-password',
-        loadComponent: () =>
-          import('./pages/auth/forgot-password/forgot-password.component').then(
-            (m) => m.ForgotPasswordComponent
-          ),
-      },
+      { path: '', component: DashboardComponent },
+      { path: 'dashboard', component: DashboardComponent },
+      { path: 'categories', component: CategoryManagementComponent },
+      { path: 'products', component: ProductManagementComponent },
+      { path: 'orders', component: OrdersComponent },
+      { path: 'orders/:id', component: OrderDetailsComponent },
+      { path: 'customers', component: UsersComponent },
+      { path: 'inventory', component: InventoryComponent },
+      { path: 'analytics', component: AnalyticsComponent },
+      { path: 'settings', component: SettingsComponent },
     ],
   },
   {
-    path: 'reset-password',
-    loadComponent: () =>
-      import('./pages/auth/reset-password/reset-password.component').then(
-        (m) => m.ResetPasswordComponent
-      ),
+    path: 'user',
+    // canActivate: [authGuard, RoleGuard],
+    data: { role: 'User' },
+    children: [
+      { path: '', component: DashboardComponent },
+      { path: 'dashboard', component: DashboardComponent },
+      { path: 'orders', component: OrdersComponent },
+      { path: 'orders/:id', component: OrderDetailsComponent },
+    ],
   },
-  {
-    path: '**',
-    redirectTo: '',
-  },
+  { path: '**', redirectTo: '/login' },
 ];

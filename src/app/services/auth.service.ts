@@ -1,187 +1,172 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
-// import { environment } from '../enviroments/enviroment';
-import { ResetPasswordResponse } from '../interfaces/api-response.interface';
 import { environment } from '../../environments/environment';
+import { Router } from '@angular/router';
 
 interface LoginResponse {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  message: string;
   token: string;
-  user: {
-    id: string;
-    email: string;
-    name?: string;
-    role?: string;
-  };
+  roles: string; // Single role as "User" or "Admin"
 }
 
 interface User {
   id: string;
   email: string;
-  name?: string;
-  role?: string;
+  firstName: string;
+  lastName: string;
+  role: string; // Single role
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = environment.apiUrl;
+  private apiUrl = environment.apiUrl || '[invalid url, do not cite]';
   private tokenKey = 'auth_token';
-  private userSubject = new BehaviorSubject<User | null>(null);
-  public user$ = this.userSubject.asObservable();
+  private rolesKey = 'auth_roles';
+  private userKey = 'auth_user';
+  private firstLoginKey = 'first_login';
+  public redirectUrl: string | null = null;
 
-  constructor(private http: HttpClient) {
-    // Initialize user state from stored token on service creation
+  private http = inject(HttpClient);
+  private router = inject(Router);
+
+  constructor() {
     this.loadUserFromToken();
   }
 
-  /**
-   * Logs in a user with email and password
-   * @param email User's email
-   * @param password User's password
-   * @returns Observable with user data
-   */
   login(email: string, password: string): Observable<User> {
     return this.http
-      .post<LoginResponse>(`${this.apiUrl}/Authentication/login`, {
+      .post<LoginResponse>(`${this.apiUrl}/Authentication/Login`, {
         email,
         password,
       })
       .pipe(
         tap((response) => {
-          // Store token and update user state
           this.setToken(response.token);
-          this.userSubject.next(response.user);
+          this.setRoles(response.roles);
+          this.setUser({
+            id: response.id,
+            email: response.email,
+            firstName: response.firstName,
+            lastName: response.lastName,
+            role: response.roles,
+          });
+          localStorage.setItem(this.firstLoginKey, 'false');
         }),
-        map((response) => response.user),
+        map((response) => ({
+          id: response.id,
+          email: response.email,
+          firstName: response.firstName,
+          lastName: response.lastName,
+          role: response.roles,
+        })),
         catchError(this.handleError)
       );
   }
 
-  /**
-   * Logs out the current user
-   */
   logout(): void {
-    // Clear token and user state
-    this.removeToken();
-    this.userSubject.next(null);
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.rolesKey);
+    localStorage.removeItem(this.userKey);
+    localStorage.removeItem(this.firstLoginKey);
+    this.redirectUrl = null;
+    this.router.navigate(['/login']);
   }
 
-  /**
-   * Checks if the user is authenticated
-   * @returns boolean indicating authentication status
-   */
   isAuthenticated(): boolean {
     const token = this.getToken();
-    if (!token) {
+    if (!token) return false;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiry = payload.exp * 1000;
+      return Date.now() < expiry;
+    } catch {
       return false;
     }
-    // Optionally, add token expiration check here
-    return true;
-  }
-  hasRole(role: string): boolean {
-    // Check if the current user's role matches the given role
-    const user = this.getCurrentUser();
-    return user != null && user.role === role;
-  }
-  /**
-   * Gets the current user
-   * @returns Current user or null
-   */
-  getCurrentUser(): User | null {
-    return this.userSubject.value;
   }
 
-  /**
-   * Gets the auth token
-   * @returns Token string or null
-   */
+  isFirstLogin(): boolean {
+    const firstLogin = localStorage.getItem(this.firstLoginKey);
+    return firstLogin === null || firstLogin === 'true';
+  }
+
+  hasRole(role: string): boolean {
+    const storedRole = this.getRoles();
+    return storedRole === role;
+  }
+
+  getCurrentUser(): User | null {
+    const user = localStorage.getItem(this.userKey);
+    return user ? JSON.parse(user) : null;
+  }
+
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }
 
-  /**
-   * Stores the auth token
-   * @param token JWT token
-   */
+  getRoles(): string | null {
+    return localStorage.getItem(this.rolesKey);
+  }
+
   private setToken(token: string): void {
     localStorage.setItem(this.tokenKey, token);
   }
 
-  /**
-   * Removes the auth token
-   */
-  private removeToken(): void {
-    localStorage.removeItem(this.tokenKey);
+  private setRoles(role: string): void {
+    localStorage.setItem(this.rolesKey, role);
   }
 
-  /**
-   * Loads user data from stored token
-   */
+  private setUser(user: User): void {
+    localStorage.setItem(this.userKey, JSON.stringify(user));
+  }
+
   private loadUserFromToken(): void {
     const token = this.getToken();
-    if (token) {
-      // Decode token to get user data (assuming JWT)
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const user: User = {
-          id: payload.sub || payload.id,
-          email: payload.email,
-          name: payload.name,
-          role: payload.role,
-        };
-        this.userSubject.next(user);
-      } catch (error) {
-        console.error('Failed to decode token:', error);
-        this.removeToken();
-        this.userSubject.next(null);
-      }
+    const user = this.getCurrentUser();
+    if (token && this.isAuthenticated() && user) {
+      // User is already loaded
+    } else {
+      this.logout();
     }
   }
 
-  /**
-   * Sends a password reset email
-   * @param email User's email
-   * @returns Observable with success message
-   */
   resetPassword(
     email: string,
     token: string,
     password: string
-  ): Observable<ResetPasswordResponse> {
+  ): Observable<{ message: string }> {
     return this.http
-      .post<ResetPasswordResponse>(
+      .post<{ message: string }>(
         `${this.apiUrl}/Authentication/resetPassword`,
         { email, token, password }
       )
       .pipe(catchError(this.handleError));
   }
 
-  /**
-   * Sends a forgot password request
-   * @param email User's email
-   * @returns Observable with success message
-   */
-  forgotPassword(email: string): Observable<any> {
-    // Replace the URL with your actual forgot password endpoint
-    return this.http.post<any>(`${this.apiUrl}/Authentication/forgetPassword`, {
-      email,
-    });
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http
+      .post<{ message: string }>(
+        `${this.apiUrl}/Authentication/forgetPassword`,
+        { email }
+      )
+      .pipe(catchError(this.handleError));
   }
-  /**
-   * Handles HTTP errors
-   * @param error HttpErrorResponse
-   * @returns Observable with error message
-   */
+
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'An error occurred. Please try again.';
     if (error.error instanceof ErrorEvent) {
-      // Client-side error
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Server-side error
       if (error.status === 401) {
         errorMessage = 'Invalid email or password.';
       } else if (error.status === 403) {

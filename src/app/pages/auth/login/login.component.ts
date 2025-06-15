@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ErrorHandler } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -9,23 +9,17 @@ import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { CommonModule } from '@angular/common';
 
-
 @Component({
   selector: 'app-login-form',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-   
-    RouterLink,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
 })
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   loading = false;
-  returnUrl = '/';
+  returnUrl: string | null = null;
   hidePassword = true;
   errorMessage = '';
 
@@ -37,48 +31,46 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/admin/dashboard']);
+    }
     this.loginForm = this.formBuilder.group({
-      email: ['', [Validators.required, Validators.email]], // Changed to email with email validator
+      email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
       rememberMe: [false],
     });
-
-    // Get return url from route parameters or default to '/'
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-
-    // Redirect if already logged in
-    // if (this.authService.isLoggedIn()) {
-    //   this.router.navigate([this.returnUrl]);
-    // }
   }
-get password() {
-  return this.loginForm.get('password');
-}
-get email() {
-  return this.loginForm.get('email');
-}
+
+  get email() {
+    return this.loginForm.get('email');
+  }
+
+  get password() {
+    return this.loginForm.get('password');
+  }
+
   onSubmit(): void {
     if (this.loginForm.invalid) {
+      this.errorMessage = 'من فضلك أدخل بريدًا إلكترونيًا وكلمة مرور صحيحة.';
       return;
     }
+
     this.loading = true;
     this.errorMessage = '';
-    const loginRequest = {
-      email: this.loginForm.controls['email'].value,
-      password: this.loginForm.controls['password'].value,
-    };
-    this.authService.login(loginRequest.email,loginRequest.password).subscribe({
-      next: (response) => {
+
+    this.authService.login(this.email!.value, this.password!.value).subscribe({
+      next: (user) => {
         this.loading = false;
-        this.router.navigate([this.returnUrl]);
+        const redirectPath = user.role === 'Admin' ? '/admin' : '/user';
+        this.router.navigate([redirectPath]);
       },
       error: (error) => {
-        this.errorMessage = error.message || 'Login failed';
         this.loading = false;
+        this.errorMessage =
+          'فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد الخاصة بك.';
       },
     });
   }
-
   togglePasswordVisibility(): void {
     this.hidePassword = !this.hidePassword;
   }

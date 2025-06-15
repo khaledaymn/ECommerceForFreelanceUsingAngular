@@ -75,12 +75,6 @@ export class ProductManagementComponent implements OnInit {
   availableAttributes: AttributeFilter[] = [];
 
   // Price presets
-  pricePresets: PricePreset[] = [
-    { label: 'أقل من 100 ريال', max: 100 },
-    { label: '100 - 500 ريال', min: 100, max: 500 },
-    { label: '500 - 1000 ريال', min: 500, max: 1000 },
-    { label: 'أكثر من 1000 ريال', min: 1000 },
-  ];
 
   // Modal state
   isModalOpen = false;
@@ -101,15 +95,23 @@ export class ProductManagementComponent implements OnInit {
       width: '15%',
       align: 'center',
     },
-    { key: 'name', title: 'اسم المنتج', sortable: true, width: '20%' },
+    { key: 'name', title: 'النوع', sortable: true, width: '20%' },
     { key: 'categoryName', title: 'الفئة', sortable: false, width: '10%' },
     {
-      key: 'price',
-      title: 'السعر',
-      type: 'currency',
+      key: 'brand',
+      title: 'العلامة التجارية',
+      type: 'text',
       sortable: true,
       width: '12%',
-      align: 'left',
+      align: 'center',
+    },
+    {
+      key: 'model',
+      title: 'الموديل',
+      type: 'text',
+      sortable: true,
+      width: '12%',
+      align: 'center',
     },
     {
       key: 'status',
@@ -238,6 +240,7 @@ export class ProductManagementComponent implements OnInit {
         this.totalPages = Math.ceil(response.totalCount / this.pageSize);
         this.extractAvailableAttributes();
         this.loading = false;
+        console.log(response);
       },
       error: (error) => {
         console.error('Error loading products:', error);
@@ -248,18 +251,6 @@ export class ProductManagementComponent implements OnInit {
 
   private applyClientSideFilters(products: Product[]): Product[] {
     let filtered = [...products];
-
-    // Apply price filter
-    if (this.priceFilter.min !== null || this.priceFilter.max !== null) {
-      filtered = filtered.filter((product) => {
-        const price = product.price;
-        const minMatch =
-          this.priceFilter.min === null || price >= this.priceFilter.min;
-        const maxMatch =
-          this.priceFilter.max === null || price <= this.priceFilter.max;
-        return minMatch && maxMatch;
-      });
-    }
 
     return filtered;
   }
@@ -337,9 +328,9 @@ export class ProductManagementComponent implements OnInit {
       case 'edit':
         this.openEditModal(event.item);
         break;
-      case 'duplicate':
-        this.duplicateProduct(event.item);
-        break;
+      // case 'duplicate':
+      //   this.duplicateProduct(event.item);
+      //   break;
       case 'delete':
         this.openDeleteConfirm(event.item);
         break;
@@ -379,11 +370,11 @@ export class ProductManagementComponent implements OnInit {
 
   getStatusClass(status: string): string {
     switch (status) {
-      case 'متوفر':
+      case 'الايجار':
         return 'status-available';
-      case 'غير متوفر':
+      case 'البيع':
         return 'status-unavailable';
-      case 'قريباً':
+      case 'الاتنين':
         return 'status-coming-soon';
       default:
         return 'status-default';
@@ -484,49 +475,12 @@ export class ProductManagementComponent implements OnInit {
     this.loadProducts();
   }
 
-  // Price filter methods
-  onPriceFilterChange(): void {
-    this.currentPage = 1;
-    this.filteredProducts = this.applyClientSideFilters(this.products);
-  }
-
-  formatPriceRange(): string {
-    if (this.priceFilter.min && this.priceFilter.max) {
-      return `${this.priceFilter.min} - ${this.priceFilter.max} ريال`;
-    } else if (this.priceFilter.min) {
-      return `من ${this.priceFilter.min} ريال`;
-    } else if (this.priceFilter.max) {
-      return `حتى ${this.priceFilter.max} ريال`;
-    }
-    return '';
-  }
-
-  isPricePresetActive(preset: PricePreset): boolean {
-    return (
-      this.priceFilter.min === (preset.min || null) &&
-      this.priceFilter.max === (preset.max || null)
-    );
-  }
-
-  applyPricePreset(preset: PricePreset): void {
-    this.priceFilter.min = preset.min || null;
-    this.priceFilter.max = preset.max || null;
-    this.onPriceFilterChange();
-  }
-
-  clearPriceFilter(): void {
-    this.priceFilter = { min: null, max: null };
-    this.onPriceFilterChange();
-  }
-
   // General filter methods
   hasActiveFilters(): boolean {
     return !!(
       this.statusFilter ||
       this.categoryFilter ||
-      this.hasActiveAttributeFilters() ||
-      this.priceFilter.min ||
-      this.priceFilter.max
+      this.hasActiveAttributeFilters()
     );
   }
 
@@ -534,7 +488,6 @@ export class ProductManagementComponent implements OnInit {
     this.statusFilter = '';
     this.categoryFilter = '';
     this.attributeFilters = {};
-    this.priceFilter = { min: null, max: null };
     this.currentPage = 1;
     this.loadProducts();
   }
@@ -569,7 +522,8 @@ export class ProductManagementComponent implements OnInit {
           id: this.editingProduct.id,
           name: productData.name,
           description: productData.description,
-          price: productData.price,
+          brand: productData.brand,
+          model: productData.model,
           status: productData.status,
           categoryId: productData.categoryId,
           mainImage: productData.mainImage,
@@ -595,7 +549,8 @@ export class ProductManagementComponent implements OnInit {
         .createProduct({
           name: productData.name,
           description: productData.description,
-          price: productData.price,
+          brand: productData.brand,
+          model: productData.model,
           status: productData.status,
           categoryId: productData.categoryId,
           mainImage: productData.mainImage,
@@ -611,25 +566,6 @@ export class ProductManagementComponent implements OnInit {
           },
         });
     }
-  }
-
-  duplicateProduct(product: Product): void {
-    this.productService
-      .createProduct({
-        name: `${product.name} (نسخة)`,
-        description: product.description,
-        price: product.price,
-        status: product.status,
-        categoryId: product.categoryId,
-      })
-      .subscribe({
-        next: () => {
-          this.loadProducts();
-        },
-        error: (error) => {
-          console.error('Error duplicating product:', error);
-        },
-      });
   }
 
   // Delete management

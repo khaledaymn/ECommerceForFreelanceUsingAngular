@@ -1,34 +1,42 @@
+<!-- <app-header></app-header> -->
+<!-- <app-sidebar></app-sidebar> -->
 <div class="dashboard-container">
   <div class="metrics-grid">
-    <app-dashboard-card 
-      title="إجمالي الإيرادات" 
-      [value]="(salesSummary.revenue | currency:'SAR':'symbol':'1.2-2') ?? ''" 
-      [change]="'+' + salesSummary.revenueChange + '%'" 
-      icon="attach_money">
+    <app-dashboard-card
+      title="إجمالي الإيرادات"
+      [value]="
+        (salesSummary.revenue | currency : 'SAR' : 'symbol' : '1.2-2') ?? ''
+      "
+      [change]="'+' + salesSummary.revenueChange + '%'"
+      icon="attach_money"
+    >
     </app-dashboard-card>
-    
-    <app-dashboard-card 
-      title="طلبات جديدة" 
-      [value]="'+' + salesSummary.orders" 
-      [change]="'+' + salesSummary.ordersChange + '%'" 
-      icon="shopping_cart">
+
+    <app-dashboard-card
+      title="طلبات جديدة"
+      [value]="'+' + salesSummary.orders"
+      [change]="'+' + salesSummary.ordersChange + '%'"
+      icon="shopping_cart"
+    >
     </app-dashboard-card>
-    
-    <app-dashboard-card 
-      title="المنتجات" 
-      [value]="salesSummary.products.toString()" 
-      [change]="'+' + salesSummary.productsChange + '%'" 
-      icon="inventory_2">
+
+    <app-dashboard-card
+      title="المنتجات"
+      [value]="salesSummary.products.toString()"
+      [change]="'+' + salesSummary.productsChange + '%'"
+      icon="inventory_2"
+    >
     </app-dashboard-card>
-    
-    <app-dashboard-card 
-      title="المستخدمين النشطين" 
-      [value]="salesSummary.customers.toString()" 
-      [change]="'+' + salesSummary.customersChange + '%'" 
-      icon="people">
+
+    <app-dashboard-card
+      title="المستخدمين النشطين"
+      [value]="salesSummary.customers.toString()"
+      [change]="'+' + salesSummary.customersChange + '%'"
+      icon="people"
+    >
     </app-dashboard-card>
   </div>
-  
+
   <div class="charts-grid">
     <div class="chart-card">
       <div class="chart-header">
@@ -37,7 +45,7 @@
       </div>
       <app-chart [data]="chartData"></app-chart>
     </div>
-    
+
     <div class="sales-card">
       <div class="sales-header">
         <h2>المبيعات الأخيرة</h2>
