@@ -4,11 +4,13 @@ import { CommonModule } from '@angular/common';
 import { HeaderComponent } from './components/header/header.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { AuthService } from './services/auth.service';
+import { NotificationCardComponent } from "./components/notification/notification-card/notification-card.component";
+import { NotificationContainerComponent } from "./components/notification/notification-container/notification-container.component";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, HeaderComponent, SidebarComponent],
+  imports: [RouterOutlet, CommonModule, HeaderComponent, SidebarComponent, NotificationContainerComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })

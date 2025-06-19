@@ -1,0 +1,42 @@
+<div class="notification-card" [class]="getTypeClass()">
+  <!-- Progress Bar -->
+  <div class="progress-bar" *ngIf="notification.duration ?? 0 > 0">
+    <div class="progress-fill" [style.width.%]="progress"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="notification-content">
+    <!-- Icon -->
+    <div class="notification-icon">
+      <i class="material-icons">{{ getIcon() }}</i>
+    </div>
+
+    <!-- Text Content -->
+    <div class="notification-text">
+      <h4 class="notification-title">{{ notification.title }}</h4>
+      <p class="notification-message">{{ notification.message }}</p>
+
+      <!-- Timestamp -->
+      <span class="notification-time">
+        {{ notification.timestamp | date:'short':'ar' }}
+      </span>
+    </div>
+
+    <!-- Actions -->
+    <div class="notification-actions">
+      <!-- Custom Action Button -->
+      <button
+        *ngIf="notification.action"
+        class="action-btn"
+        (click)="onActionClick()"
+      >
+        {{ notification.action.label }}
+      </button>
+
+      <!-- Close Button -->
+      <button class="close-btn" (click)="onClose()">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+  </div>
+</div>

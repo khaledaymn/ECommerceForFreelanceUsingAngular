@@ -1,0 +1,10 @@
+<div class="notification-container" *ngIf="notifications.length > 0">
+  <div class="notifications-list">
+    <app-notification-card
+      *ngFor="let notification of notifications; trackBy: trackByNotification"
+      [notification]="notification"
+      (close)="onNotificationClose($event)"
+      (actionClick)="onActionClick()"
+    ></app-notification-card>
+  </div>
+</div>
