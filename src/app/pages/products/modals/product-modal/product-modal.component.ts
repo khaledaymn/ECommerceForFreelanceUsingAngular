@@ -9,18 +9,18 @@ import {
   ViewChild,
   ElementRef,
   Renderer2,
-  model,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Product } from '../../../../interfaces/product.interface';
 import { Category } from '../../../../interfaces/category';
 
-interface ImagePreview {
+interface MediaPreview {
   url: string;
   isExisting: boolean;
-  isVideo: boolean;
+  mediaType: 'image' | 'video' | 'pdf';
   file?: File;
+  mediaPublicId?: string | null;
 }
 
 @Component({
@@ -38,8 +38,8 @@ export class ProductModalComponent implements OnInit, OnChanges {
   @Output() save = new EventEmitter<any>();
 
   @ViewChild('mainImageInput') mainImageInput!: ElementRef<HTMLInputElement>;
-  @ViewChild('additionalImagesInput')
-  additionalImagesInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('additionalMediaInput')
+  additionalMediaInput!: ElementRef<HTMLInputElement>;
 
   formData = {
     id: null as number | null,
@@ -50,14 +50,15 @@ export class ProductModalComponent implements OnInit, OnChanges {
     status: 'متوفر',
     categoryId: '',
     mainImage: null as File | null,
-    additionalImages: [] as File[],
+    additionalMedia: [] as File[],
     additionalAttributes: {} as Record<string, string>,
   };
 
   mainImagePreview: string | null = null;
-  additionalImagePreviews: ImagePreview[] = [];
+  additionalMediaPreviews: MediaPreview[] = [];
+  mediaToDelete: string[] = []; // Track deleted media public IDs
   mainImageError: string | null = null;
-  additionalImagesError: string | null = null;
+  additionalMediaError: string | null = null;
   isSubmitting = false;
   isEditingMode = false;
   hasExistingMainImage = false;
@@ -75,7 +76,6 @@ export class ProductModalComponent implements OnInit, OnChanges {
     if (changes['isOpen'] && this.isOpen) {
       this.resetForm();
     }
-
     if (changes['product']) {
       this.resetForm();
     }
@@ -91,6 +91,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
   resetForm(): void {
     this.isEditingMode = !!this.product;
     this.hasExistingMainImage = false;
+    this.mediaToDelete = []; // Reset mediaToDelete
 
     if (this.product) {
       this.formData = {
@@ -102,19 +103,15 @@ export class ProductModalComponent implements OnInit, OnChanges {
         status: this.product.status || 'متوفر',
         categoryId: this.product.categoryId?.toString() || '',
         mainImage: null,
-        additionalImages: [],
+        additionalMedia: [],
         additionalAttributes: this.product.additionalAttributes
           ? typeof this.product.additionalAttributes === 'string'
             ? JSON.parse(this.product.additionalAttributes)
             : this.product.additionalAttributes
           : {},
       };
-
-      // Handle existing main image
       this.setExistingMainImagePreview();
-
-      // Handle existing additional images
-      this.setExistingAdditionalImagePreviews();
+      this.setExistingAdditionalMediaPreviews();
     } else {
       this.formData = {
         id: null,
@@ -125,25 +122,24 @@ export class ProductModalComponent implements OnInit, OnChanges {
         status: 'متوفر',
         categoryId: '',
         mainImage: null,
-        additionalImages: [],
+        additionalMedia: [],
         additionalAttributes: {},
       };
       this.mainImagePreview = null;
-      this.additionalImagePreviews = [];
+      this.additionalMediaPreviews = [];
       this.hasExistingMainImage = false;
     }
 
     this.mainImageError = null;
-    this.additionalImagesError = null;
+    this.additionalMediaError = null;
     this.isSubmitting = false;
     this.newAttribute = { key: '', value: '' };
 
-    // Reset file inputs
     if (this.mainImageInput) {
       this.mainImageInput.nativeElement.value = '';
     }
-    if (this.additionalImagesInput) {
-      this.additionalImagesInput.nativeElement.value = '';
+    if (this.additionalMediaInput) {
+      this.additionalMediaInput.nativeElement.value = '';
     }
   }
 
@@ -161,20 +157,21 @@ export class ProductModalComponent implements OnInit, OnChanges {
     }
   }
 
-  private setExistingAdditionalImagePreviews(): void {
-    this.additionalImagePreviews = [];
-
+  private setExistingAdditionalMediaPreviews(): void {
+    this.additionalMediaPreviews = [];
     if (this.product?.productMedia && this.product.productMedia.length > 0) {
-      this.product.productMedia.forEach((image) => {
+      this.product.productMedia.forEach((media) => {
         if (
-          image.mediaURL &&
-          image.mediaURL !== 'null' &&
-          image.mediaURL.trim() !== ''
+          media.mediaURL &&
+          media.mediaURL !== 'null' &&
+          media.mediaURL.trim() !== '' &&
+          ['image', 'video', 'pdf'].includes(media.mediaType || '')
         ) {
-          this.additionalImagePreviews.push({
-            url: image.mediaURL,
+          this.additionalMediaPreviews.push({
+            url: media.mediaURL,
             isExisting: true,
-            isVideo: image.mediaType === 'video',
+            mediaType: media.mediaType as 'image' | 'video' | 'pdf',
+            mediaPublicId: media.mediaPublicId || null,
           });
         }
       });
@@ -185,38 +182,33 @@ export class ProductModalComponent implements OnInit, OnChanges {
     this.mainImageInput.nativeElement.click();
   }
 
-  triggerAdditionalImagesInput(): void {
-    this.additionalImagesInput.nativeElement.click();
+  triggerAdditionalMediaInput(): void {
+    this.additionalMediaInput.nativeElement.click();
   }
 
   onMainImageChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-
     if (file) {
       this.handleMainImageFile(file);
     }
   }
 
-  onAdditionalImagesChange(event: Event): void {
+  onAdditionalMediaChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const files = Array.from(input.files || []);
-
     files.forEach((file) => {
       if (this.validateMediaFile(file)) {
-        this.handleAdditionalImageFile(file);
+        this.handleAdditionalMediaFile(file);
       }
     });
-
-    // Reset input
-    input.value = '';
+    input.value = ''; // Reset input
   }
 
   onMainImageDrop(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
     this.dragOver = false;
-
     const files = event.dataTransfer?.files;
     if (files && files.length > 0) {
       const file = files[0];
@@ -238,11 +230,9 @@ export class ProductModalComponent implements OnInit, OnChanges {
 
   handleMainImageFile(file: File): void {
     if (!this.validateImageFile(file)) return;
-
     this.formData.mainImage = file;
     this.hasExistingMainImage = false;
     this.mainImageError = null;
-
     const reader = new FileReader();
     reader.onload = (e) => {
       this.mainImagePreview = e.target?.result as string;
@@ -251,17 +241,22 @@ export class ProductModalComponent implements OnInit, OnChanges {
     reader.readAsDataURL(file);
   }
 
-  handleAdditionalImageFile(file: File): void {
-    this.formData.additionalImages.push(file);
-    this.additionalImagesError = null;
-
+  handleAdditionalMediaFile(file: File): void {
+    this.formData.additionalMedia.push(file);
+    this.additionalMediaError = null;
     const reader = new FileReader();
     reader.onload = (e) => {
-      this.additionalImagePreviews.push({
+      const mediaType = file.type.startsWith('image/')
+        ? 'image'
+        : file.type.startsWith('video/')
+        ? 'video'
+        : 'pdf';
+      this.additionalMediaPreviews.push({
         url: e.target?.result as string,
         isExisting: false,
-        isVideo: file.type.startsWith('video/'),
-        file: file,
+        mediaType,
+        file,
+        mediaPublicId: null,
       });
     };
     reader.readAsDataURL(file);
@@ -272,23 +267,21 @@ export class ProductModalComponent implements OnInit, OnChanges {
     this.mainImagePreview = null;
     this.hasExistingMainImage = false;
     this.mainImageError = null;
-
     if (this.mainImageInput) {
       this.mainImageInput.nativeElement.value = '';
     }
   }
 
-  removeAdditionalImage(index: number): void {
-    const preview = this.additionalImagePreviews[index];
-
-    // Remove from preview array
-    this.additionalImagePreviews.splice(index, 1);
-
-    // If it's a new file, remove from formData.additionalImages
+  removeAdditionalMedia(index: number): void {
+    const preview = this.additionalMediaPreviews[index];
+    if (preview.isExisting && preview.mediaPublicId) {
+      this.mediaToDelete.push(preview.mediaPublicId);
+    }
+    this.additionalMediaPreviews.splice(index, 1);
     if (!preview.isExisting && preview.file) {
-      const fileIndex = this.formData.additionalImages.indexOf(preview.file);
+      const fileIndex = this.formData.additionalMedia.indexOf(preview.file);
       if (fileIndex > -1) {
-        this.formData.additionalImages.splice(fileIndex, 1);
+        this.formData.additionalMedia.splice(fileIndex, 1);
       }
     }
   }
@@ -323,23 +316,42 @@ export class ProductModalComponent implements OnInit, OnChanges {
       'image/svg+xml',
     ];
     const videoTypes = ['video/mp4', 'video/webm', 'video/mov', 'video/mkv'];
-
+    const pdfTypes = ['application/pdf'];
+    const allowedVideoExtensions = ['.mp4', '.webm', '.mov', '.mkv'];
+    const fileExtension = file.name
+      .toLowerCase()
+      .slice(file.name.lastIndexOf('.'));
+    const isValidVideoExtension =
+      allowedVideoExtensions.includes(fileExtension);
     if (imageTypes.includes(file.type)) {
       if (file.size > 3 * 1024 * 1024) {
-        this.additionalImagesError = 'حجم الصورة يجب أن يكون أقل من 3 ميجابايت';
+        this.additionalMediaError = 'حجم الصورة يجب أن يكون أقل من 3 ميجابايت';
+        this.showErrorFeedback();
         return false;
       }
       return true;
-    } else if (videoTypes.includes(file.type)) {
+    } else if (videoTypes.includes(file.type) && isValidVideoExtension) {
       if (file.size > 10 * 1024 * 1024) {
-        this.additionalImagesError =
+        this.additionalMediaError =
           'حجم الفيديو يجب أن يكون أقل من 10 ميجابايت';
+        this.showErrorFeedback();
+        return false;
+      }
+      return true;
+    } else if (pdfTypes.includes(file.type)) {
+      if (file.size > 5 * 1024 * 1024) {
+        this.additionalMediaError = 'حجم ملف PDF يجب أن يكون أقل من 5 ميجابايت';
+        this.showErrorFeedback();
         return false;
       }
       return true;
     }
-
-    this.additionalImagesError = 'نوع الملف غير مدعوم';
+    this.additionalMediaError = `نوع الملف غير مدعوم. ${
+      file.type.startsWith('video/')
+        ? 'الفيديوهات المسموح بها: .mp4, .webm, .mov, .mkv'
+        : ''
+    }`;
+    this.showErrorFeedback();
     return false;
   }
 
@@ -347,9 +359,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
     const uploadArea = document.querySelector('.upload-area');
     if (uploadArea) {
       uploadArea.classList.add('error-state');
-      setTimeout(() => {
-        uploadArea.classList.remove('error-state');
-      }, 2000);
+      setTimeout(() => uploadArea.classList.remove('error-state'), 2000);
     }
   }
 
@@ -357,9 +367,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
     const imagePreview = document.querySelector('.image-preview');
     if (imagePreview) {
       imagePreview.classList.add('success-state');
-      setTimeout(() => {
-        imagePreview.classList.remove('success-state');
-      }, 1000);
+      setTimeout(() => imagePreview.classList.remove('success-state'), 1000);
     }
   }
 
@@ -368,6 +376,24 @@ export class ProductModalComponent implements OnInit, OnChanges {
       this.isEditingMode &&
       this.hasExistingMainImage &&
       !this.formData.mainImage
+    );
+  }
+
+  getImages(): MediaPreview[] {
+    return this.additionalMediaPreviews.filter(
+      (media) => media.mediaType === 'image'
+    );
+  }
+
+  getVideos(): MediaPreview[] {
+    return this.additionalMediaPreviews.filter(
+      (media) => media.mediaType === 'video'
+    );
+  }
+
+  getPdfs(): MediaPreview[] {
+    return this.additionalMediaPreviews.filter(
+      (media) => media.mediaType === 'pdf'
     );
   }
 
@@ -382,32 +408,10 @@ export class ProductModalComponent implements OnInit, OnChanges {
 
   addAttribute(): void {
     if (this.newAttribute.key.trim() && this.newAttribute.value.trim()) {
-      // Check if key already exists
-      if (
-        this.formData.additionalAttributes.hasOwnProperty(
-          this.newAttribute.key.trim()
-        )
-      ) {
-        // Update existing attribute
-        this.formData.additionalAttributes[this.newAttribute.key.trim()] =
-          this.newAttribute.value.trim();
-        console.log(
-          `Updated existing attribute: ${this.newAttribute.key.trim()} = ${this.newAttribute.value.trim()}`
-        );
-      } else {
-        // Add new attribute
-        this.formData.additionalAttributes[this.newAttribute.key.trim()] =
-          this.newAttribute.value.trim();
-        console.log(
-          `Added new attribute: ${this.newAttribute.key.trim()} = ${this.newAttribute.value.trim()}`
-        );
-      }
-
-      // Reset the form
+      this.formData.additionalAttributes[this.newAttribute.key.trim()] =
+        this.newAttribute.value.trim();
       this.newAttribute = { key: '', value: '' };
-
-      // Clear any previous errors
-      this.additionalImagesError = null;
+      this.additionalMediaError = null;
     }
   }
 
@@ -431,64 +435,35 @@ export class ProductModalComponent implements OnInit, OnChanges {
     }
   }
 
-  // onSubmit(): void {
-  //   if (this.isSubmitting) return;
-
-  //   this.isSubmitting = true;
-
-  //   const submitData = {
-  //     ...this.formData,
-  //     id: this.formData.id || null,
-  //     price: Number(this.formData.price),
-  //     categoryId: Number(this.formData.categoryId),
-  //     additionalAttributes: JSON.stringify(this.formData.additionalAttributes),
-  //     removeExistingMainImage:
-  //       this.isEditingMode &&
-  //       !this.hasExistingMainImage &&
-  //       !this.formData.mainImage,
-  //   };
-  //   console.log('Submitting product data:', submitData);
-  //   console.log(
-  //     submitData.additionalAttributes,
-  //     'as JSON string:',
-  //     JSON.stringify(submitData.additionalAttributes)
-  //   );
-  //   console.log('formData:', this.formData);
-  //   console.log(
-  //     'formData.additionalAttributes:',
-  //     this.formData.additionalAttributes
-  //   );
-
-  //   setTimeout(() => {
-  //     this.save.emit(submitData);
-  //     this.isSubmitting = false;
-  //   }, 500);
-  // }
-
   onSubmit(): void {
     if (this.isSubmitting) return;
-
     this.isSubmitting = true;
 
     const submitData = {
-      ...this.formData,
-      id: this.product?.id || 0, // Ensure id is included and not overwritten
-
-      categoryId: Number(this.formData.categoryId),
-      additionalAttributes: this.formData.additionalAttributes, // Pass as object, let service handle JSON
-      removeExistingMainImage:
-        this.isEditingMode &&
-        !this.hasExistingMainImage &&
-        !this.formData.mainImage,
-      imagesToDelete: this.additionalImagePreviews
-        .filter((img) => img.isExisting)
-        .map((img) => img.url), // Include URLs of existing images to delete
+      id: this.formData.id || 0,
+      name: this.formData.name || '',
+      description: this.formData.description || '',
+      brand: this.formData.brand || '',
+      model: this.formData.model || '',
+      status: this.formData.status || 'متوفر',
+      categoryId: this.formData.categoryId
+        ? Number(this.formData.categoryId)
+        : 0,
+      mainImage: this.formData.mainImage || null,
+      additionalMedia:
+        this.formData.additionalMedia.length > 0
+          ? this.formData.additionalMedia
+          : [],
+      mediaToDelete: this.mediaToDelete.length > 0 ? this.mediaToDelete : [],
+      additionalAttributes:
+        Object.keys(this.formData.additionalAttributes).length > 0
+          ? this.formData.additionalAttributes
+          : {},
     };
 
     console.log('Submitting product data:', submitData);
-
-    this.isSubmitting = false;
     this.save.emit(submitData);
+    this.isSubmitting = false;
   }
 
   onClose(): void {

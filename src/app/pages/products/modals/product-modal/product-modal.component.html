@@ -28,7 +28,7 @@
 
     <!-- Modal Body -->
     <div class="modal-body">
-      <form (ngSubmit)="onSubmit()" #productForm="ngForm">
+      <form #productForm="ngForm" (ngSubmit)="onSubmit()">
         <div class="form-content">
           <!-- Images Section -->
           <div class="images-section">
@@ -41,7 +41,6 @@
                   <span class="required-indicator">*</span>
                 </div>
               </div>
-
               <div class="main-image-upload">
                 <div class="image-preview" *ngIf="mainImagePreview">
                   <img
@@ -62,7 +61,6 @@
                     موجودة
                   </div>
                 </div>
-
                 <div
                   class="upload-area"
                   [class.has-image]="mainImagePreview"
@@ -79,17 +77,14 @@
                     <span class="upload-hint">PNG, JPG, WebP حتى 3MB</span>
                   </div>
                 </div>
-
                 <input
                   #mainImageInput
                   type="file"
-                  accept="image/*"
+                  accept="image/png,image/jpeg,image/webp,image/svg+xml"
                   (change)="onMainImageChange($event)"
                   class="file-input"
-                  placeholder="اختر صورة رئيسية"
-                  title="اختر صورة رئيسية"
+                  name="mainImage"
                 />
-
                 <div class="error-message" *ngIf="mainImageError">
                   <i class="material-icons">error</i>
                   {{ mainImageError }}
@@ -103,42 +98,38 @@
                 <div class="section-title">
                   <i class="material-icons">photo_library</i>
                   <span>صور إضافية</span>
-                  <span
-                    class="images-count"
-                    *ngIf="additionalImagePreviews.length > 0"
+                  <span class="images-count" *ngIf="getImages().length > 0"
+                    >({{ getImages().length }})</span
                   >
-                    ({{ additionalImagePreviews.length }})
-                  </span>
                 </div>
                 <button
                   type="button"
                   class="add-images-button"
-                  (click)="triggerAdditionalImagesInput()"
+                  (click)="triggerAdditionalMediaInput()"
                 >
                   <i class="material-icons">add_photo_alternate</i>
                   <span>إضافة صور</span>
                 </button>
               </div>
-
               <div
                 class="additional-images-grid"
-                *ngIf="additionalImagePreviews.length > 0"
+                *ngIf="getImages().length > 0"
               >
                 <div
-                  *ngFor="let preview of additionalImagePreviews; let i = index"
+                  *ngFor="let preview of getImages(); let i = index"
                   class="image-item"
                 >
                   <div class="image-container">
                     <img
                       [src]="preview.url"
-                      alt="'صورة إضافية ' + {{ i + 1 }}"
+                      alt="'صورة إضافية ' + (i + 1)"
                       class="additional-image"
                     />
                     <div class="image-overlay">
                       <button
                         type="button"
                         class="remove-button"
-                        (click)="removeAdditionalImage(i)"
+                        (click)="removeAdditionalMedia(i)"
                       >
                         <i class="material-icons">delete</i>
                       </button>
@@ -149,36 +140,137 @@
                     >
                       {{ preview.isExisting ? "موجودة" : "جديدة" }}
                     </div>
-                    <div class="media-type-badge" *ngIf="preview.isVideo">
-                      <i class="material-icons">videocam</i>
+                  </div>
+                </div>
+              </div>
+              <div class="upload-placeholder" *ngIf="getImages().length === 0">
+                <i class="material-icons">photo_library</i>
+                <span>لم يتم إضافة صور إضافية</span>
+              </div>
+            </div>
+
+            <!-- Videos Upload -->
+            <div class="videos-section">
+              <div class="section-header">
+                <div class="section-title">
+                  <i class="material-icons">video_library</i>
+                  <span>الفيديوهات</span>
+                  <span class="images-count" *ngIf="getVideos().length > 0"
+                    >({{ getVideos().length }})</span
+                  >
+                </div>
+                <button
+                  type="button"
+                  class="add-images-button"
+                  (click)="triggerAdditionalMediaInput()"
+                >
+                  <i class="material-icons">add_circle</i>
+                  <span>إضافة فيديو</span>
+                </button>
+              </div>
+              <div class="videos-grid" *ngIf="getVideos().length > 0">
+                <div
+                  *ngFor="let preview of getVideos(); let i = index"
+                  class="video-item"
+                >
+                  <div class="video-container">
+                    <video
+                      [src]="preview.url"
+                      controls
+                      class="video-player"
+                    ></video>
+                    <div class="image-overlay">
+                      <button
+                        type="button"
+                        class="remove-button"
+                        (click)="removeAdditionalMedia(i)"
+                      >
+                        <i class="material-icons">delete</i>
+                      </button>
+                    </div>
+                    <div
+                      class="image-badge"
+                      [class.existing]="preview.isExisting"
+                    >
+                      {{ preview.isExisting ? "موجود" : "جديد" }}
+                    </div>
+                    <div class="media-type-badge">
+                      <i class="material-icons">play_circle</i>
                     </div>
                   </div>
                 </div>
               </div>
-
-              <div
-                class="upload-placeholder"
-                *ngIf="additionalImagePreviews.length === 0"
-              >
-                <i class="material-icons">photo_library</i>
-                <span>لم يتم إضافة صور إضافية</span>
+              <div class="upload-placeholder" *ngIf="getVideos().length === 0">
+                <i class="material-icons">video_library</i>
+                <span>لم يتم إضافة فيديوهات</span>
               </div>
+            </div>
 
-              <input
-                #additionalImagesInput
-                type="file"
-                accept="image/*,video/*"
-                multiple
-                (change)="onAdditionalImagesChange($event)"
-                class="file-input"
-                placeholder="اختر صور أو فيديوهات إضافية"
-                title="اختر صور أو فيديوهات إضافية"
-              />
-
-              <div class="error-message" *ngIf="additionalImagesError">
-                <i class="material-icons">error</i>
-                {{ additionalImagesError }}
+            <!-- PDFs Upload -->
+            <div class="pdfs-section">
+              <div class="section-header">
+                <div class="section-title">
+                  <i class="material-icons">picture_as_pdf</i>
+                  <span>المستندات</span>
+                  <span class="images-count" *ngIf="getPdfs().length > 0"
+                    >({{ getPdfs().length }})</span
+                  >
+                </div>
+                <button
+                  type="button"
+                  class="add-images-button"
+                  (click)="triggerAdditionalMediaInput()"
+                >
+                  <i class="material-icons">add_circle</i>
+                  <span>إضافة مستند</span>
+                </button>
               </div>
+              <div class="pdfs-grid" *ngIf="getPdfs().length > 0">
+                <div
+                  *ngFor="let preview of getPdfs(); let i = index"
+                  class="pdf-item"
+                >
+                  <div class="pdf-container">
+                    <a [href]="preview.url" target="_blank" class="pdf-link">
+                      <i class="material-icons">picture_as_pdf</i>
+                      <span>مستند {{ i + 1 }}</span>
+                    </a>
+                    <div class="image-overlay">
+                      <button
+                        type="button"
+                        class="remove-button"
+                        (click)="removeAdditionalMedia(i)"
+                      >
+                        <i class="material-icons">delete</i>
+                      </button>
+                    </div>
+                    <div
+                      class="image-badge"
+                      [class.existing]="preview.isExisting"
+                    >
+                      {{ preview.isExisting ? "موجود" : "جديد" }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="upload-placeholder" *ngIf="getPdfs().length === 0">
+                <i class="material-icons">picture_as_pdf</i>
+                <span>لم يتم إضافة مستندات</span>
+              </div>
+            </div>
+
+            <input
+              #additionalMediaInput
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/svg+xml,video/mp4,video/webm,video/mov,video/mkv,application/pdf"
+              multiple
+              (change)="onAdditionalMediaChange($event)"
+              class="file-input"
+              name="additionalMedia"
+            />
+            <div class="error-message" *ngIf="additionalMediaError">
+              <i class="material-icons">error</i>
+              {{ additionalMediaError }}
             </div>
           </div>
 
@@ -192,9 +284,7 @@
                   <span>المعلومات الأساسية</span>
                 </div>
               </div>
-
               <div class="form-grid">
-                <!-- Product Name -->
                 <div class="form-group">
                   <label class="form-label">
                     <span>اسم المنتج</span>
@@ -243,7 +333,6 @@
                     (blur)="onInputBlur($event)"
                   />
                 </div>
-                <!-- Category -->
                 <div class="form-group">
                   <label class="form-label">
                     <span>الفئة</span>
@@ -267,10 +356,6 @@
                     </option>
                   </select>
                 </div>
-
-                <!-- Brand -->
-
-                <!-- Status -->
                 <div class="form-group">
                   <label class="form-label">
                     <span>الحالة</span>
@@ -291,8 +376,6 @@
                   </select>
                 </div>
               </div>
-
-              <!-- Description -->
               <div class="form-group full-width">
                 <label class="form-label">
                   <span>الوصف</span>
@@ -310,15 +393,13 @@
             </div>
 
             <!-- Additional Attributes -->
-            <div class="form-group-section">
+            <!-- <div class="form-group-section">
               <div class="section-header">
                 <div class="section-title">
                   <i class="material-icons">tune</i>
                   <span>خصائص إضافية</span>
                 </div>
               </div>
-
-              <!-- Existing Attributes -->
               <div
                 class="attributes-list"
                 *ngIf="getAttributesArray().length > 0"
@@ -343,8 +424,6 @@
                   </button>
                 </div>
               </div>
-
-              <!-- Add New Attribute -->
               <div class="add-attribute-form">
                 <div class="attribute-inputs">
                   <input
@@ -374,7 +453,7 @@
                   </button>
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </form>
@@ -395,7 +474,7 @@
           type="submit"
           class="action-button primary-button"
           (click)="onSubmit()"
-          [disabled]="isSubmitting"
+          [disabled]="isSubmitting || productForm.invalid"
         >
           <div class="button-content">
             <div class="loading-spinner" *ngIf="isSubmitting"></div>

@@ -20,6 +20,7 @@
     <div class="modal-body">
       <div class="product-details" *ngIf="product">
         <!-- Product Images Section -->
+        <!-- Images Section -->
         <div class="images-section">
           <!-- Main Image -->
           <div class="main-image-container" *ngIf="product.mainImageURL">
@@ -44,24 +45,21 @@
           </div>
 
           <!-- Additional Images -->
-          <div
-            class="additional-images"
-            *ngIf="product.productMedia && product.productMedia.length > 0"
-          >
+          <div class="additional-images" *ngIf="getImages().length >= 0">
             <div class="section-title">
               <i class="material-icons">photo_library</i>
-              <span>الصور الإضافية ({{ product.productMedia.length }})</span>
+              <span>الصور الإضافية ({{ getImages().length }})</span>
             </div>
             <div class="images-grid">
               <div
-                *ngFor="let image of product.productMedia; let i = index"
+                *ngFor="let image of getImages(); let i = index"
                 class="image-item"
-                (click)="image.mediaURL && openImageZoom(image.mediaURL!)"
+                (click)="image.mediaURL && openImageZoom(image.mediaURL)"
               >
                 <div class="image-container">
                   <img
                     [src]="image.mediaURL"
-                    alt="'صورة إضافية ' + {{ i + 1 }}"
+                    alt="'صورة إضافية ' + (i + 1)"
                     class="additional-image"
                     (error)="onImageError($event)"
                   />
@@ -70,10 +68,30 @@
                       <i class="material-icons">zoom_in</i>
                     </button>
                   </div>
-                  <div
-                    class="media-type-badge"
-                    *ngIf="image.mediaType === 'video'"
-                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Videos -->
+          <div class="videos-section" *ngIf="getVideos().length > 0">
+            <div class="section-title">
+              <i class="material-icons">video_library</i>
+              <span>الفيديوهات ({{ getVideos().length }})</span>
+            </div>
+            <div class="videos-grid">
+              <div
+                *ngFor="let video of getVideos(); let i = index"
+                class="video-item"
+              >
+                <div class="video-container">
+                  <video
+                    [src]="video.mediaURL"
+                    controls
+                    class="video-player"
+                    (error)="onImageError($event)"
+                  ></video>
+                  <div class="media-type-badge">
                     <i class="material-icons">play_circle</i>
                   </div>
                 </div>
@@ -81,17 +99,40 @@
             </div>
           </div>
 
-          <!-- No Images Placeholder -->
+          <!-- PDFs -->
+          <div class="pdfs-section" *ngIf="getPdfs().length > 0">
+            <div class="section-title">
+              <i class="material-icons">picture_as_pdf</i>
+              <span>المستندات ({{ getPdfs().length }})</span>
+            </div>
+            <div class="pdfs-grid">
+              <div
+                *ngFor="let pdf of getPdfs(); let i = index"
+                class="pdf-item"
+              >
+                <div class="pdf-container">
+                  <a [href]="pdf.mediaURL" target="_blank" class="pdf-link">
+                    <i class="material-icons">picture_as_pdf</i>
+                    <span>مستند {{ i + 1 }}</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- No Media Placeholder -->
           <div
             class="no-images-placeholder"
             *ngIf="
               !product.mainImageURL &&
-              (!product.productMedia || product.productMedia.length === 0)
+              getImages().length === 0 &&
+              getVideos().length === 0 &&
+              getPdfs().length === 0
             "
           >
             <div class="placeholder-content">
               <i class="material-icons">image_not_supported</i>
-              <span>لا توجد صور متاحة</span>
+              <span>لا توجد وسائط متاحة</span>
             </div>
           </div>
         </div>
@@ -221,7 +262,7 @@
     <div class="zoom-container">
       <img
         [src]="zoomedImageUrl"
-        alt="{{ product?.name }}"
+        alt="{{ product.name }}"
         class="zoomed-image"
       />
       <button class="zoom-close-button" (click)="closeImageZoom()">

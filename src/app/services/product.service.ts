@@ -54,14 +54,6 @@ export class ProductService {
         () => new ApiError(400, 'validation', this.errorMessages['imageType'])
       );
     }
-    if (
-      product.additionalImages &&
-      !this.validateMediaFiles(product.additionalImages)
-    ) {
-      return throwError(
-        () => new ApiError(400, 'validation', this.errorMessages['videoType'])
-      );
-    }
 
     const formData = new FormData();
     formData.append('name', product.name);
@@ -69,7 +61,7 @@ export class ProductService {
       formData.append('description', product.description);
     if (product.additionalAttributes) {
       formData.append(
-        'additionalAttributes',
+        'AdditionalAttributesJson',
         JSON.stringify(product.additionalAttributes)
       );
     }
@@ -78,10 +70,10 @@ export class ProductService {
     if (product.status) formData.append('status', product.status);
     formData.append('categoryId', product.categoryId.toString());
     if (product.mainImage) formData.append('mainImage', product.mainImage);
-    if (product.additionalImages) {
-      product.additionalImages.forEach((file, index) =>
-        formData.append(`additionalImages[${index}]`, file)
-      );
+    if (product.additionalMedia && product.additionalMedia.length > 0) {
+      product.additionalMedia.forEach((file) => {
+        formData.append('AdditionalMedia', file);
+      });
     }
 
     return this.http.post<Result>(`${this.baseUrl}/Create`, formData).pipe(
@@ -149,136 +141,7 @@ export class ProductService {
     );
   }
 
-  // updateProduct(product: UpdateProduct): Observable<Result> {
-  //   // Client-side validation
-  //   if (product.mainImage && !this.validateImageFile(product.mainImage)) {
-  //     return throwError(
-  //       () => new ApiError(400, 'validation', this.errorMessages['imageType'])
-  //     );
-  //   }
-  //   if (
-  //     product.additionalImages &&
-  //     !this.validateMediaFiles(product.additionalImages)
-  //   ) {
-  //     return throwError(
-  //       () => new ApiError(400, 'validation', this.errorMessages['videoType'])
-  //     );
-  //   }
-
-  //   const formData = new FormData();
-  //   formData.append('id', product.id.toString());
-  //   if (product.name) formData.append('name', product.name);
-  //   if (product.description)
-  //     formData.append('description', product.description);
-
-  //   // console.log(product.additionalAttributes, 'dsdddddddddddddddddddddddddddddddd');
-  //   console.log(
-  //     product.additionalAttributes,
-  //     'dsdddddddddddddddddddddddddddddddd'
-  //   );
-  //   if (product.additionalAttributes) {
-  //     formData.append(
-  //       'additionalAttributes',
-  //       JSON.stringify(product.additionalAttributes)
-  //     );
-  //     console.log(
-  //       JSON.stringify(product.additionalAttributes) +
-  //         'iffffffffff ' +
-  //         product.additionalAttributes
-  //     );
-  //   }
-  //   if (product.price !== null && product.price !== undefined) {
-  //     formData.append('price', product.price.toString());
-  //     console.log(product.price + ' priceeeeeeeeeeeeeeeeeeeeeeeeee');
-  //   }
-  //   if (product.status) formData.append('status', product.status);
-  //   if (product.categoryId)
-  //     formData.append('categoryId', product.categoryId.toString());
-  //   if (product.mainImage) formData.append('mainImage', product.mainImage);
-  //   if (product.additionalImages) {
-  //     product.additionalImages.forEach((file, index) =>
-  //       formData.append(`additionalImages[${index}]`, file)
-  //     );
-  //   }
-  //   if (product.imagesToDelete) {
-  //     product.imagesToDelete.forEach((url, index) =>
-  //       formData.append(`imagesToDelete[${index}]`, url)
-  //     );
-  //   }
-  //   console.log(product);
-
-  //   return this.http.put<Result>(`${this.baseUrl}/Update`, formData).pipe(
-  //     retry({ count: this.maxRetries  }),
-  //     catchError((error) =>
-  //       this.handleError(error, 'updateProduct', { id: product.id })
-  //     )
-  //   );
-  // }
-  // updateProduct(product: UpdateProduct): Observable<Result> {
-  //   // Client-side validation (only for fields included in params)
-  //   // if (product.mainImage && !this.validateImageFile(product.mainImage)) {
-  //   //   return throwError(
-  //   //     () => new ApiError(400, 'validation', this.errorMessages['imageType'])
-  //   //   );
-  //   // }
-  //   // if (
-  //   //   product.additionalImages &&
-  //   //   !this.validateMediaFiles(product.additionalImages)
-  //   // ) {
-  //   //   return throwError(
-  //   //     () => new ApiError(400, 'validation', this.errorMessages['videoType'])
-  //   //   );
-  //   // }
-
-  //   // Initialize HttpParams
-  //   let params = new HttpParams()
-  //     .set('id', product.id)
-  //     .set('name', product.name ?? '')
-  //     .set('description', product.description ?? '')
-  //     .set(
-  //       'price',
-  //       product.price !== null && product.price !== undefined
-  //         ? product.price.toString()
-  //         : ''
-  //     )
-  //     .set('status', product.status ?? '')
-  //     .set(
-  //       'categoryId',
-  //       product.categoryId ? product.categoryId.toString() : ''
-  //     );
-  //   console.log(product, 'product in updateProduct');
-  //   console.log(params, 'params in updateProduct');
-  //   // Handle additionalAttributes
-  //   if (product.additionalAttributes) {
-  //     params = params.set(
-  //       'additionalAttributes',
-  //       JSON.stringify(product.additionalAttributes)
-  //     );
-  //   }
-
-  //   // Log for debugging (optional)
-  //   console.log('additionalAttributes:', product.additionalAttributes);
-  //   if (product.additionalAttributes) {
-  //     console.log(
-  //       'JSON additionalAttributes:',
-  //       JSON.stringify(product.additionalAttributes)
-  //     );
-  //   }
-  //   if (product.price !== null && product.price !== undefined) {
-  //     console.log('price:', product.price);
-  //   }
-  //   console.log('product:', product);
-
-  //   // Send PUT request with query params (no body)
-  //   return this.http.put<Result>(`${this.baseUrl}/Update`, { params }).pipe(
-  //     retry({ count: this.maxRetries  }),
-  //     catchError((error) =>
-  //       this.handleError(error, 'updateProduct', { id: product.id })
-  //     )
-  //   );
-  // }
   updateProduct(product: UpdateProduct): Observable<Result> {
-    // Client-side validation
     if (!product.id || product.id <= 0) {
       return throwError(
         () =>
@@ -289,54 +152,85 @@ export class ProductService {
           )
       );
     }
-    // Skip file validation since backend expects query parameters only
-    // if (product.mainImage || product.additionalImages || product.imagesToDelete) {
+    if (product.mainImage && !this.validateImageFile(product.mainImage)) {
+      return throwError(
+        () => new ApiError(400, 'validation', this.errorMessages['imageType'])
+      );
+    }
+    // if (
+    //   product.additionalMedia &&
+    //   !this.validateMediaFiles(product.additionalMedia)
+    // ) {
     //   return throwError(
-    //     () => new ApiError(400, 'validation', 'File uploads are not supported for this endpoint.')
+    //     () =>
+    //       new ApiError(
+    //         400,
+    //         'validation',
+    //         this.getMediaValidationError(product.additionalMedia)
+    //       )
     //   );
     // }
 
-    // Initialize HttpParams
     let params = new HttpParams()
       .set('Id', product.id.toString())
-      .set('Name', product.name ?? '')
-      .set('Description', product.description ?? '')
+      .set('Name', product.name || '')
+      .set('Description', product.description || '')
+      .set('Brand', product.brand || '')
+      .set('Model', product.model || '')
+      .set('Quantity', product.quantity?.toString() || '0')
+      .set('Status', product.status || '')
+      .set('CategoryId', product.categoryId?.toString() || '0');
 
-      .set('Status', product.status ?? '')
-      .set(
-        'CategoryId',
-        product.categoryId ? product.categoryId.toString() : ''
-      );
+    // Normalize AdditionalAttributes
+    const attributes =
+      product.additionalAttributes &&
+      Object.keys(product.additionalAttributes).length > 0
+        ? product.additionalAttributes
+        : {};
+    console.log('AdditionalAttributes before stringify:', attributes);
+    // try {
+    //   const attributesString = JSON.stringify(attributes);
+    //   params = params.set('AdditionalAttributes', attributesString);
+    // } catch (e) {
+    //   return throwError(
+    //     () =>
+    //       new ApiError(
+    //         400,
+    //         'validation',
+    //         'Failed to serialize AdditionalAttributes.'
+    //       )
+    //   );
+    // }
 
-    // Handle additionalAttributes
-    if (product.additionalAttributes) {
+    if (product.mediaToDelete && product.mediaToDelete.length > 0) {
       params = params.set(
-        'AdditionalAttributes',
-        `${product.additionalAttributes}`
+        `MediaToDelete`,
+        JSON.stringify(product.mediaToDelete)
       );
     }
 
-    // Handle imagesToDelete
-    if (product.imagesToDelete && product.imagesToDelete.length > 0) {
-      product.imagesToDelete.forEach((url, index) => {
-        params = params.set(`ImagesToDelete[${index}]`, url);
+    const formData = new FormData();
+    if (product.mainImage) {
+      formData.append('MainImage', product.mainImage);
+    }
+    if (product.additionalMedia && product.additionalMedia.length > 0) {
+      product.additionalMedia.forEach((file) => {
+        formData.append('AdditionalMedia', file);
       });
     }
 
-    // Log for debugging
-    console.log('Query Parameters:');
-    params.keys().forEach((key) => {
-      console.log(
-        `${key}: ${params.get(key) || params.getAll(key)?.join(', ')}`
-      );
-    });
-    console.log('Product:', product);
+    const debugData: { [key: string]: any } = {};
+    for (const [key, value] of formData.entries()) {
+      debugData[key] = value instanceof File ? value.name : value;
+    }
+    console.log('Query Params in updateProduct:', params.toString());
+    console.log('FormData in updateProduct:', debugData);
 
-    console.log(product.additionalAttributes, 'additionalAttributes');
-    console.log(params, 'params in updateProduct');
-    // Send PUT request with query params (no body)
     return this.http
-      .put<Result>(`${this.baseUrl}/Update`, null, { params })
+      .put<Result>(`${this.baseUrl}/Update`, formData, {
+        headers: { Accept: 'text/plain' },
+        params,
+      })
       .pipe(
         retry({ count: this.maxRetries }),
         catchError((error) =>
@@ -344,6 +238,72 @@ export class ProductService {
         )
       );
   }
+  // updateProduct(product: UpdateProduct): Observable<Result> {
+  //   // Client-side validation
+  //   if (!product.id || product.id <= 0) {
+  //     return throwError(
+  //       () =>
+  //         new ApiError(
+  //           400,
+  //           'validation',
+  //           'Product ID must be a positive integer.'
+  //         )
+  //     );
+  //   }
+  //   if (product.mainImage && !this.validateImageFile(product.mainImage)) {
+  //     return throwError(
+  //       () => new ApiError(400, 'validation', this.errorMessages['imageType'])
+  //     );
+  //   }
+  //   // if (
+  //   //   product.additionalMedia &&
+  //   //   !this.validateMediaFiles(product.additionalMedia)
+  //   // ) {
+  //   //   return throwError(
+  //   //     () =>
+  //   //       new ApiError(
+  //   //         400,
+  //   //         'validation',
+  //   //         this.getMediaValidationError(product.additionalMedia)
+  //   //       )
+  //   //   );
+  //   // }
+
+  //   const formData = new FormData();
+  //   formData.append('id', product.id.toString());
+  //   formData.append('name', product.name ?? '');
+  //   if (product.description)
+  //     formData.append('description', product.description);
+  //   if (product.additionalAttributes) {
+  //     formData.append(
+  //       'AdditionalAttributesJson',
+  //       JSON.stringify(product.additionalAttributes)
+  //     );
+  //   }
+  //   if (product.brand) formData.append('brand', product.brand);
+  //   if (product.model) formData.append('model', product.model);
+  //   if (product.status) formData.append('status', product.status);
+  //   if (product.mediaToDelete && product.mediaToDelete.length > 0) {
+  //     product.mediaToDelete.forEach((mediaId, index) => {
+  //       formData.append(`mediaToDelete[${index}]`, mediaId);
+  //     });
+  //   }
+  //   if (product.categoryId)
+  //     formData.append('categoryId', product.categoryId.toString());
+  //   if (product.mainImage) formData.append('mainImage', product.mainImage);
+  //   if (product.additionalMedia && product.additionalMedia.length > 0) {
+  //     product.additionalMedia.forEach((file) => {
+  //       formData.append('AdditionalMedia', file);
+  //     });
+  //   }
+  //   console.log(...formData, 'formData in updateProduct');
+  //   return this.http.put<Result>(`${this.baseUrl}/update`, formData).pipe(
+  //     retry({ count: this.maxRetries }),
+  //     catchError((error) =>
+  //       this.handleError(error, 'updateProduct', { id: product.id })
+  //     )
+  //   );
+  // }
   deleteProduct(id: number): Observable<Result> {
     if (id < 1) {
       return throwError(
@@ -388,19 +348,19 @@ export class ProductService {
     return true;
   }
 
-  private validateMediaFiles(files: File[]): boolean {
-    return files.every((file) => {
-      const extension = file.name
-        .substring(file.name.lastIndexOf('.'))
-        .toLowerCase();
-      if (this.allowedImageExtensions.includes(extension)) {
-        return file.size <= this.maxAllowedImageSize;
-      } else if (this.allowedVideoExtensions.includes(extension)) {
-        return file.size <= this.maxAllowedVideoSize;
-      }
-      return false;
-    });
-  }
+  // private validateMediaFiles(files: File[]): boolean {
+  //   return files.every((file) => {
+  //     const extension = file.name
+  //       .substring(file.name.lastIndexOf('.'))
+  //       .toLowerCase();
+  //     if (this.allowedImageExtensions.includes(extension)) {
+  //       return file.size <= this.maxAllowedImageSize;
+  //     } else if (this.allowedVideoExtensions.includes(extension)) {
+  //       return file.size <= this.maxAllowedVideoSize;
+  //     }
+  //     return false;
+  //   });
+  // }
 
   private handleError(
     error: HttpErrorResponse,

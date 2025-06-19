@@ -19,12 +19,6 @@ interface AttributeFilter {
   values: { value: string; count: number }[];
 }
 
-interface PricePreset {
-  label: string;
-  min?: number;
-  max?: number;
-}
-
 @Component({
   selector: 'app-product',
   standalone: true,
@@ -45,6 +39,7 @@ export class ProductManagementComponent implements OnInit {
   categories: Category[] = [];
   filteredProducts: Product[] = [];
   loading = false;
+  errorMessage: string | null = null; // New: To display errors to the user
 
   // Pagination
   currentPage = 1;
@@ -74,13 +69,11 @@ export class ProductManagementComponent implements OnInit {
   // Available attributes for filtering
   availableAttributes: AttributeFilter[] = [];
 
-  // Price presets
-
   // Modal state
   isModalOpen = false;
   isDetailsModalOpen = false;
   editingProduct: Product | null = null;
-  selectedProduct: Product | null = null;
+  selectedProduct!: Product;
   deleteConfirm: { isOpen: boolean; productId: number | null } = {
     isOpen: false,
     productId: null,
@@ -101,7 +94,7 @@ export class ProductManagementComponent implements OnInit {
       key: 'brand',
       title: 'العلامة التجارية',
       type: 'text',
-      sortable: true,
+      sortable: false,
       width: '12%',
       align: 'center',
     },
@@ -109,7 +102,7 @@ export class ProductManagementComponent implements OnInit {
       key: 'model',
       title: 'الموديل',
       type: 'text',
-      sortable: true,
+      sortable: false,
       width: '12%',
       align: 'center',
     },
@@ -134,7 +127,6 @@ export class ProductManagementComponent implements OnInit {
   actions: TableAction[] = [
     { label: 'عرض', icon: 'visibility', action: 'view' },
     { label: 'تعديل', icon: 'edit', action: 'edit' },
-    { label: 'نسخ', icon: 'content_copy', action: 'duplicate' },
     { label: 'حذف', icon: 'delete', action: 'delete', type: 'danger' },
   ];
 
@@ -194,13 +186,15 @@ export class ProductManagementComponent implements OnInit {
     if (this.statusFilter) count++;
     if (this.categoryFilter) count++;
     if (this.priceFilter.min || this.priceFilter.max) count++;
-    count += Object.keys(this.attributeFilters).length;
+    count += Object.values(this.attributeFilters).reduce(
+      (sum, values) => sum + values.length,
+      0
+    );
     return count;
   }
 
   loadCategories(): void {
     this.loading = true;
-
     const params: CategoryParams = {
       pageIndex: 1,
       pageSize: 100,
@@ -209,7 +203,7 @@ export class ProductManagementComponent implements OnInit {
     this.categoryService.getAllCategories(params).subscribe({
       next: (response) => {
         this.categories = response.data;
-        //  this.categories.forEach((data)=> console.log(data));
+        this.loading = false;
       },
       error: (error) => {
         console.error('Error loading categories:', error);
@@ -217,30 +211,28 @@ export class ProductManagementComponent implements OnInit {
       },
     });
   }
+
   loadProducts(): void {
     this.loading = true;
-
     const params: ProductParams = {
       pageIndex: this.currentPage,
       pageSize: this.pageSize,
       search: this.searchTerm,
       status: this.statusFilter || undefined,
-      categoryId: this.categoryFilter
-        ? Number.parseInt(this.categoryFilter)
-        : undefined,
-      sortProp: this.sortColumn as any, // Cast to SortProp if compatible
-      sortDirection: this.sortDirection as any, // Cast to SortDirection if compatible
+      categoryId: this.categoryFilter ? Number(this.categoryFilter) : undefined,
+      sortProp: this.sortColumn as any,
+      sortDirection: this.sortDirection as any,
     };
 
     this.productService.getAllProducts(params).subscribe({
       next: (response) => {
         this.products = response.data;
-        this.filteredProducts = response.data;
+        this.filteredProducts = this.applyClientSideFilters(response.data);
         this.totalItems = response.totalCount;
         this.totalPages = Math.ceil(response.totalCount / this.pageSize);
         this.extractAvailableAttributes();
         this.loading = false;
-        console.log(response);
+        // Clear any previous error messages
       },
       error: (error) => {
         console.error('Error loading products:', error);
@@ -252,6 +244,27 @@ export class ProductManagementComponent implements OnInit {
   private applyClientSideFilters(products: Product[]): Product[] {
     let filtered = [...products];
 
+    // Apply attribute filters
+    if (Object.keys(this.attributeFilters).length > 0) {
+      filtered = filtered.filter((product) => {
+        if (!product.additionalAttributes) return false;
+        let attributes: Record<string, string>;
+        try {
+          attributes =
+            typeof product.additionalAttributes === 'string'
+              ? JSON.parse(product.additionalAttributes)
+              : product.additionalAttributes;
+        } catch {
+          return false;
+        }
+
+        return Object.entries(this.attributeFilters).every(([key, values]) => {
+          const productValue = String(attributes[key] || '');
+          return values.length === 0 || values.includes(productValue);
+        });
+      });
+    }
+
     return filtered;
   }
 
@@ -260,23 +273,28 @@ export class ProductManagementComponent implements OnInit {
 
     this.products.forEach((product) => {
       if (product.additionalAttributes) {
+        let attributes: Record<string, string>;
         try {
-          const attributes = JSON.parse(product.additionalAttributes);
-          Object.entries(attributes).forEach(([key, value]) => {
-            if (!attributesMap.has(key)) {
-              attributesMap.set(key, new Map());
-              // Initialize search term for this attribute if not exists
-              if (!this.attributeSearchTerms[key]) {
-                this.attributeSearchTerms[key] = '';
-              }
-            }
-            const valueMap = attributesMap.get(key)!;
-            const stringValue = String(value);
-            valueMap.set(stringValue, (valueMap.get(stringValue) || 0) + 1);
-          });
+          attributes =
+            typeof product.additionalAttributes === 'string'
+              ? JSON.parse(product.additionalAttributes)
+              : product.additionalAttributes;
         } catch (error) {
           console.error('Error parsing additional attributes:', error);
+          return;
         }
+
+        Object.entries(attributes).forEach(([key, value]) => {
+          if (!attributesMap.has(key)) {
+            attributesMap.set(key, new Map());
+            if (!this.attributeSearchTerms[key]) {
+              this.attributeSearchTerms[key] = '';
+            }
+          }
+          const valueMap = attributesMap.get(key)!;
+          const stringValue = String(value);
+          valueMap.set(stringValue, (valueMap.get(stringValue) || 0) + 1);
+        });
       }
     });
 
@@ -300,8 +318,6 @@ export class ProductManagementComponent implements OnInit {
     this.sortColumn = event.column;
     this.sortDirection = event.direction;
     this.currentPage = 1;
-    console.log(event);
-
     this.loadProducts();
   }
 
@@ -328,9 +344,6 @@ export class ProductManagementComponent implements OnInit {
       case 'edit':
         this.openEditModal(event.item);
         break;
-      // case 'duplicate':
-      //   this.duplicateProduct(event.item);
-      //   break;
       case 'delete':
         this.openDeleteConfirm(event.item);
         break;
@@ -398,8 +411,6 @@ export class ProductManagementComponent implements OnInit {
   }
 
   getCategoryCount(categoryId: number): number {
-    console.log('CatId ' + categoryId + this.products);
-
     return this.products.filter((p) => p.categoryId === categoryId).length;
   }
 
@@ -410,7 +421,6 @@ export class ProductManagementComponent implements OnInit {
     return category?.name || 'غير محدد';
   }
 
-  // Attribute filter methods
   getFilteredAttributeValues(
     attribute: AttributeFilter
   ): { value: string; count: number }[] {
@@ -425,7 +435,6 @@ export class ProductManagementComponent implements OnInit {
     if (!this.attributeFilters[key]) {
       this.attributeFilters[key] = [];
     }
-
     const index = this.attributeFilters[key].indexOf(value);
     if (index > -1) {
       this.attributeFilters[key].splice(index, 1);
@@ -435,7 +444,6 @@ export class ProductManagementComponent implements OnInit {
     } else {
       this.attributeFilters[key].push(value);
     }
-
     this.currentPage = 1;
     this.loadProducts();
   }
@@ -475,12 +483,13 @@ export class ProductManagementComponent implements OnInit {
     this.loadProducts();
   }
 
-  // General filter methods
   hasActiveFilters(): boolean {
     return !!(
       this.statusFilter ||
       this.categoryFilter ||
-      this.hasActiveAttributeFilters()
+      this.hasActiveAttributeFilters() ||
+      this.priceFilter.min ||
+      this.priceFilter.max
     );
   }
 
@@ -488,35 +497,37 @@ export class ProductManagementComponent implements OnInit {
     this.statusFilter = '';
     this.categoryFilter = '';
     this.attributeFilters = {};
+    this.priceFilter = { min: null, max: null };
     this.currentPage = 1;
     this.loadProducts();
   }
 
-  // Modal management
   openAddModal(): void {
     this.editingProduct = null;
     this.isModalOpen = true;
+    this.errorMessage = null; // Clear previous errors
   }
 
   openEditModal(product: Product): void {
     this.editingProduct = { ...product };
     this.isModalOpen = true;
+    this.errorMessage = null; // Clear previous errors
   }
 
   closeModal(): void {
     this.isModalOpen = false;
+    this.editingProduct = null;
+    this.errorMessage = null; // Clear errors on close
   }
 
   saveProduct(productData: any): void {
+    this.errorMessage = null; // Clear previous errors
+    const formattedAttributes = JSON.stringify(
+      productData.additionalAttributes || {}
+    );
+
     if (this.editingProduct) {
       // Update existing product
-      console.log('Updating product:', this.editingProduct);
-      console.log('Product data:', productData);
-      console.log(
-        'Product data additonal:',
-        JSON.stringify(productData.additionalAttributes)
-      );
-
       this.productService
         .updateProduct({
           id: this.editingProduct.id,
@@ -527,19 +538,19 @@ export class ProductManagementComponent implements OnInit {
           status: productData.status,
           categoryId: productData.categoryId,
           mainImage: productData.mainImage,
-          additionalImages: productData.additionalImages,
-          imagesToDelete: productData.imagesToDelete,
-          additionalAttributes: JSON.stringify(
-            productData.additionalAttributes
-          ),
+          additionalMedia: productData.additionalMedia || [],
+          mediaToDelete: productData.mediaToDelete || [],
+          additionalAttributes: formattedAttributes,
         })
         .subscribe({
-          next: (response) => {
+          next: () => {
             this.loadProducts();
             this.closeModal();
-            console.log(response);
+            console.log('Product updated successfully', productData);
           },
           error: (error) => {
+            this.errorMessage =
+              error.message || 'فشل في تحديث المنتج. حاول مرة أخرى.';
             console.error('Error updating product:', error);
           },
         });
@@ -554,21 +565,24 @@ export class ProductManagementComponent implements OnInit {
           status: productData.status,
           categoryId: productData.categoryId,
           mainImage: productData.mainImage,
-          additionalImages: productData.additionalImages,
+          additionalMedia: productData.additionalMedia || [],
         })
         .subscribe({
           next: () => {
             this.loadProducts();
             this.closeModal();
+            console.log('Product created successfully', productData);
           },
           error: (error) => {
+            this.errorMessage =
+              error.message ||
+              'فشل في إنشاء المنتج. تأكد من أن جميع الملفات مدعومة.';
             console.error('Error creating product:', error);
           },
         });
     }
   }
 
-  // Delete management
   openDeleteConfirm(product: Product): void {
     this.deleteConfirm = {
       isOpen: true,
@@ -600,7 +614,6 @@ export class ProductManagementComponent implements OnInit {
     }
   }
 
-  // Details modal
   viewDetails(product: Product): void {
     this.selectedProduct = { ...product };
     this.isDetailsModalOpen = true;
@@ -608,7 +621,7 @@ export class ProductManagementComponent implements OnInit {
 
   closeDetailsModal(): void {
     this.isDetailsModalOpen = false;
-    this.selectedProduct = null;
+    this.selectedProduct = null as any; // Reset selected product
   }
 
   openEditModalFromDetails(product: Product): void {
@@ -621,5 +634,10 @@ export class ProductManagementComponent implements OnInit {
       isOpen: true,
       productId: product.id,
     };
+  }
+
+  // New: Clear error message
+  clearError(): void {
+    this.errorMessage = null;
   }
 }

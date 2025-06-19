@@ -3,13 +3,13 @@ import { SortDirection } from './category';
 export interface CreateProduct {
   name: string;
   description?: string | null;
-  additionalAttributes?: Record<string, string> | null;
-  brand: string; // Corrected typo from "brabd" to "brand"
-  model: string; // Corrected typo from "modle" to "model"
+  additionalAttributes?: Record<string, string> | string; // JSON string or object
+  brand: string;
+  model: string;
   status?: string | null;
   categoryId: number;
   mainImage?: File | null; // Image only (png, jpg, jpeg, webp, svg)
-  additionalImages?: File[] | null; // Images or videos (png, jpg, jpeg, webp, svg, mp4, webm, mov, mkv)
+  additionalMedia?: File[] | null;
 }
 
 export interface UpdateProduct {
@@ -19,11 +19,12 @@ export interface UpdateProduct {
   additionalAttributes?: Record<string, string> | string;
   brand?: string | null;
   model?: string | null;
+  quantity?: number | null; // Optional for updates
   status?: string | null;
   categoryId?: number | null;
   mainImage?: File | null; // Image only
-  additionalImages?: File[] | null; // Images or videos
-  imagesToDelete?: string[] | null; // URLs or public IDs of media to delete
+  additionalMedia?: File[] | null; // Images or videos
+  mediaToDelete?: string[] | null; // URLs or public IDs of media to delete
 }
 
 export interface Product {
@@ -47,17 +48,18 @@ export interface ProductMedia {
   mediaURL?: string | null; // URL for image or video
   imageThumbnailURL?: string | null; // Thumbnail for images or videos (if applicable)
   mediaPublicId?: string | null;
-  mediaType?: 'image' | 'video' | null; // Added to distinguish media type
+  mediaType?: 'image' | 'video' | 'pdf' | null; // Added to distinguish media type
 }
 
 export enum SortProp {
   Id = 0,
   Name = 1,
   Description = 2,
-  Price = 3,
-  Status = 4,
-  CategoryId = 5,
-  CreatedAt = 6,
+  brand = 3,
+  model = 4,
+  quantity = 5,
+  firstName = 6,
+  lastName = 7,
 }
 
 export interface ProductParams {

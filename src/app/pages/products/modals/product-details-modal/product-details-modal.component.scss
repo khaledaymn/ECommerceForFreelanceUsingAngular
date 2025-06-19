@@ -283,7 +283,100 @@ $gray-900: #111827;
 .additional-images {
   margin-top: 1rem;
 }
+// Videos Section
+.videos-section {
+  margin-top: 1rem;
+}
 
+.videos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.video-item {
+  cursor: pointer;
+}
+
+.video-container {
+  position: relative;
+  aspect-ratio: 16 / 9; // Adjust for video aspect ratio
+  border-radius: 8px;
+  overflow: hidden;
+  background: $gray-100;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.video-player {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+// PDFs Section
+.pdfs-section {
+  margin-top: 1rem;
+}
+
+.pdfs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.pdf-item {
+  cursor: pointer;
+}
+
+.pdf-container {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: $gray-100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.pdf-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: $gray-700;
+  font-size: 14px;
+  font-weight: 500;
+
+  .material-icons {
+    font-size: 40px;
+    color: $danger; // Red for PDFs
+  }
+
+  &:hover {
+    color: $secondary;
+  }
+}
 .section-title {
   display: flex;
   align-items: center;
