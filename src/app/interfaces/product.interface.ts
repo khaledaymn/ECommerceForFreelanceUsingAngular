@@ -27,6 +27,12 @@ export interface UpdateProduct {
   mediaToDelete?: string[] | null; // URLs or public IDs of media to delete
 }
 
+export enum ProductStatus {
+  Rent = 'إيجار', // For short-term renting (e.g., cars, equipment)
+  Purchase = 'شراء', // For purchasing only
+  RentAndPurchase = 'إيجار وشراء', // For both renting and purchasing
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -62,14 +68,26 @@ export enum SortProp {
   lastName = 7,
 }
 
+// export interface ProductParams {
+//   search?: string | null;
+//   description?: string | null;
+//   attributesFilter?: Record<string, string> | null;
+//   categoryId?: number | null;
+//   status?: string | null;
+//   sortProp?: SortProp | null;
+//   sortDirection?: SortDirection | null;
+//   pageIndex: number;
+//   pageSize: number;
+// }
+
 export interface ProductParams {
-  search?: string | null;
-  description?: string | null;
-  attributesFilter?: Record<string, string> | null;
-  categoryId?: number | null;
-  status?: string | null;
-  sortProp?: SortProp | null;
-  sortDirection?: SortDirection | null;
   pageIndex: number;
   pageSize: number;
+  search?: string;
+  status?: string;
+  categoryId?: number;
+  brand?: string;
+  model?: string;
+  sortProp?: string;
+  sortDirection?: 0 | 1;
 }

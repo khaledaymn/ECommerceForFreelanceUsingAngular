@@ -1,4 +1,4 @@
-<div *ngIf="isOpen" class="modal-overlay" (click)="onClose()">
+<div *ngIf="isOpen" class="modal-overlay">
   <div class="modal-container" (click)="$event.stopPropagation()" dir="rtl">
     <!-- Modal Header -->
     <div class="modal-header">
@@ -26,7 +26,7 @@
         >
           <img
             [src]="category.imageURL"
-            [alt]="category.name"
+            alt="{{category.name}}"
             class="category-image"
             (error)="onImageError($event)"
           />
@@ -62,13 +62,6 @@
                 </div>
                 <div class="info-value">{{ category.name || "غير محدد" }}</div>
               </div>
-              <!-- <div class="info-item">
-                <div class="info-label">
-                  <i class="material-icons">category</i>
-                  نوع الفئة
-                </div>
-                <div class="info-value">فئة رئيسية</div>
-              </div> -->
             </div>
           </div>
         </div>
@@ -85,37 +78,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Image Information Card -->
-        <!-- <div class="info-card" *ngIf="category.imageURL">
-          <div class="card-header">
-            <i class="material-icons">image</i>
-            <h3>معلومات الصورة</h3>
-          </div>
-          <div class="card-content">
-            <div class="info-item">
-              <div class="info-label">
-                <i class="material-icons">link</i>
-                رابط الصورة
-              </div>
-              <div class="info-value url-text">{{ category.imageURL }}</div>
-              <button
-                class="copy-btn"
-                (click)="copyToClipboard(category.imageURL)"
-              >
-                <i class="material-icons">content_copy</i>
-                <span>نسخ الرابط</span>
-              </button>
-            </div>
-            <div class="info-item" *ngIf="category.imagePublicId">
-              <div class="info-label">
-                <i class="material-icons">fingerprint</i>
-                معرف الصورة
-              </div>
-              <div class="info-value">{{ category.imagePublicId }}</div>
-            </div>
-          </div>
-        </div> -->
       </div>
     </div>
 
@@ -153,7 +115,7 @@
     <div class="image-zoom-container">
       <img
         [src]="category?.imageURL"
-        [alt]="category?.name"
+        alt="{{category?.name}}"
         class="zoomed-image"
       />
       <button class="zoom-close-btn" (click)="closeImageZoom()">

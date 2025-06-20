@@ -19,11 +19,11 @@ export class SidebarComponent {
   isCollapsed = false;
 
   menuItems: MenuItem[] = [
-    {
-      label: 'لوحة التحكم',
-      route: '/',
-      icon: 'dashboard',
-    },
+    // {
+    //   label: 'لوحة التحكم',
+    //   route: '/admin/dashboard',
+    //   icon: 'dashboard',
+    // },
     {
       label: 'الفئات',
       route: '/admin/categories',

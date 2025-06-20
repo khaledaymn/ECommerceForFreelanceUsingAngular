@@ -26,6 +26,7 @@ $gray-900: #111827;
   right: 0;
   bottom: 0;
   background-color: rgba($black, 0.6);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -154,7 +155,6 @@ $gray-900: #111827;
   overflow-y: auto;
   flex: 1;
   min-height: 0;
-  -webkit-overflow-scrolling: touch;
 
   &::-webkit-scrollbar {
     width: 8px;
@@ -258,7 +258,7 @@ $gray-900: #111827;
   &:hover {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     .image-overlay {
-      opacity: 1;
+      opacity: 0;
     }
   }
 
@@ -285,8 +285,12 @@ $gray-900: #111827;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
+  opacity: 0; 
   transition: opacity 0.3s ease;
+  
+  &:hover {
+    opacity: 1;
+  }
 }
 
 .remove-image-button,
@@ -306,6 +310,31 @@ $gray-900: #111827;
 
   &:hover {
     background: darken($danger, 10%);
+    transform: scale(1.05);
+  }
+
+  .material-icons {
+    font-size: 14px;
+  }
+}
+
+.change-image-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: $secondary;
+  color: $white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 25px;
+
+  &:hover {
+    background: darken($secondary, 10%);
     transform: scale(1.05);
   }
 

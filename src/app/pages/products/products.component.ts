@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../services/product.service';
 import { CategoryService } from '../../services/category.service';
-import { Product, ProductParams } from '../../interfaces/product.interface';
+import { Product, ProductParams, ProductStatus } from '../../interfaces/product.interface';
 import { Category, CategoryParams } from '../../interfaces/category';
 import {
   DataTableComponent,
@@ -51,6 +51,8 @@ export class ProductManagementComponent implements OnInit {
   searchTerm = '';
   statusFilter = '';
   categoryFilter = '';
+  brandFilter = '';
+  modelFilter = '';
   attributeFilters: Record<string, string[]> = {};
   priceFilter = { min: null as number | null, max: null as number | null };
   sortColumn = 'name';
@@ -64,6 +66,8 @@ export class ProductManagementComponent implements OnInit {
   // Filter search terms
   statusSearchTerm = '';
   categorySearchTerm = '';
+  brandSearchTerm = '';
+  modelSearchTerm = '';
   attributeSearchTerms: Record<string, string> = {};
 
   // Available attributes for filtering
@@ -177,6 +181,16 @@ export class ProductManagementComponent implements OnInit {
     this.activeDropdown = null;
   }
 
+  selectBrand(brand: string): void {
+    this.onBrandFilterChange(brand);
+    this.activeDropdown = null;
+  }
+
+  selectModel(model: string): void {
+    this.onModelFilterChange(model);
+    this.activeDropdown = null;
+  }
+
   applyFilters(): void {
     this.closeFiltersPanel();
   }
@@ -185,11 +199,8 @@ export class ProductManagementComponent implements OnInit {
     let count = 0;
     if (this.statusFilter) count++;
     if (this.categoryFilter) count++;
-    if (this.priceFilter.min || this.priceFilter.max) count++;
-    count += Object.values(this.attributeFilters).reduce(
-      (sum, values) => sum + values.length,
-      0
-    );
+    if (this.brandFilter) count++;
+    if (this.modelFilter) count++;
     return count;
   }
 
@@ -220,6 +231,8 @@ export class ProductManagementComponent implements OnInit {
       search: this.searchTerm,
       status: this.statusFilter || undefined,
       categoryId: this.categoryFilter ? Number(this.categoryFilter) : undefined,
+      brand: this.brandFilter || undefined,
+      model: this.modelFilter || undefined,
       sortProp: this.sortColumn as any,
       sortDirection: this.sortDirection as any,
     };
@@ -383,12 +396,12 @@ export class ProductManagementComponent implements OnInit {
 
   getStatusClass(status: string): string {
     switch (status) {
-      case 'الايجار':
-        return 'status-available';
-      case 'البيع':
-        return 'status-unavailable';
-      case 'الاتنين':
-        return 'status-coming-soon';
+      case ProductStatus.Purchase.toString():
+        return 'status-purchase';
+      case ProductStatus.Rent.toString():
+        return 'status-rent';
+      case ProductStatus.RentAndPurchase.toString():
+        return 'status-rent-and-purchase';
       default:
         return 'status-default';
     }
@@ -421,6 +434,35 @@ export class ProductManagementComponent implements OnInit {
     return category?.name || 'غير محدد';
   }
 
+  onBrandFilterChange(brand: string): void {
+    this.brandFilter = brand;
+    this.activeFilter = null;
+    this.currentPage = 1;
+    this.loadProducts();
+  }
+
+  getFilteredBrands(): string[] {
+    const allBrands = [...new Set(this.products.map((p) => p.brand || ''))].filter(Boolean);
+    if (!this.brandSearchTerm) return allBrands;
+    return allBrands.filter((brand) =>
+      brand.toLowerCase().includes(this.brandSearchTerm.toLowerCase())
+    );
+  }
+
+onModelFilterChange(model: string): void {
+    this.modelFilter = model;
+    this.activeFilter = null;
+    this.currentPage = 1;
+    this.loadProducts();
+  }
+
+  getFilteredModels(): string[] {
+    const allModels = [...new Set(this.products.map((p) => p.model || ''))].filter(Boolean);
+    if (!this.modelSearchTerm) return allModels;
+    return allModels.filter((model) =>
+      model.toLowerCase().includes(this.modelSearchTerm.toLowerCase())
+    );
+  }
   getFilteredAttributeValues(
     attribute: AttributeFilter
   ): { value: string; count: number }[] {
@@ -487,9 +529,11 @@ export class ProductManagementComponent implements OnInit {
     return !!(
       this.statusFilter ||
       this.categoryFilter ||
-      this.hasActiveAttributeFilters() ||
-      this.priceFilter.min ||
-      this.priceFilter.max
+      this.brandFilter ||
+      this.modelFilter
+      // this.hasActiveAttributeFilters() ||
+      // this.priceFilter.min ||
+      // this.priceFilter.max
     );
   }
 

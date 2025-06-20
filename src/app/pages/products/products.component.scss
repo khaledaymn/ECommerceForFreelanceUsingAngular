@@ -1,3 +1,7 @@
+$rent-color: #2196F3;
+$purchase-color: #4CAF50;
+$rent-and-purchase-color: #FF9800;
+
 /* Enhanced Filters Toggle Button */
 .filters-toggle-btn {
   position: relative;
@@ -143,7 +147,7 @@
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
-
+  z-index: 1000;
   &.visible {
     opacity: 1;
     visibility: visible;
@@ -157,6 +161,7 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
 
@@ -505,6 +510,24 @@
   }
 }
 
+// .select-dropdown {
+//   position: absolute;
+//   top: 100%;
+//   left: 0;
+//   right: 0;
+//   z-index: 1000;
+//   background: white;
+//   border: 1px solid #e5e7eb;
+//   border-radius: 12px;
+//   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+//   margin-top: 8px;
+//   overflow: hidden;
+//   animation: dropdownSlideIn 0.3s ease;
+//   max-height: 300px;
+//   display: flex;
+//   flex-direction: column;
+// }
+
 .select-dropdown {
   position: absolute;
   top: 100%;
@@ -512,15 +535,19 @@
   right: 0;
   z-index: 1000;
   background: white;
-  border: 1px solid #e5e7eb;
   border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border: 2px solid #2563eb; /* حدود مميزة عند الفتح */
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3); /* ظل مميز */
   margin-top: 8px;
   overflow: hidden;
   animation: dropdownSlideIn 0.3s ease;
-  max-height: 300px;
+  max-height: 200px; /* تقليل الارتفاع الأقصى من 300px إلى 200px */
   display: flex;
   flex-direction: column;
+  overflow-y: auto; /* الإبقاء على التمرير الداخلي */
+  /* إضافة لضمان عدم التأثير على تمرير الصفحة */
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 @keyframes dropdownSlideIn {
@@ -576,7 +603,7 @@
 .dropdown-options {
   padding: 8px;
   overflow-y: auto;
-  max-height: 200px;
+  max-height: 300px;
   flex: 1;
 }
 
@@ -670,16 +697,16 @@
   border-radius: 50%;
   flex-shrink: 0;
 
-  &.status-available {
-    background-color: #10b981;
+  &.status-purchase {
+    background-color: $purchase-color;
   }
 
-  &.status-unavailable {
-    background-color: #ef4444;
+  &.status-rent {
+    background-color: $rent-color;
   }
 
-  &.status-coming-soon {
-    background-color: #f59e0b;
+  &.status-rent-and-purchase {
+    background-color: $rent-and-purchase-color;
   }
 
   &.status-default {

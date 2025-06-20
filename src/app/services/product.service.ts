@@ -92,11 +92,13 @@ export class ProductService {
       .set('pageSize', Math.min(params.pageSize, 10).toString())
       .set('search', params.search ?? '');
     // .set('description', params.description ?? '');
-    if (params.attributesFilter) {
-      Object.entries(params.attributesFilter).forEach(([key, value]) => {
-        httpParams = httpParams.set(`attributesFilter[${key}]`, value);
-      });
-    }
+    // if (params.attributesFilter) {
+    //   Object.entries(params.attributesFilter).forEach(([key, value]) => {
+    //     httpParams = httpParams.set(`attributesFilter[${key}]`, value);
+    //   });
+    // }
+    if (params.brand) httpParams = httpParams.set('brand', params.brand);
+  if (params.model) httpParams = httpParams.set('model', params.model);
     if (params.categoryId)
       httpParams = httpParams.set('categoryId', params.categoryId.toString());
     if (params.status) httpParams = httpParams.set('status', params.status);
@@ -104,7 +106,7 @@ export class ProductService {
       httpParams = httpParams.set('sortProp', params.sortProp);
     if (params.sortDirection)
       httpParams = httpParams.set('sortDirection', params.sortDirection);
-    console.log(params);
+    // console.log(params);
 
     return this.http
       .get<PaginatedResponse<Product>>(`${this.baseUrl}/GetAllProducts`, {
@@ -187,7 +189,6 @@ export class ProductService {
       Object.keys(product.additionalAttributes).length > 0
         ? product.additionalAttributes
         : {};
-    console.log('AdditionalAttributes before stringify:', attributes);
     // try {
     //   const attributesString = JSON.stringify(attributes);
     //   params = params.set('AdditionalAttributes', attributesString);
@@ -202,11 +203,11 @@ export class ProductService {
     //   );
     // }
 
+
     if (product.mediaToDelete && product.mediaToDelete.length > 0) {
-      params = params.set(
-        `MediaToDelete`,
-        JSON.stringify(product.mediaToDelete)
-      );
+      product.mediaToDelete.forEach(item => {
+        params = params.append(`MediaToDelete`, item);
+      })
     }
 
     const formData = new FormData();
@@ -223,8 +224,8 @@ export class ProductService {
     for (const [key, value] of formData.entries()) {
       debugData[key] = value instanceof File ? value.name : value;
     }
-    console.log('Query Params in updateProduct:', params.toString());
-    console.log('FormData in updateProduct:', debugData);
+    // console.log('Query Params in updateProduct:', params.toString());
+    // console.log('FormData in updateProduct:', debugData);
 
     return this.http
       .put<Result>(`${this.baseUrl}/Update`, formData, {

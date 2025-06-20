@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Product } from '../../../../interfaces/product.interface';
+import { Product, ProductStatus } from '../../../../interfaces/product.interface';
 import { Category } from '../../../../interfaces/category';
 
 interface MediaPreview {
@@ -21,6 +21,7 @@ interface MediaPreview {
   mediaType: 'image' | 'video' | 'pdf';
   file?: File;
   mediaPublicId?: string | null;
+  originalIndex?: number;
 }
 
 @Component({
@@ -47,7 +48,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
     description: '',
     brand: '',
     model: '',
-    status: 'متوفر',
+    status: ProductStatus.Purchase.toString(),
     categoryId: '',
     mainImage: null as File | null,
     additionalMedia: [] as File[],
@@ -100,7 +101,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
         description: this.product.description || '',
         brand: this.product.brand || '',
         model: this.product.model || '',
-        status: this.product.status || 'متوفر',
+        status: this.product.status || ProductStatus.Purchase.toString(),
         categoryId: this.product.categoryId?.toString() || '',
         mainImage: null,
         additionalMedia: [],
@@ -119,7 +120,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
         description: '',
         brand: '',
         model: '',
-        status: 'متوفر',
+        status: ProductStatus.Purchase.toString(),
         categoryId: '',
         mainImage: null,
         additionalMedia: [],
@@ -160,7 +161,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
   private setExistingAdditionalMediaPreviews(): void {
     this.additionalMediaPreviews = [];
     if (this.product?.productMedia && this.product.productMedia.length > 0) {
-      this.product.productMedia.forEach((media) => {
+      this.product.productMedia.forEach((media, index) => {
         if (
           media.mediaURL &&
           media.mediaURL !== 'null' &&
@@ -172,6 +173,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
             isExisting: true,
             mediaType: media.mediaType as 'image' | 'video' | 'pdf',
             mediaPublicId: media.mediaPublicId || null,
+            originalIndex: index,
           });
         }
       });
@@ -257,6 +259,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
         mediaType,
         file,
         mediaPublicId: null,
+        originalIndex: this.additionalMediaPreviews.length,
       });
     };
     reader.readAsDataURL(file);
@@ -284,6 +287,9 @@ export class ProductModalComponent implements OnInit, OnChanges {
         this.formData.additionalMedia.splice(fileIndex, 1);
       }
     }
+    this.additionalMediaPreviews.forEach((preview, idx) => {
+    preview.originalIndex = idx;
+  });
   }
 
   validateImageFile(file: File): boolean {
@@ -445,7 +451,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
       description: this.formData.description || '',
       brand: this.formData.brand || '',
       model: this.formData.model || '',
-      status: this.formData.status || 'متوفر',
+      status: this.formData.status || ProductStatus.Purchase.toString(),
       categoryId: this.formData.categoryId
         ? Number(this.formData.categoryId)
         : 0,
@@ -461,7 +467,6 @@ export class ProductModalComponent implements OnInit, OnChanges {
           : {},
     };
 
-    console.log('Submitting product data:', submitData);
     this.save.emit(submitData);
     this.isSubmitting = false;
   }

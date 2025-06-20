@@ -1,4 +1,4 @@
-<div *ngIf="isOpen" class="modal-overlay" (click)="onClose()">
+<div *ngIf="isOpen" class="modal-overlay">
   <div class="modal-container" (click)="$event.stopPropagation()" dir="rtl">
     <form (ngSubmit)="onSubmit()" #categoryForm="ngForm" class="modal-form">
       <!-- Header -->
@@ -148,14 +148,7 @@
             <i class="material-icons">error</i>
             {{ imageError }}
           </div>
-          
-          <!-- Image Info (for debugging in development) -->
-          <div *ngIf="isEditingMode && category" class="image-debug-info" style="display: none;">
-            <small>Debug - Image URL: {{ category.imageURL || 'None' }}</small><br>
-            <small>Debug - Thumbnail URL: {{ category.imageThumbnailURL || 'None' }}</small><br>
-            <small>Debug - Has Existing: {{ hasExistingImage }}</small><br>
-            <small>Debug - Preview: {{ imagePreview ? 'Set' : 'None' }}</small>
-          </div>
+         
         </div>
       </div>
 

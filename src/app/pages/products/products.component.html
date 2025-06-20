@@ -50,7 +50,6 @@
       <div class="filter-badge" *ngIf="getActiveFiltersCount() > 0">
         {{ getActiveFiltersCount() }}
       </div>
-      <div class="btn-shine"></div>
     </button>
     <!-- Filters Panel -->
     <div class="filters-panel" [class.visible]="showFilters">
@@ -117,9 +116,6 @@
                 </button>
               </div>
 
-              <!-- Price Filter -->
-
-              <!-- Attribute Filters -->
               <div
                 *ngFor="let attr of getActiveAttributeFilters()"
                 class="filter-tag"
@@ -317,132 +313,142 @@
               </div>
             </div>
 
-            <!-- Row 2: Price Range -->
-
-            <!-- Row 3: Dynamic Attribute Filters -->
-            <div
-              class="filter-row attribute-filters-row"
-              *ngIf="availableAttributes.length > 0"
-            >
-              <div
-                class="filter-field attribute-field"
-                *ngFor="let attribute of availableAttributes"
-              >
+            <div class="filter-row">
+              <!-- Brand Filter -->
+              <div class="filter-field">
                 <label class="filter-label">
-                  <i class="material-icons">tune</i>
-                  {{ attribute.key }}
+                  <i class="material-icons">branding_watermark</i>
+                  العلامة التجارية
                 </label>
                 <div
                   class="searchable-select"
-                  [class.open]="activeDropdown === 'attr_' + attribute.key"
+                  [class.open]="activeDropdown === 'brand'"
                 >
-                  <div
-                    class="select-trigger"
-                    (click)="toggleDropdown('attr_' + attribute.key)"
-                  >
+                  <div class="select-trigger" (click)="toggleDropdown('brand')">
                     <span
                       class="select-value"
-                      *ngIf="
-                        attributeFilters[attribute.key]?.length;
-                        else attrPlaceholder
-                      "
+                      *ngIf="brandFilter; else brandPlaceholder"
                     >
-                      {{
-                        attributeFilters[attribute.key].length > 1
-                          ? attributeFilters[attribute.key].length +
-                            " قيم محددة"
-                          : attributeFilters[attribute.key][0]
-                      }}
+                      {{ brandFilter }}
                     </span>
-                    <ng-template #attrPlaceholder>
-                      <span class="select-placeholder">اختر القيمة</span>
+                    <ng-template #brandPlaceholder>
+                      <span class="select-placeholder">اختر البراند</span>
                     </ng-template>
                     <i
                       class="material-icons expand-icon"
-                      [class.rotated]="
-                        activeDropdown === 'attr_' + attribute.key
-                      "
+                      [class.rotated]="activeDropdown === 'brand'"
                       >expand_more</i
                     >
                   </div>
 
                   <div
                     class="select-dropdown"
-                    *ngIf="activeDropdown === 'attr_' + attribute.key"
+                    *ngIf="activeDropdown === 'brand'"
                   >
                     <div class="dropdown-search">
                       <input
                         type="text"
-                        [placeholder]="'البحث في ' + attribute.key + '...'"
-                        [(ngModel)]="attributeSearchTerms[attribute.key]"
+                        placeholder="البحث في العلامات التجارية..."
+                        [(ngModel)]="brandSearchTerm"
                         class="search-input"
                         (click)="$event.stopPropagation()"
-                        [title]="'البحث في ' + attribute.key + '...'"
-                        placeholder="أدخل قيمة البحث"
-                        title="حقل البحث عن قيمة السمة"
                       />
                       <i class="material-icons">search</i>
                     </div>
 
                     <div class="dropdown-options">
                       <div
-                        *ngFor="
-                          let value of getFilteredAttributeValues(attribute)
-                        "
-                        class="dropdown-option attribute-option"
-                        [class.selected]="
-                          isAttributeValueSelected(attribute.key, value.value)
-                        "
-                        (click)="
-                          toggleAttributeValue(attribute.key, value.value)
-                        "
+                        class="dropdown-option"
+                        [class.selected]="brandFilter === ''"
+                        (click)="selectBrand('')"
                       >
                         <div class="option-content">
-                          <div class="option-checkbox">
-                            <input
-                              type="checkbox"
-                              [checked]="
-                                isAttributeValueSelected(
-                                  attribute.key,
-                                  value.value
-                                )
-                              "
-                              (click)="$event.stopPropagation()"
-                              (change)="
-                                toggleAttributeValue(attribute.key, value.value)
-                              "
-                              title="تحديد القيمة {{ value.value }} لـ {{
-                                attribute.key
-                              }}"
-                              placeholder="تحديد القيمة {{ value.value }} لـ {{
-                                attribute.key
-                              }}"
-                              [attr.aria-label]="
-                                'تحديد القيمة ' +
-                                value.value +
-                                ' لـ ' +
-                                attribute.key
-                              "
-                            />
-                          </div>
-                          <span>{{ value.value }}</span>
+                          <i class="material-icons">all_inclusive</i>
+                          <span>جميع العلامات التجارية</span>
                         </div>
-                        <!-- <span class="option-count">{{ value.count }}</span> -->
+                      </div>
+
+                      <div
+                        *ngFor="let brand of getFilteredBrands()"
+                        class="dropdown-option"
+                        [class.selected]="brandFilter === brand"
+                        (click)="selectBrand(brand)"
+                      >
+                        <div class="option-content">
+                          <i class="material-icons">branding_watermark</i>
+                          <span>{{ brand }}</span>
+                        </div>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
 
-                    <!-- Clear attribute button -->
-                    <div
-                      class="dropdown-footer"
-                      *ngIf="attributeFilters[attribute.key]?.length"
+              <!-- Model Filter -->
+              <div class="filter-field">
+                <label class="filter-label">
+                  <i class="material-icons">toys</i>
+                  الموديل
+                </label>
+                <div
+                  class="searchable-select"
+                  [class.open]="activeDropdown === 'model'"
+                >
+                  <div class="select-trigger" (click)="toggleDropdown('model')">
+                    <span
+                      class="select-value"
+                      *ngIf="modelFilter; else modelPlaceholder"
                     >
-                      <button
-                        class="clear-attribute-btn"
-                        (click)="clearAttributeFilter(attribute.key)"
+                      {{ modelFilter }}
+                    </span>
+                    <ng-template #modelPlaceholder>
+                      <span class="select-placeholder">اختر الموديل</span>
+                    </ng-template>
+                    <i
+                      class="material-icons expand-icon"
+                      [class.rotated]="activeDropdown === 'model'"
+                      >expand_more</i
+                    >
+                  </div>
+
+                  <div
+                    class="select-dropdown"
+                    *ngIf="activeDropdown === 'model'"
+                  >
+                    <div class="dropdown-search">
+                      <input
+                        type="text"
+                        placeholder="البحث في الموديلات..."
+                        [(ngModel)]="modelSearchTerm"
+                        class="search-input"
+                        (click)="$event.stopPropagation()"
+                      />
+                      <i class="material-icons">search</i>
+                    </div>
+
+                    <div class="dropdown-options">
+                      <div
+                        class="dropdown-option"
+                        [class.selected]="modelFilter === ''"
+                        (click)="selectModel('')"
                       >
-                        <i class="material-icons">clear</i>
-                        مسح التحديد
-                      </button>
+                        <div class="option-content">
+                          <i class="material-icons">all_inclusive</i>
+                          <span>جميع الموديلات</span>
+                        </div>
+                      </div>
+
+                      <div
+                        *ngFor="let model of getFilteredModels()"
+                        class="dropdown-option"
+                        [class.selected]="modelFilter === model"
+                        (click)="selectModel(model)"
+                      >
+                        <div class="option-content">
+                          <i class="material-icons">toys</i>
+                          <span>{{ model }}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -501,5 +507,5 @@
   confirmText="حذف"
   cancelText="إلغاء"
   (confirm)="confirmDelete()"
-  (cancel)="closeDeleteConfirm()"
+  (close)="closeDeleteConfirm()"
 />

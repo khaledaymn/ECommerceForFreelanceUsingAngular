@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import {
   Product,
   ProductMedia,
+  ProductStatus,
 } from '../../../../interfaces/product.interface';
 import { Category } from '../../../../interfaces/category';
 import { ProductService } from '../../../../services/product.service';
@@ -103,12 +104,12 @@ export class ProductDetailsModalComponent implements OnInit {
 
   getStatusClass(status: string): string {
     switch (status) {
-      case 'متوفر':
-        return 'status-available';
-      case 'غير متوفر':
-        return 'status-unavailable';
-      case 'قريباً':
-        return 'status-coming-soon';
+      case ProductStatus.Purchase.toString():
+        return 'status-purchase';
+      case ProductStatus.Rent.toString():
+        return 'status-rent';
+      case ProductStatus.RentAndPurchase.toString():
+        return 'status-rent-and-purchase';
       default:
         return 'status-default';
     }
@@ -116,12 +117,12 @@ export class ProductDetailsModalComponent implements OnInit {
 
   getStatusText(status: string): string {
     switch (status) {
-      case 'متوفر':
-        return 'متوفر';
-      case 'غير متوفر':
-        return 'غير متوفر';
-      case 'قريباً':
-        return 'قريباً';
+      case ProductStatus.Purchase.toString():
+        return ProductStatus.Purchase.toString();
+      case ProductStatus.Rent.toString():
+        return ProductStatus.Rent.toString();
+      case ProductStatus.RentAndPurchase.toString():
+        return ProductStatus.RentAndPurchase.toString();
       default:
         return status || 'غير محدد';
     }

@@ -9,6 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SortDirection } from '../../interfaces/category';
+import { ProductStatus } from '../../interfaces/product.interface';
 
 export interface TableColumn {
   key: string;
@@ -293,12 +294,12 @@ export class DataTableComponent implements OnInit {
 
   getStatusClass(status: string): string {
     switch (status) {
-      case 'متوفر':
-        return 'status-available';
-      case 'غير متوفر':
-        return 'status-unavailable';
-      case 'قريباً':
-        return 'status-coming-soon';
+      case ProductStatus.Purchase.toString():
+        return 'status-purchase';
+      case ProductStatus.Rent.toString():
+        return 'status-rent';
+      case ProductStatus.RentAndPurchase.toString():
+        return 'status-rent-and-purchase';
       default:
         return 'status-default';
     }

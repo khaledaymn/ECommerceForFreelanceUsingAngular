@@ -1,3 +1,6 @@
+$rent-color: #2196F3;
+$purchase-color: #4CAF50;
+$rent-and-purchase-color: #FF9800;
 // Base container - no overflow
 .data-table-container {
   padding: 16px;
@@ -588,19 +591,19 @@
   font-size: 12px;
   font-weight: 500;
 
-  &.status-available {
-    background-color: #dcfce7;
-    color: #166534;
+  &.status-purchase {
+    background: rgba($purchase-color, 0.1);
+    color: $purchase-color;
   }
 
-  &.status-unavailable {
-    background-color: #fee2e2;
-    color: #991b1b;
+  &.status-rent {
+    background: rgba($rent-color, 0.1);
+    color: $rent-color;
   }
 
-  &.status-coming-soon {
-    background-color: #fef3c7;
-    color: #92400e;
+  &.status-rent-and-purchase {
+    background: rgba($rent-and-purchase-color, 0.1);
+    color: $rent-and-purchase-color;
   }
 
   &.status-default {

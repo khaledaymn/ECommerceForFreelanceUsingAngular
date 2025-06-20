@@ -1,4 +1,4 @@
-<div class="modal-overlay" *ngIf="isOpen" (click)="onClose()">
+<div class="modal-overlay" *ngIf="isOpen">
   <div class="modal-container" (click)="$event.stopPropagation()">
     <!-- Modal Header -->
     <div class="modal-header">
@@ -56,6 +56,10 @@
                     >
                       <i class="material-icons">delete</i>
                     </button>
+                    <button type="button" class="change-image-button" (click)="triggerMainImageInput()">
+                      <i class="material-icons">edit</i>
+                      <span>تغيير الصورة</span>
+                    </button>
                   </div>
                   <div class="image-badge" *ngIf="isExistingMainImage()">
                     موجودة
@@ -84,6 +88,8 @@
                   (change)="onMainImageChange($event)"
                   class="file-input"
                   name="mainImage"
+                  title="اختر صورة رئيسية"
+                  placeholder="اختر صورة رئيسية"
                 />
                 <div class="error-message" *ngIf="mainImageError">
                   <i class="material-icons">error</i>
@@ -129,7 +135,7 @@
                       <button
                         type="button"
                         class="remove-button"
-                        (click)="removeAdditionalMedia(i)"
+                        (click)="removeAdditionalMedia(preview.originalIndex ?? i)"
                       >
                         <i class="material-icons">delete</i>
                       </button>
@@ -183,7 +189,7 @@
                       <button
                         type="button"
                         class="remove-button"
-                        (click)="removeAdditionalMedia(i)"
+                        (click)="removeAdditionalMedia(preview.originalIndex ?? i)"
                       >
                         <i class="material-icons">delete</i>
                       </button>
@@ -239,7 +245,7 @@
                       <button
                         type="button"
                         class="remove-button"
-                        (click)="removeAdditionalMedia(i)"
+                        (click)="removeAdditionalMedia(preview.originalIndex ?? i)"
                       >
                         <i class="material-icons">delete</i>
                       </button>
@@ -267,6 +273,8 @@
               (change)="onAdditionalMediaChange($event)"
               class="file-input"
               name="additionalMedia"
+              placeholder="اختر ملفات الوسائط"
+              title="إضافة صور أو فيديوهات أو مستندات"
             />
             <div class="error-message" *ngIf="additionalMediaError">
               <i class="material-icons">error</i>
@@ -370,9 +378,9 @@
                     (blur)="onInputBlur($event)"
                     aria-label="الحالة"
                   >
-                    <option value="متوفر">متوفر</option>
-                    <option value="غير متوفر">غير متوفر</option>
-                    <option value="قريباً">قريباً</option>
+                    <option value="شراء">شراء</option>
+                    <option value="إيجار">إيجار</option>
+                    <option value="إيجار وشراء">إيجار وشراء</option>
                   </select>
                 </div>
               </div>
@@ -393,7 +401,7 @@
             </div>
 
             <!-- Additional Attributes -->
-            <!-- <div class="form-group-section">
+            <div class="form-group-section">
               <div class="section-header">
                 <div class="section-title">
                   <i class="material-icons">tune</i>
@@ -453,7 +461,7 @@
                   </button>
                 </div>
               </div>
-            </div> -->
+            </div>
           </div>
         </div>
       </form>

@@ -1,4 +1,4 @@
-<div class="modal-overlay" *ngIf="isOpen" (click)="onClose()">
+<div class="modal-overlay" *ngIf="isOpen">
   <div class="modal-container" (click)="$event.stopPropagation()">
     <!-- Modal Header -->
     <div class="modal-header">
@@ -16,13 +16,9 @@
       </button>
     </div>
 
-    <!-- Modal Body -->
     <div class="modal-body">
       <div class="product-details" *ngIf="product">
-        <!-- Product Images Section -->
-        <!-- Images Section -->
         <div class="images-section">
-          <!-- Main Image -->
           <div class="main-image-container" *ngIf="product.mainImageURL">
             <div class="image-wrapper">
               <img

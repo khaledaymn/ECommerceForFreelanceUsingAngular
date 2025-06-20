@@ -1,53 +1,47 @@
 <header class="header">
-  <div class="header-right">
-    <h1 class="page-title">لوحة التحكم</h1>
-    <p class="page-subtitle">مرحبًا بك في لوحة تحكم المتجر الإلكتروني</p>
-  </div>
-  <div class="header-left">
-    <button class="view-store-btn">
-      <span class="material-icons">storefront</span>
-      عرض المتجر
-    </button>
-
-    <div class="user-dropdown" *ngIf="currentUser">
-      <button class="user-avatar" (click)="toggleDropdown()">
-        <span>{{ currentUser.fName }}</span>
-      </button>
-
-      <div
-        class="dropdown-menu"
-        *ngIf="isDropdownOpen"
-        (mouseleave)="closeDropdown()"
-      >
-        <div class="dropdown-header">
-          <div class="user-info">
-            <p class="user-name">{{ currentUser.fName }}</p>
-            <p class="user-email">{{ currentUser.email }}</p>
-          </div>
-        </div>
-
-        <div class="dropdown-divider"></div>
-
-        <ul class="dropdown-list">
-          <li>
-            <a routerLink="/settings/profile">
-              <span class="material-icons">person</span>
-              الملف الشخصي
-            </a>
-          </li>
-          <li>
-            <a routerLink="/settings">
-              <span class="material-icons">settings</span>
-              الإعدادات
-            </a>
-          </li>
-          <li></li>
-        </ul>
-      </div>
+  <div class="header-content">
+    <!-- Page Title Section -->
+    <div class="header-title">
+      <h1 class="page-title">
+        <span class="title-icon">
+          <span class="material-icons">dashboard</span>
+        </span>
+        لوحة التحكم
+      </h1>
+      <p class="page-subtitle">
+        <span class="welcome-text">مرحباً بك في</span>
+        <span class="store-name">متجرك الإلكتروني</span>
+      </p>
     </div>
-    <button class="login-btn" (click)="logout()">
-      <span class="material-icons">logout</span>
-      تسجيل الخروج
-    </button>
+
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <!-- View Store Button -->
+      <a
+        [href]="storeUrl"
+        target="_blank"
+        class="view-store-btn"
+        (click)="openStore()"
+        title="عرض المتجر"
+      >
+        <span class="material-icons">storefront</span>
+        <span class="btn-text">عرض المتجر</span>
+        <span class="material-icons external-icon">open_in_new</span>
+      </a>
+
+      
+      <button
+        class="logout-btn"
+        (click)="logout()"
+        [disabled]="isLoading"
+        title="تسجيل الخروج"
+      >
+        <span class="material-icons">logout</span>
+        <span class="btn-text">تسجيل الخروج</span>
+        <div class="loading-spinner" *ngIf="isLoading"></div>
+      </button>
+     
+    </div>
+
   </div>
 </header>
