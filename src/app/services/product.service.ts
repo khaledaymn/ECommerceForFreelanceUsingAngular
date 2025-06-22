@@ -61,10 +61,11 @@ export class ProductService {
       formData.append('description', product.description);
     if (product.additionalAttributes) {
       formData.append(
-        'AdditionalAttributesJson',
-        JSON.stringify(product.additionalAttributes)
+        'additionalAttributes',
+        product.additionalAttributes.toString()
       );
     }
+
     if (product.brand) formData.append('brand', product.brand);
     if (product.model) formData.append('model', product.model);
     if (product.status) formData.append('status', product.status);
@@ -75,6 +76,8 @@ export class ProductService {
         formData.append('AdditionalMedia', file);
       });
     }
+
+    // console.log(product.additionalAttributes);
 
     return this.http.post<Result>(`${this.baseUrl}/Create`, formData).pipe(
       retry({ count: this.maxRetries }),
@@ -159,19 +162,6 @@ export class ProductService {
         () => new ApiError(400, 'validation', this.errorMessages['imageType'])
       );
     }
-    // if (
-    //   product.additionalMedia &&
-    //   !this.validateMediaFiles(product.additionalMedia)
-    // ) {
-    //   return throwError(
-    //     () =>
-    //       new ApiError(
-    //         400,
-    //         'validation',
-    //         this.getMediaValidationError(product.additionalMedia)
-    //       )
-    //   );
-    // }
 
     let params = new HttpParams()
       .set('Id', product.id.toString())
@@ -179,9 +169,9 @@ export class ProductService {
       .set('Description', product.description || '')
       .set('Brand', product.brand || '')
       .set('Model', product.model || '')
-      .set('Quantity', product.quantity?.toString() || '0')
+      .set('Quantity', product.quantity?.toString() || '')
       .set('Status', product.status || '')
-      .set('CategoryId', product.categoryId?.toString() || '0');
+      .set('CategoryId', product.categoryId?.toString() || '');
 
     // Normalize AdditionalAttributes
     const attributes =
@@ -189,19 +179,20 @@ export class ProductService {
       Object.keys(product.additionalAttributes).length > 0
         ? product.additionalAttributes
         : {};
-    // try {
-    //   const attributesString = JSON.stringify(attributes);
-    //   params = params.set('AdditionalAttributes', attributesString);
-    // } catch (e) {
-    //   return throwError(
-    //     () =>
-    //       new ApiError(
-    //         400,
-    //         'validation',
-    //         'Failed to serialize AdditionalAttributes.'
-    //       )
-    //   );
-    // }
+
+    try {
+      const attributesString = attributes;
+      params = params.set('AdditionalAttributes', attributesString.toString());
+    } catch (e) {
+      return throwError(
+        () =>
+          new ApiError(
+            400,
+            'validation',
+            'Failed to serialize AdditionalAttributes.'
+          )
+      );
+    }
 
 
     if (product.mediaToDelete && product.mediaToDelete.length > 0) {
@@ -239,6 +230,7 @@ export class ProductService {
         )
       );
   }
+
   // updateProduct(product: UpdateProduct): Observable<Result> {
   //   // Client-side validation
   //   if (!product.id || product.id <= 0) {
@@ -305,6 +297,7 @@ export class ProductService {
   //     )
   //   );
   // }
+
   deleteProduct(id: number): Observable<Result> {
     if (id < 1) {
       return throwError(

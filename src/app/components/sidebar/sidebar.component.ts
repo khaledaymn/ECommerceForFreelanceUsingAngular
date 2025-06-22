@@ -39,11 +39,11 @@ export class SidebarComponent {
     //   route: '/admin/orders',
     //   icon: 'shopping_cart',
     // },
-    {
-      label: 'العملاء',
-      route: '/admin/customers',
-      icon: 'people',
-    },
+    // {
+    //   label: 'العملاء',
+    //   route: '/admin/customers',
+    //   icon: 'people',
+    // },
     // {
     //   label: 'المخزون',
     //   route: '/inventory',

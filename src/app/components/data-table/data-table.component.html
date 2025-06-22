@@ -179,7 +179,7 @@
 
             <!-- Currency Type -->
             <span *ngIf="column.type === 'currency'" class="currency-value">
-              {{ formatCurrency(getCellValue(item, column)) }}
+              {{ getCellValue(item, column) }}
             </span>
 
             <!-- Date Type -->
@@ -316,7 +316,7 @@
           </div>
 
           <div class="card-info">
-            <h3 class="card-title">{{ item.name || item.title || "عنصر" }}</h3>
+            <h3 class="card-title">{{ item.name || item.title || item.fName || '' }}</h3>
             <hr />
             <p class="card-description">{{ item.description || "" }}</p>
 
@@ -342,6 +342,9 @@
                   </span>
                   <span *ngIf="!column.type || column.type === 'text'">
                     {{ getCellValue(item, column) }}
+                  </span>
+                  <span *ngIf="!column.type || column.type === 'boolean'">
+                    {{ getCellValue(item, column)?'محظور' : 'غير محظور' }}
                   </span>
                   <span *ngIf="column.type === 'date'" class="date-value">
                     {{ formatDate(getCellValue(item, column)) }}

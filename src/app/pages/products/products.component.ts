@@ -92,8 +92,18 @@ export class ProductManagementComponent implements OnInit {
       width: '15%',
       align: 'center',
     },
-    { key: 'name', title: 'النوع', sortable: true, width: '20%' },
-    { key: 'categoryName', title: 'الفئة', sortable: false, width: '10%' },
+    {
+      key: 'name',
+      title: 'النوع',
+      sortable: true,
+      width: '20%'
+    },
+    {
+      key: 'categoryName',
+      title: 'الفئة',
+      sortable: false,
+      width: '10%'
+    },
     {
       key: 'brand',
       title: 'العلامة التجارية',
@@ -119,11 +129,19 @@ export class ProductManagementComponent implements OnInit {
       align: 'center',
     },
     {
+      key: 'quantity',
+      title: 'الكميه',
+      type: 'currency',
+      sortable: false,
+      width: '12%',
+      align: 'center',
+    },
+    {
       key: 'createdAt',
       title: 'التاريخ',
       type: 'date',
       sortable: false,
-      width: '10%',
+      width: '15%',
       align: 'center',
     },
   ];
@@ -541,7 +559,9 @@ onModelFilterChange(model: string): void {
     this.statusFilter = '';
     this.categoryFilter = '';
     this.attributeFilters = {};
-    this.priceFilter = { min: null, max: null };
+    this.brandFilter = '';
+    this.modelFilter = '';
+    // this.priceFilter = { min: null, max: null };
     this.currentPage = 1;
     this.loadProducts();
   }
@@ -581,6 +601,7 @@ onModelFilterChange(model: string): void {
           model: productData.model,
           status: productData.status,
           categoryId: productData.categoryId,
+          quantity: productData.quantity,
           mainImage: productData.mainImage,
           additionalMedia: productData.additionalMedia || [],
           mediaToDelete: productData.mediaToDelete || [],
@@ -590,7 +611,7 @@ onModelFilterChange(model: string): void {
           next: () => {
             this.loadProducts();
             this.closeModal();
-            console.log('Product updated successfully', productData);
+            console.log('Product updated successfully', productData,"Add. :"+formattedAttributes);
           },
           error: (error) => {
             this.errorMessage =
@@ -608,8 +629,10 @@ onModelFilterChange(model: string): void {
           model: productData.model,
           status: productData.status,
           categoryId: productData.categoryId,
+          quantity: productData.quantity,
           mainImage: productData.mainImage,
           additionalMedia: productData.additionalMedia || [],
+          additionalAttributes: formattedAttributes
         })
         .subscribe({
           next: () => {

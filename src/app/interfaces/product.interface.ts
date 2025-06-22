@@ -8,6 +8,7 @@ export interface CreateProduct {
   model: string;
   status?: string | null;
   categoryId: number;
+  quantity: number;
   mainImage?: File | null; // Image only (png, jpg, jpeg, webp, svg)
   additionalMedia?: File[] | null;
 }
@@ -46,6 +47,7 @@ export interface Product {
   categoryId: number;
   categoryName?: string | null;
   createdAt: string; // ISO date string
+  quantity: number;
   productMedia: ProductMedia[]; // Array of image or video media
 }
 

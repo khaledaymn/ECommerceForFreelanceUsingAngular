@@ -50,6 +50,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
     model: '',
     status: ProductStatus.Purchase.toString(),
     categoryId: '',
+    quantity: 0 as number | 0,
     mainImage: null as File | null,
     additionalMedia: [] as File[],
     additionalAttributes: {} as Record<string, string>,
@@ -103,6 +104,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
         model: this.product.model || '',
         status: this.product.status || ProductStatus.Purchase.toString(),
         categoryId: this.product.categoryId?.toString() || '',
+        quantity: this.product.quantity || 0,
         mainImage: null,
         additionalMedia: [],
         additionalAttributes: this.product.additionalAttributes
@@ -122,6 +124,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
         model: '',
         status: ProductStatus.Purchase.toString(),
         categoryId: '',
+        quantity: 0,
         mainImage: null,
         additionalMedia: [],
         additionalAttributes: {},
@@ -455,6 +458,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
       categoryId: this.formData.categoryId
         ? Number(this.formData.categoryId)
         : 0,
+      quantity: this.formData.quantity || 0,
       mainImage: this.formData.mainImage || null,
       additionalMedia:
         this.formData.additionalMedia.length > 0
@@ -466,6 +470,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
           ? this.formData.additionalAttributes
           : {},
     };
+    console.log(submitData.quantity);
 
     this.save.emit(submitData);
     this.isSubmitting = false;

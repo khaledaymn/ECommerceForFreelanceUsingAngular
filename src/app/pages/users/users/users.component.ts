@@ -42,10 +42,34 @@ import { UserService } from '../../../services/user.service';
 })
 export class UsersComponent implements OnInit {
   columns: TableColumn[] = [
-    { key: 'fName', title: 'الاسم الأول', sortable: true, width: '15%' },
-    { key: 'lName', title: 'الاسم الأخير', sortable: true, width: '15%' },
-    { key: 'email', title: 'البريد الإلكتروني', sortable: true, width: '20%' },
-    { key: 'phoneNumber', title: 'رقم الهاتف', sortable: true, width: '15%' },
+    { 
+      key: 'fName', 
+      title: 'الاسم الأول', 
+      sortable: true, 
+      type: 'text',
+      width: '15%' 
+    },
+    { 
+      key: 'lName', 
+      title: 'الاسم الأخير', 
+      sortable: true, 
+      type: 'text',
+      width: '15%' 
+    },
+    // { 
+    //   key: 'email', 
+    //   title: 'البريد الإلكتروني', 
+    //   sortable: true, 
+    //   type: 'text',
+    //   width: '20%' 
+    // },
+    { 
+      key: 'phoneNumber', 
+      title: 'رقم الهاتف', 
+      sortable: true, 
+      type: 'text',
+      width: '15%' 
+    },
     // { key: 'isBlocked', title: 'حالة الحظر', type: 'boolean', sortable: true, width: '10%' },
     {
       key: 'isDeleted',
@@ -62,6 +86,7 @@ export class UsersComponent implements OnInit {
     { label: 'حظر/إلغاء الحظر', icon: 'block', action: 'toggleBlock' },
     { label: 'حذف', icon: 'delete', action: 'delete', type: 'danger' },
   ];
+  viewMode: 'table' | 'grid' = 'table';
 
   users = signal<User[]>([]);
   totalItems = signal<number>(0);
@@ -82,7 +107,6 @@ export class UsersComponent implements OnInit {
     isBlocked: undefined,
   });
 
-  viewMode: 'table' | 'grid' = 'table';
   isDetailsModalOpen = false;
   isEditModalOpen = false;
   selectedUser: User | null = null;
