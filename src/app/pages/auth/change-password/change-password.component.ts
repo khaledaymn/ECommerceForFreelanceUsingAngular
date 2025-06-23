@@ -117,10 +117,18 @@ export class ChangePasswordComponent implements OnInit {
   submitChangePassword(): void {
     if (this.changePasswordForm.invalid) {
       this.changePasswordForm.markAllAsTouched();
+      // this.toastService.show({
+      //   message: 'يرجى إكمال جميع الحقول المطلوبة بشكل صحيح',
+      //   type: 'error',
+      // });
       return;
     }
 
     if (!this.userId) {
+      // this.toastService.show({
+      //   message: 'معرف المستخدم غير متوفر. يرجى تسجيل الدخول.',
+      //   type: 'error',
+      // });
       this.router.navigate(['/login']);
       return;
     }
@@ -145,6 +153,7 @@ export class ChangePasswordComponent implements OnInit {
           this.isSubmitting = false;
           const errorMessage =
             'حدث خطأ أثناء تغيير كلمة المرور. يرجى المحاولة مرة أخرى.';
+
           this.notification.error('خطأ', errorMessage);
           console.error('Password change error:', error);
         },

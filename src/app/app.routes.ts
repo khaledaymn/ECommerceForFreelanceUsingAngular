@@ -12,6 +12,7 @@ import { InventoryComponent } from './pages/inventory/inventory.component';
 import { AnalyticsComponent } from './pages/analytics/analytics.component';
 import { SettingsComponent } from './pages/settings/settings.component';
 import { ChangePasswordComponent } from './pages/auth/change-password/change-password.component';
+import { UserManagementComponent } from './pages/auth/change-email/change-email.component';
 
 export const routes: Routes = [
   {
@@ -39,7 +40,7 @@ export const routes: Routes = [
       { path: 'inventory', component: InventoryComponent },
       { path: 'analytics', component: AnalyticsComponent },
       // { path: 'settings', component: SettingsComponent },
-      { path: 'settings', component: ChangePasswordComponent },
+      { path: 'settings', component: UserManagementComponent },
     ],
   },
   {

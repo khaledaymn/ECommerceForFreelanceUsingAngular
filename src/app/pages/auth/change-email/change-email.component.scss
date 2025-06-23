@@ -1,0 +1,210 @@
+.card {
+  border-radius: 10px;
+  background-color: #fff;
+  width: 100%; /* Fluid width */
+  max-width: 900px; /* Wider max-width for side-by-side forms */
+  min-width: 280px; /* Minimum width for very small screens */
+  margin: 0 auto; /* Center the card */
+  transition: all 0.3s ease; /* Smooth resizing */
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #000;
+  font-weight: bold;
+  padding: 1rem;
+  transition: all 0.3s ease;
+  border-radius: 5px; /* Consistent with form-control */
+  width: 100%; /* Full width for better touch targets */
+
+  &:hover {
+    background-color: #e0a800;
+    border-color: #e0a800;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.form-control {
+  border-radius: 5px;
+  font-size: 1rem; /* Default font size */
+  width: 100%; /* Ensure full width */
+  transition: all 0.3s ease; /* Smooth transitions */
+}
+
+.form-label {
+  font-weight: 500;
+  color: #333;
+  font-size: 1rem; /* Default font size */
+  margin-bottom: 0.5rem; /* Consistent spacing */
+}
+
+.invalid-feedback {
+  font-size: 0.875rem;
+  color: #dc3545; /* Bootstrap-style error color */
+}
+
+/* Responsive adjustments */
+@media (min-width: 1200px) {
+  .card {
+    max-width: 1000px; /* Slightly wider for large screens */
+  }
+
+  .btn-warning {
+    padding: 1.2rem;
+    font-size: 1.1rem;
+  }
+
+  .form-control {
+    // padding: 0.85rem;
+    font-size: 1.1rem;
+  }
+
+  .form-label {
+    font-size: 1.1rem;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    max-width: 90%; /* More fluid width for tablets */
+    padding: 1rem;
+  }
+
+  .card-body {
+    padding: 1.75rem;
+  }
+
+  .btn-warning {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .form-control {
+    // padding: 0.65rem;
+    font-size: 0.95rem;
+  }
+
+  .form-label {
+    font-size: 0.95rem;
+  }
+
+  .section-title {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .card {
+    max-width: 95%; /* Almost full width for small screens */
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  .btn-warning {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+
+  .form-control {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+
+  .form-label {
+    font-size: 0.9rem;
+  }
+
+  .invalid-feedback {
+    font-size: 0.8rem;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .card {
+    max-width: 100%; /* Full width for very small screens */
+    min-width: 250px; /* Ensure usability */
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  .btn-warning {
+    // padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .form-control {
+    // padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .form-label {
+    font-size: 0.85rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .invalid-feedback {
+    font-size: 0.75rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .card {
+    max-width: 100%; /* Full width for tiny screens */
+    min-width: 220px; /* Further reduced minimum width */
+  }
+
+  .card-body {
+    padding: 0.75rem;
+  }
+
+  .btn-warning {
+    padding: 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  .form-control {
+    padding: 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  .form-label {
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .invalid-feedback {
+    font-size: 0.7rem;
+  }
+
+  .section-title {
+    font-size: 0.9rem;
+  }
+}

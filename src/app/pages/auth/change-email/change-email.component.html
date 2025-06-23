@@ -1,0 +1,167 @@
+<div class="container py-5 m-0">
+  <div class="row justify-content-center">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h2 class="card-title text-center mb-4">إدارة المستخدم</h2>
+          <div class="row">
+            <!-- Change Password Form -->
+            <div class="col-md-6 mb-4 mb-md-0">
+              <h3 class="section-title mb-3">تغيير كلمة المرور</h3>
+              <form
+                [formGroup]="changePasswordForm"
+                (ngSubmit)="submitChangePassword()"
+              >
+                <!-- Old Password -->
+                <div class="mb-3">
+                  <label for="oldPassword" class="form-label"
+                    >كلمة المرور القديمة</label
+                  >
+                  <input
+                    type="password"
+                    id="oldPassword"
+                    formControlName="oldPassword"
+                    class="form-control"
+                    [ngClass]="{
+                      'is-invalid': isFieldInvalid(
+                        changePasswordForm,
+                        'oldPassword'
+                      )
+                    }"
+                    placeholder="أدخل كلمة المرور القديمة"
+                  />
+                  <div
+                    *ngIf="isFieldInvalid(changePasswordForm, 'oldPassword')"
+                    class="invalid-feedback"
+                  >
+                    {{ getFieldError(changePasswordForm, "oldPassword") }}
+                  </div>
+                </div>
+
+                <!-- New Password -->
+                <div class="mb-3">
+                  <label for="newPassword" class="form-label"
+                    >كلمة المرور الجديدة</label
+                  >
+                  <input
+                    type="password"
+                    id="newPassword"
+                    formControlName="newPassword"
+                    class="form-control"
+                    [ngClass]="{
+                      'is-invalid': isFieldInvalid(
+                        changePasswordForm,
+                        'newPassword'
+                      )
+                    }"
+                    placeholder="أدخل كلمة المرور الجديدة"
+                  />
+                  <div
+                    *ngIf="isFieldInvalid(changePasswordForm, 'newPassword')"
+                    class="invalid-feedback"
+                  >
+                    {{ getFieldError(changePasswordForm, "newPassword") }}
+                  </div>
+                </div>
+
+                <!-- Confirm New Password -->
+                <div class="mb-3">
+                  <label for="confirmNewPassword" class="form-label"
+                    >تأكيد كلمة المرور الجديدة</label
+                  >
+                  <input
+                    type="password"
+                    id="confirmNewPassword"
+                    formControlName="confirmNewPassword"
+                    class="form-control"
+                    [ngClass]="{
+                      'is-invalid': isFieldInvalid(
+                        changePasswordForm,
+                        'confirmNewPassword'
+                      )
+                    }"
+                    placeholder="أدخل كلمة المرور الجديدة مرة أخرى"
+                  />
+                  <div
+                    *ngIf="
+                      isFieldInvalid(changePasswordForm, 'confirmNewPassword')
+                    "
+                    class="invalid-feedback"
+                  >
+                    {{
+                      getFieldError(changePasswordForm, "confirmNewPassword")
+                    }}
+                  </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid">
+                  <button
+                    type="submit"
+                    class="btn btn-warning"
+                    [disabled]="
+                      isSubmittingPassword || changePasswordForm.invalid
+                    "
+                  >
+                    {{
+                      isSubmittingPassword
+                        ? "جاري التغيير..."
+                        : "تغيير كلمة المرور"
+                    }}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Update Email Form -->
+            <div class="col-md-6">
+              <h3 class="section-title mb-3">تغيير البريد الإلكتروني</h3>
+              <form
+                [formGroup]="updateEmailForm"
+                (ngSubmit)="submitUpdateEmail()"
+              >
+                <!-- Email -->
+                <div class="mb-3">
+                  <label for="email" class="form-label"
+                    >البريد الإلكتروني</label
+                  >
+                  <input
+                    type="email"
+                    id="email"
+                    formControlName="email"
+                    class="form-control"
+                    [ngClass]="{
+                      'is-invalid': isFieldInvalid(updateEmailForm, 'email')
+                    }"
+                    placeholder="أدخل البريد الإلكتروني الجديد"
+                  />
+                  <div
+                    *ngIf="isFieldInvalid(updateEmailForm, 'email')"
+                    class="invalid-feedback"
+                  >
+                    {{ getFieldError(updateEmailForm, "email") }}
+                  </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid">
+                  <button
+                    type="submit"
+                    class="btn btn-warning"
+                    [disabled]="isSubmittingEmail || updateEmailForm.invalid"
+                  >
+                    {{
+                      isSubmittingEmail
+                        ? "جاري التحديث..."
+                        : "تحديث البريد الإلكتروني"
+                    }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
