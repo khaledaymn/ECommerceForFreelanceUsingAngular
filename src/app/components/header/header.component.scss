@@ -233,27 +233,7 @@
     padding: 0.5rem;
 
     .header-title {
-      .page-title {
-        font-size: 1.25rem;
-        gap: 0.5rem;
-
-        .title-icon {
-          width: 32px;
-          height: 32px;
-
-          .material-icons {
-            font-size: 18px;
-          }
-        }
-      }
-
-      .page-subtitle {
-        font-size: 0.8rem;
-
-        .store-name {
-          padding: 0.15rem 0.5rem;
-        }
-      }
+      display: none; // إخفاء header-title بالكامل
     }
 
     .header-actions {
@@ -297,21 +277,6 @@
 @media (max-width: 360px) {
   .header {
     padding: 0.5rem 0.25rem;
-
-    .header-title {
-      .page-title {
-        font-size: 1.1rem;
-        flex-direction: column;
-        gap: 0.25rem;
-        text-align: center;
-      }
-
-      .page-subtitle {
-        font-size: 0.75rem;
-        flex-direction: column;
-        gap: 0.25rem;
-      }
-    }
 
     .header-actions {
       flex-direction: row;
