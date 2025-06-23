@@ -50,7 +50,7 @@
 //       //   message: 'معرف المستخدم غير متوفر.',
 //       //   type: 'error',
 //       // });
-//       this.router.navigate(['/admin/dashboard']);
+//       this.router.navigate(['/admin/products']);
 //       return;
 //     }
 
@@ -99,7 +99,7 @@
 //       //   message: 'معرف المستخدم أو بيانات المستخدم غير متوفرة.',
 //       //   type: 'error',
 //       // });
-//       this.router.navigate(['/admin/dashboard']);
+//       this.router.navigate(['/admin/products']);
 //       return;
 //     }
 
@@ -127,7 +127,7 @@
 //         //   message: response.message || 'تم تحديث البريد الإلكتروني بنجاح!',
 //         //   type: 'success',
 //         // });
-//         this.router.navigate(['/admin/dashboard']);
+//         this.router.navigate(['/admin/products']);
 //       },
 //       error: (error) => {
 //         this.isSubmitting = false;
@@ -349,7 +349,8 @@ export class UserManagementComponent implements OnInit {
       //   message: 'معرف المستخدم أو بيانات المستخدم غير متوفرة.',
       //   type: 'error',
       // });
-      this.router.navigate(['/admin/dashboard']);
+
+      this.router.navigate(['/admin/products']);
       return;
     }
 
@@ -383,7 +384,8 @@ export class UserManagementComponent implements OnInit {
         //   message: response.message || 'تم تحديث البريد الإلكتروني بنجاح!',
         //   type: 'success',
         // });
-        this.router.navigate(['/admin/dashboard']);
+        this.notification.success('نجاح', 'تم تغيير الايميل بنجاح');
+        this.router.navigate(['/admin/products']);
       },
       error: (error) => {
         this.isSubmittingEmail = false;
@@ -393,6 +395,7 @@ export class UserManagementComponent implements OnInit {
         //   message: errorMessage,
         //   type: 'error',
         // });
+        this.notification.error('خطأ', 'حدث خطأ أثناء تحديث البريد الإلكتروني');
         console.error('Email update error:', error);
       },
     });
