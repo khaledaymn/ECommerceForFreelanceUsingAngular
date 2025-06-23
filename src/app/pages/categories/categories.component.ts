@@ -7,6 +7,7 @@ import { DataTableComponent, TableAction, TableColumn } from "../../components/d
 import { CategoryModalComponent } from "./modals/category-modal/category-modal.component"
 import { ConfirmDialogComponent } from "../../components/confirm-dialog/confirm-dialog.component"
 import { CategoryDetailsModalComponent } from "./modals/category-details-modal/category-details-modal.component"
+import { NotificationService } from "../../services/notification.service"
 
 @Component({
   selector: "app-category",
@@ -64,7 +65,9 @@ export class CategoryManagementComponent implements OnInit {
 
   viewMode: "table" | "grid" = "table"
 
-  constructor(private categoryService: CategoryService) {}
+  constructor(private categoryService: CategoryService,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit(): void {
     this.loadCategories()
@@ -99,6 +102,7 @@ export class CategoryManagementComponent implements OnInit {
       },
       error: (error) => {
         console.error("Error loading categories:", error)
+        this.notificationService.error("خطأ في تحميل البيانات", "فشل في تحميل قائمة الفئات. يرجى المحاولة مرة أخرى.")
         this.loading = false
       },
     })
@@ -177,11 +181,13 @@ export class CategoryManagementComponent implements OnInit {
         })
         .subscribe({
           next: () => {
+            this.notificationService.success("تم التحديث بنجاح", `تم تحديث الفئة "${categoryData.name}" بنجاح.`)
             this.loadCategories()
             this.closeModal()
           },
           error: (error) => {
             console.error("Error updating category:", error)
+            this.notificationService.error("خطأ في التحديث", "فشل في تحديث الفئة. يرجى المحاولة مرة أخرى.")
           },
         })
     } else {
@@ -194,11 +200,13 @@ export class CategoryManagementComponent implements OnInit {
         })
         .subscribe({
           next: () => {
+            this.notificationService.success("تم الإنشاء بنجاح", `تم إنشاء الفئة "${categoryData.name}" بنجاح.`)
             this.loadCategories()
             this.closeModal()
           },
           error: (error) => {
             console.error("Error creating category:", error)
+            this.notificationService.error("خطأ في الإنشاء", "فشل في إنشاء الفئة. يرجى المحاولة مرة أخرى.")
           },
         })
     }
@@ -221,13 +229,17 @@ export class CategoryManagementComponent implements OnInit {
 
   confirmDelete(): void {
     if (this.deleteConfirm.categoryId) {
+      const categoryToDelete = this.categories.find((c) => c.id === this.deleteConfirm.categoryId)
+      const categoryName = categoryToDelete?.name || "الفئة"
       this.categoryService.deleteCategory(this.deleteConfirm.categoryId).subscribe({
         next: () => {
+          this.notificationService.success("تم الحذف بنجاح", `تم حذف الفئة "${categoryName}" بنجاح.`)
           this.loadCategories()
           this.closeDeleteConfirm()
         },
         error: (error) => {
           console.error("Error deleting category:", error)
+          this.notificationService.error("خطأ في الحذف", "فشل في حذف الفئة. يرجى المحاولة مرة أخرى.")
           this.closeDeleteConfirm()
         },
       })

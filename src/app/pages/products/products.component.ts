@@ -13,6 +13,7 @@ import {
 import { ProductModalComponent } from './modals/product-modal/product-modal.component';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { ProductDetailsModalComponent } from './modals/product-details-modal/product-details-modal.component';
+import { NotificationService } from '../../services/notification.service';
 
 interface AttributeFilter {
   key: string;
@@ -156,6 +157,7 @@ export class ProductManagementComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
+    private notificationService: NotificationService,
     private categoryService: CategoryService
   ) {}
 
@@ -267,6 +269,7 @@ export class ProductManagementComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading products:', error);
+        this.notificationService.error("خطأ في تحميل البيانات", "فشل في تحميل قائمة المنتجات. يرجى المحاولة مرة أخرى.")
         this.loading = false;
       },
     });
@@ -609,14 +612,15 @@ onModelFilterChange(model: string): void {
         })
         .subscribe({
           next: () => {
+            this.notificationService.success("تم التحديث بنجاح", `تم تحديث المنتج "${productData.name}" بنجاح.`)
             this.loadProducts();
             this.closeModal();
-            console.log('Product updated successfully', productData,"Add. :"+formattedAttributes);
           },
           error: (error) => {
             this.errorMessage =
               error.message || 'فشل في تحديث المنتج. حاول مرة أخرى.';
             console.error('Error updating product:', error);
+            this.notificationService.error("خطأ في التحديث", "فشل في تحديث المنتج. يرجى المحاولة مرة أخرى.")
           },
         });
     } else {
@@ -636,6 +640,7 @@ onModelFilterChange(model: string): void {
         })
         .subscribe({
           next: () => {
+            this.notificationService.success("تم الإنشاء بنجاح", `تم إنشاء المنتج "${productData.name}" بنجاح.`)
             this.loadProducts();
             this.closeModal();
             console.log('Product created successfully', productData);
@@ -645,6 +650,7 @@ onModelFilterChange(model: string): void {
               error.message ||
               'فشل في إنشاء المنتج. تأكد من أن جميع الملفات مدعومة.';
             console.error('Error creating product:', error);
+             this.notificationService.error("خطأ في الإنشاء", "فشل في إنشاء المنتج. يرجى المحاولة مرة أخرى.")
           },
         });
     }
@@ -666,15 +672,19 @@ onModelFilterChange(model: string): void {
 
   confirmDelete(): void {
     if (this.deleteConfirm.productId) {
+      const productToDelete = this.products.find((p) => p.id === this.deleteConfirm.productId)
+      const productName = productToDelete?.name || "المنتج"
       this.productService
         .deleteProduct(this.deleteConfirm.productId)
         .subscribe({
           next: () => {
+            this.notificationService.success("تم الحذف بنجاح", `تم حذف المنتج "${productName}" بنجاح.`)
             this.loadProducts();
             this.closeDeleteConfirm();
           },
           error: (error) => {
             console.error('Error deleting product:', error);
+            this.notificationService.error("خطأ في الحذف", "فشل في حذف المنتج. يرجى المحاولة مرة أخرى.")
             this.closeDeleteConfirm();
           },
         });
