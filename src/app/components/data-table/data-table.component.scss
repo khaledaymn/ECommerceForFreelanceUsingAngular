@@ -767,6 +767,7 @@ $rent-and-purchase-color: #FF9800;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -778,7 +779,7 @@ $rent-and-purchase-color: #FF9800;
   line-height: 1.5;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

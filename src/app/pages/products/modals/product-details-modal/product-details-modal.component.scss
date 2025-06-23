@@ -83,7 +83,7 @@ $rent-and-purchase-color: #FF9800;
 .header-icon {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, $secondary 0%, darken($secondary, 10%) 100%);
+  background: linear-gradient(135deg, $secondary 0%,  ($secondary, 10%) 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -763,24 +763,24 @@ $rent-and-purchase-color: #FF9800;
   }
 
   &.edit-button {
-    background: linear-gradient(135deg, $secondary 0%, darken($secondary, 10%) 100%);
+    background: linear-gradient(135deg, $secondary 0%,  ($secondary, 10%) 100%);
     color: $white;
     box-shadow: 0 4px 8px rgba($secondary, 0.3);
 
     &:hover {
-      background: linear-gradient(135deg, darken($secondary, 10%) 0%, darken($secondary, 20%) 100%);
+      background: linear-gradient(135deg,  ($secondary, 10%) 0%,  ($secondary, 20%) 100%);
       transform: translateY(-1px);
       box-shadow: 0 6px 16px rgba($secondary, 0.4);
     }
   }
 
   &.danger-button {
-    background: linear-gradient(135deg, $danger 0%, darken($danger, 10%) 100%);
+    background: linear-gradient(135deg, $danger 0%,  ($danger, 10%) 100%);
     color: $white;
     box-shadow: 0 4px 8px rgba($danger, 0.3);
 
     &:hover {
-      background: linear-gradient(135deg, darken($danger, 10%) 0%, darken($danger, 20%) 100%);
+      background: linear-gradient(135deg,  ($danger, 10%) 0%,  ($danger, 20%) 100%);
       transform: translateY(-1px);
       box-shadow: 0 6px 16px rgba($danger, 0.4);
     }

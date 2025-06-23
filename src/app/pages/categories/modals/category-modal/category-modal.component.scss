@@ -185,7 +185,7 @@ $breakpoint-xl: 1280px;
   @include flex-column;
   animation: slideUp 0.3s ease-out;
   direction: rtl;
-  
+
   @media (max-width: 768px) {
     max-width: 95vw;
     max-height: 95vh;
@@ -206,7 +206,7 @@ $breakpoint-xl: 1280px;
   padding: 1.5rem 2rem;
   @include flex-between;
   flex-shrink: 0;
-  
+
   @media (max-width: 768px) {
     padding: 1rem 1.5rem;
   }
@@ -223,21 +223,21 @@ $breakpoint-xl: 1280px;
   height: 48px;
   // background: rgba($white, 0.2);
   // background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
-  background: linear-gradient(135deg, #F5C518 0%, darken(#F5C518, 8%) 100%);
+  background: linear-gradient(135deg, #F5C518 0%,  (#F5C518, 8%) 100%);
   border-radius: 12px;
   @include flex-center;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  
+
   @media (max-width: 768px) {
     width: 40px;
     height: 40px;
   }
-  
+
   .material-icons {
     font-size: 24px;
     color: $white;
-    
+
     @media (max-width: 768px) {
       font-size: 20px;
     }
@@ -253,7 +253,7 @@ $breakpoint-xl: 1280px;
   font-weight: 700;
   margin: 0 0 4px 0;
   line-height: 1.2;
-  
+
   @media (max-width: 768px) {
     font-size: 1.25rem;
   }
@@ -278,12 +278,12 @@ $breakpoint-xl: 1280px;
   // color: $white;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(4px);
-  
+
   &:hover {
     background: rgb(195, 198, 202);
     transform: scale(1.05);
   }
-  
+
   .material-icons {
     font-size: 20px;
   }
@@ -297,24 +297,24 @@ $breakpoint-xl: 1280px;
   min-height: 0;
   -webkit-overflow-scrolling: touch;
   background: $gray-50;
-  
+
   @media (max-width: 768px) {
     padding: 1.5rem;
   }
-  
+
   &::-webkit-scrollbar {
     width: 6px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: $gray-100;
     border-radius: 3px;
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background: $gray-300;
     border-radius: 3px;
-    
+
     &:hover {
       background: $gray-400;
     }
@@ -324,7 +324,7 @@ $breakpoint-xl: 1280px;
 // Form Elements (keeping existing styles)
 .form-group {
   margin-bottom: 1.5rem;
-  
+
   &:last-child {
     margin-bottom: 0;
   }
@@ -337,13 +337,13 @@ $breakpoint-xl: 1280px;
   font-weight: 600;
   color: $gray-600; // Changed from $gray-700 to lighter gray
   margin-bottom: 8px;
-  
+
   &.required::after {
     content: '*';
     color: $danger-color;
     margin-right: 4px;
   }
-  
+
   .material-icons {
     font-size: 16px;
     color: #F5C518;
@@ -355,7 +355,7 @@ $breakpoint-xl: 1280px;
   @include input-base;
   padding: 12px 16px;
   color: $gray-700; // Gray text color
-  
+
   &::placeholder {
     color: $gray-400;
   }
@@ -382,14 +382,14 @@ $breakpoint-xl: 1280px;
   @include flex-center;
   position: relative;
   overflow: hidden;
-  
+
   &:hover {
     border-color: #F5C518;
     background: rgba(#F5C518, 0.05);
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(#F5C518, 0.15);
   }
-  
+
   &.drag-over {
     border-color: #F5C518;
     background: rgba(#F5C518, 0.1);
@@ -415,7 +415,7 @@ $breakpoint-xl: 1280px;
   @include flex-center;
   margin-bottom: 8px;
   box-shadow: 0 4px 8px rgba(#F5C518, 0.3);
-  
+
   .material-icons {
     font-size: 32px;
     color: $white;
@@ -449,7 +449,7 @@ $breakpoint-xl: 1280px;
   padding: 3px 6px;
   border-radius: 4px;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: #F5C518;
     color: $white;
@@ -471,25 +471,25 @@ $breakpoint-xl: 1280px;
   background: $gray-50;
   border: 2px solid $gray-200;
   transition: all 0.3s ease;
-  
+
   &:hover {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    
+
     .image-overlay {
       opacity: 1;
     }
   }
-  
+
   &.success-state {
     border-color: $success-color;
     box-shadow: 0 0 16px rgba($success-color, 0.3);
   }
-  
+
   &.editing-preview {
     border-color: #F5C518;
     box-shadow: 0 0 12px rgba(#F5C518, 0.2);
   }
-  
+
   &.new-image-preview {
     border-color: $success-color;
     box-shadow: 0 0 12px rgba($success-color, 0.2);
@@ -523,7 +523,7 @@ $breakpoint-xl: 1280px;
   z-index: 2;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  
+
   .material-icons {
     font-size: 12px;
   }
@@ -544,7 +544,7 @@ $breakpoint-xl: 1280px;
   z-index: 2;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  
+
   .material-icons {
     font-size: 12px;
   }
@@ -563,7 +563,7 @@ $breakpoint-xl: 1280px;
   transition: opacity 0.3s ease;
   -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
-  
+
   @media (hover: none) {
     opacity: 1;
     background: rgba($black, 0.5);
@@ -580,27 +580,27 @@ $breakpoint-xl: 1280px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &.change-btn {
     background: $primary-color;
     color: $white;
-    
+
     &:hover {
       background: $primary-dark;
       transform: scale(1.05);
     }
   }
-  
+
   &.remove-btn {
     background: $danger-color;
     color: $white;
-    
+
     &:hover {
-      background: darken($danger-color, 10%);
+      background:  ($danger-color, 10%);
       transform: scale(1.05);
     }
   }
-  
+
   .material-icons {
     font-size: 14px;
   }
@@ -622,7 +622,7 @@ $breakpoint-xl: 1280px;
   border-radius: 6px;
   border: 1px solid rgba($danger-color, 0.2);
   animation: slideInError 0.3s ease-out;
-  
+
   .material-icons {
     font-size: 14px;
   }
@@ -647,7 +647,7 @@ $breakpoint-xl: 1280px;
   background: $white;
   gap: 1rem;
   flex-shrink: 0;
-  
+
   @media (max-width: 768px) {
     padding: 1rem 1.5rem;
     flex-direction: column-reverse;
@@ -659,16 +659,16 @@ $breakpoint-xl: 1280px;
   padding: 12px 24px;
   font-size: 14px;
   font-weight: 500;
-  
+
   @media (max-width: 768px) {
     width: 100%;
   }
-  
+
   &.btn-secondary {
     background: $white;
     color: $gray-600;
     border: 2px solid $gray-300;
-    
+
     &:hover {
       background: $gray-50;
       border-color: $gray-400;
@@ -677,33 +677,33 @@ $breakpoint-xl: 1280px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
   }
-  
+
   &.btn-primary {
     background: linear-gradient(135deg, #F5C518 0%, #F5C518 100%);
     color: $white;
     box-shadow: 0 4px 8px rgba(#F5C518, 0.3);
-    
+
     &:hover:not(:disabled) {
-      background: linear-gradient(135deg, #F5C518 0%, darken(#F5C518, 10%) 100%);
+      background: linear-gradient(135deg, #F5C518 0%,  (#F5C518, 10%) 100%);
       transform: translateY(-1px);
       box-shadow: 0 6px 16px rgba(#F5C518, 0.4);
     }
-    
+
     &:disabled {
       background: $gray-300;
       cursor: not-allowed;
       transform: none;
       box-shadow: none;
     }
-    
+
     &.loading {
       position: relative;
       pointer-events: none;
-      
+
       .btn-text {
         opacity: 0;
       }
-      
+
       &::after {
         content: '';
         position: absolute;
@@ -719,11 +719,11 @@ $breakpoint-xl: 1280px;
       }
     }
   }
-  
+
   .material-icons {
     font-size: 16px;
   }
-  
+
   &.spinning .material-icons {
     animation: spin 1s linear infinite;
   }
@@ -816,7 +816,7 @@ $breakpoint-xl: 1280px;
   .overlay-btn:active {
     transform: scale(0.95);
   }
-  
+
   .upload-area:active {
     border-color: $primary-color;
     background: rgba($primary-color, 0.05);

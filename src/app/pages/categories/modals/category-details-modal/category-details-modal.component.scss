@@ -516,19 +516,19 @@ $gray-900: #111827;
     box-shadow: 0 4px 8px rgba($primary, 0.3);
 
     &:hover {
-      background: linear-gradient(135deg, $primary-dark 0%, darken($primary-dark, 10%) 100%);
+      background: linear-gradient(135deg, $primary-dark 0%,  ($primary-dark, 10%) 100%);
       transform: translateY(-1px);
       box-shadow: 0 6px 16px rgba($primary, 0.4);
     }
   }
 
   &.btn-danger {
-    background: linear-gradient(135deg, $danger 0%, darken($danger, 10%) 100%);
+    background: linear-gradient(135deg, $danger 0%,  ($danger, 10%) 100%);
     color: $white;
     box-shadow: 0 4px 8px rgba($danger, 0.3);
 
     &:hover {
-      background: linear-gradient(135deg, darken($danger, 10%) 0%, darken($danger, 20%) 100%);
+      background: linear-gradient(135deg,  ($danger, 10%) 0%,  ($danger, 20%) 100%);
       transform: translateY(-1px);
       box-shadow: 0 6px 16px rgba($danger, 0.4);
     }
