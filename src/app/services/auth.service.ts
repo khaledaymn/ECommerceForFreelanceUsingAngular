@@ -161,7 +161,26 @@ export class AuthService {
       )
       .pipe(catchError(this.handleError));
   }
-
+  changePassword(changePasswordDto: {
+    userId: string;
+    oldPassword: string;
+    newPassword: string;
+  }): Observable<{ message: string }> {
+    return this.http
+      .post<{ message: string }>(
+        `${this.apiUrl}/Authentication/ChangePassword`,
+        changePasswordDto,
+        {
+          headers: { 'Content-Type': 'application/json', accept: '*/*' },
+        }
+      )
+      .pipe(
+        tap((response) => {
+          // Optionally handle response, e.g., logging or cache clearing
+          console.log('Password change response:', response.message);
+        })
+      );
+  }
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'An error occurred. Please try again.';
     if (error.error instanceof ErrorEvent) {
