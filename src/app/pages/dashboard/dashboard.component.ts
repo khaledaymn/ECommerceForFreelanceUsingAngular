@@ -1,12 +1,12 @@
+// src/app/components/dashboard/dashboard.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardCardComponent } from './dashboard-card/dashboard-card.component';
-import { ChartComponent } from './chart/chart.component';
-import { RecentSalesComponent } from './recent-sales/recent-sales.component';
+// import { DashboardService } from '../../services/dashboard.service';
+import { DashboardData } from '../../interfaces/dashboard.interface';
 import { DashboardService } from '../../services/dashboard.service';
-import { SalesSummary } from '../../interfaces/sales-summary.interface';
-import { Sale } from '../../interfaces/sale.interface';
-import { ChartData } from '../../interfaces/chart-data.interface';
+import { OrderService } from '../../services/order.service';
+// import { DashboardData } from '../../interfaces/dashboard-data.interface';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,22 +16,22 @@ import { ChartData } from '../../interfaces/chart-data.interface';
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent implements OnInit {
-  salesSummary: SalesSummary = {
-    revenue: 0,
-    orders: 0,
-    products: 0,
-    customers: 0,
-    revenueChange: 0,
-    ordersChange: 0,
-    productsChange: 0,
-    customersChange: 0,
+  dashboardData: DashboardData = {
+    totalProducts: 0,
+    totalRentProducts: 0,
+    totalPurchaseProducts: 0,
+    totalRentAndPurchaseProducts: 0,
+    totalNewOrders: 0,
+    totalProcessingOrders: 0,
+    totalCompletedOrders: 0,
+    totalCancelledOrders: 0,
+    totalRentOrders: 0,
+    totalPurchaseOrders: 0,
   };
 
-  recentSales: Sale[] = [];
-  chartData: ChartData = { labels: [], datasets: [] };
   isLoading = true;
 
-  constructor(private dashboardService: DashboardService) {}
+  constructor(private dashboardService: OrderService) {}
 
   ngOnInit() {
     this.loadDashboardData();
@@ -40,36 +40,23 @@ export class DashboardComponent implements OnInit {
   loadDashboardData() {
     this.isLoading = true;
 
-    // Load sales summary
-    this.dashboardService.getSalesSummary().subscribe({
+    this.dashboardService.getDashboardData().subscribe({
       next: (data) => {
-        this.salesSummary = data;
+        this.dashboardData = data;
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading sales summary', error);
+        console.error('Error loading dashboard data', error);
         this.isLoading = false;
       },
     });
+  }
 
-    // Load recent sales
-    this.dashboardService.getRecentSales().subscribe({
-      next: (data) => {
-        this.recentSales = data;
-      },
-      error: (error) => {
-        console.error('Error loading recent sales', error);
-      },
-    });
-
-    // Load chart data
-    this.dashboardService.getSalesChartData().subscribe({
-      next: (data) => {
-        this.chartData = data;
-      },
-      error: (error) => {
-        console.error('Error loading chart data', error);
-      },
-    });
+  // دوال مساعدة (يمكن إضافتها لاحقًا إذا أردت نسب تغيير)
+  isPositive(): boolean {
+    return false; // يمكن تحديثها إذا كان هناك تغيير
+  }
+  isNegative(): boolean {
+    return false; // يمكن تحديثها إذا كان هناك تغيير
   }
 }

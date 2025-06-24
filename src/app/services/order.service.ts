@@ -11,6 +11,7 @@ import {
 } from '../interfaces/order.interface';
 import { createLinkedSignal } from '@angular/core/primitives/signals';
 import { Result } from '../interfaces/category';
+import { DashboardData } from '../interfaces/dashboard.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -24,6 +25,11 @@ export class OrderService {
   private readonly cacheTTL = 5 * 60 * 1000; // 5 minutes
 
   constructor(private http: HttpClient) {}
+  getDashboardData(): Observable<DashboardData> {
+    return this.http.get<DashboardData>(
+      `${this.apiUrl}/Dashboard/GetDashboardData`
+    );
+  }
 
   getOrders(filter: OrdersFilter): Observable<OrdersResponse> {
     const cacheKey = JSON.stringify(filter);

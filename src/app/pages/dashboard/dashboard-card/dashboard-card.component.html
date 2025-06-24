@@ -5,7 +5,11 @@
   </div>
   <div class="card-content">
     <div class="card-value">{{ value }}</div>
-    <p class="card-change" [class.positive]="isPositive()" [class.negative]="isNegative()">
+    <p
+      class="card-change"
+      [class.positive]="isPositive()"
+      [class.negative]="isNegative()"
+    >
       {{ change }}
     </p>
   </div>
