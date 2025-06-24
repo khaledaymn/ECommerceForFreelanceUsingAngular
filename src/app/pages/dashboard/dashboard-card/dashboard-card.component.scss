@@ -1,454 +1,66 @@
 .dashboard-card {
-  position: relative;
-  background-color: #e0f2fe; // أزرق فاتح (من .processing) كلون افتراضي
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e5e7eb;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-  min-height: 180px;
-  display: flex;
-  flex-direction: column;
+  background-color: #f9fafb; // خلفية رمادية فاتحة جدًا للراحة البصرية
+  border-radius: 12px; // زوايا أكثر انسيابية
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08); // ظل أعمق للعمق
+  padding: 20px; // مساحة داخلية أكبر لتحسين القراءة
+  border: 1px solid #e5e7eb; // إضافة حدود خفيفة
+  transition: all 0.3s ease; // انتقال سلس للتغييرات
 
   &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.08);
-
-    .card-glow {
-      opacity: 1;
-    }
-
-    .card-hover-effect {
-      opacity: 1;
-    }
-
-    .icon-container {
-      transform: scale(1.1) rotate(5deg);
-    }
-
-    .card-value {
-      transform: scale(1.05);
-    }
+    box-shadow: 0 7px 14px rgba(0, 0, 0, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08); // ظل أقوى عند التمرير
+    transform: translateY(-2px); // رفع البطاقة قليلاً
   }
-
-  // Card variants
-  &.primary {
-    background-color: #dbeafe; // أزرق فاتح (من .shipped)
-    color: #1e40af;
-
-    .card-title,
-    .card-value {
-      color: #1e40af;
-    }
-  }
-
-  &.success {
-    background-color: #d1fae5; // أخضر فاتح (من .delivered)
-    color: #065f46;
-
-    .card-title,
-    .card-value {
-      color: #065f46;
-    }
-  }
-
-  &.warning {
-    background-color: #fef3c7; // أصفر فاتح (من .pending)
-    color: #92400e;
-
-    .card-title,
-    .card-value {
-      color: #92400e;
-    }
-  }
-
-  &.info {
-    background-color: #e0f2fe; // أزرق فاتح (من .processing)
-    color: #0369a1;
-
-    .card-title,
-    .card-value {
-      color: #0369a1;
-    }
-  }
-
-  &.cancelled {
-    background-color: #fee2e2; // أحمر فاتح (من .cancelled)
-    color: #b91c1c;
-
-    .card-title,
-    .card-value {
-      color: #b91c1c;
-    }
-  }
-}
-
-.card-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  overflow: hidden;
-  border-radius: 20px;
-}
-
-.card-pattern {
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 20px 20px;
-  animation: float 20s ease-in-out infinite;
-}
-
-.card-glow {
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: linear-gradient(45deg, #e0f2fe, #d1fae5); // تدرج بين أزرق وأخضر
-  background-size: 400% 400%;
-  border-radius: 22px;
-  opacity: 0;
-  z-index: -1;
-  animation: gradientShift 3s ease infinite;
-  transition: opacity 0.3s ease;
-}
-
-.card-hover-effect {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-  border-radius: 20px;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 16px;
+  align-items: center;
+  margin-bottom: 12px; // مساحة أكبر بين العنوان والمحتوى
 }
 
-.icon-container {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #dbeafe; // أزرق فاتح (من .shipped)
-  box-shadow: 0 8px 16px rgba(219, 234, 254, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.5s ease;
-  }
-
-  &:hover::before {
-    left: 100%;
-  }
+.card-title {
+  font-size: 16px; // زيادة الحجم لتحسين القراءة
+  font-weight: 600; // وزن أقوى للتميز
+  color: #374151; // لون داكن للنصوص
+  margin: 0;
+  text-transform: uppercase; // تحويل إلى أحرف كبيرة للأناقة
+  letter-spacing: 0.5px; // تباعد الحروف للمظهر الحديث
 }
 
 .card-icon {
-  font-size: 28px;
-  color: #1e40af; // أزرق داكن (من .shipped)
-  z-index: 1;
-}
+  color: #6b7280; // لون أيقونة أغمق قليلاً
+  font-size: 24px; // زيادة حجم الأيقونة
+  transition: color 0.3s ease; // انتقال لون عند التفاعل
 
-.card-actions {
-  .action-btn {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: rgba(0, 0, 0, 0.1);
-      transform: scale(1.1);
-    }
-
-    .material-icons {
-      font-size: 18px;
-      color: #64748b;
-    }
+  .dashboard-card:hover & {
+    color: #3b82f6; // لون أزرق عند التمرير
   }
 }
 
 .card-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.card-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #64748b;
-  margin: 0 0 12px 0;
-  line-height: 1.4;
-  text-align: right;
-}
-
-.card-value-container {
-  position: relative;
-  margin-bottom: 16px;
+  text-align: center; // محاذاة المحتوى للوسط للتوازن
 }
 
 .card-value {
-  font-size: 32px;
-  font-weight: 800;
-  color: #1e293b;
-  margin: 0;
+  font-size: 32px; // زيادة الحجم لجعل القيمة بارزة
+  font-weight: 700;
+  color: #1f2937; // لون داكن جدًا للقيمة
   line-height: 1.2;
-  text-align: right;
-  transition: all 0.3s ease;
-  position: relative;
-
-  &::after {
-    content: attr(data-value);
-    position: absolute;
-    top: 0;
-    right: 0;
-    color: transparent;
-    background: linear-gradient(135deg, #e0f2fe, #d1fae5); // تدرج بين أزرق وأخضر
-    background-clip: text;
-    -webkit-background-clip: text;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  &:hover::after {
-    opacity: 1;
-  }
-}
-
-.value-animation {
-  position: absolute;
-  bottom: -4px;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #e0f2fe, #d1fae5);
-  border-radius: 2px;
-  width: 0;
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.dashboard-card:hover .value-animation {
-  width: 60%;
-}
-
-.card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: auto;
+  margin-bottom: 8px; // مساحة بين القيمة والتغيير
 }
 
 .card-change {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 12px;
-  transition: all 0.2s ease;
-
-  &.positive {
-    color: #065f46; // من .delivered
-    background: rgba(209, 250, 229, 0.5); // شفافية من .delivered
-
-    .change-icon {
-      color: #065f46;
-    }
-  }
-
-  &.negative {
-    color: #b91c1c; // من .cancelled
-    background: rgba(254, 226, 226, 0.5); // شفافية من .cancelled
-
-    .change-icon {
-      color: #b91c1c;
-    }
-  }
-
-  &.neutral {
-    color: #64748b;
-    background: rgba(209, 213, 219, 0.1); // رمادي فاتح مستوحى
-
-    .change-icon {
-      color: #64748b;
-    }
-  }
+  font-size: 14px; // زيادة الحجم لتحسين القراءة
+  margin: 0;
+  font-weight: 500;
+  text-align: center;
 }
 
-.change-icon {
-  font-size: 16px;
+.positive {
+  color: #16a34a; // أخضر داكن للدلالة على الزيادة
 }
 
-.card-trend {
-  width: 40px;
-  height: 20px;
-  position: relative;
-}
-
-.trend-line {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  border-radius: 1px;
-
-  &.trend-up {
-    background: linear-gradient(90deg, #065f46, #34d399); // مستوحى من .delivered
-    animation: trendUp 2s ease-in-out infinite;
-  }
-
-  &.trend-down {
-    background: linear-gradient(90deg, #b91c1c, #f87171); // مستوحى من .cancelled
-    animation: trendDown 2s ease-in-out infinite;
-  }
-
-  &.trend-flat {
-    background: linear-gradient(90deg, #64748b, #94a3b8);
-  }
-}
-
-.card-progress {
-  margin-top: 16px;
-
-  .progress-bar {
-    width: 100%;
-    height: 6px;
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: 8px;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #e0f2fe, #d1fae5); // تدرج بين .processing و .delivered
-    border-radius: 3px;
-    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-
-    &::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      animation: shimmer 2s infinite;
-    }
-  }
-
-  .progress-text {
-    font-size: 11px;
-    color: #64748b;
-    font-weight: 500;
-  }
-}
-
-// Responsive Design
-@media (max-width: 768px) {
-  .dashboard-card {
-    padding: 20px;
-    min-height: 160px;
-  }
-
-  .icon-container {
-    width: 48px;
-    height: 48px;
-  }
-
-  .card-icon {
-    font-size: 24px;
-  }
-
-  .card-value {
-    font-size: 28px;
-  }
-}
-
-@media (max-width: 480px) {
-  .dashboard-card {
-    padding: 16px;
-    min-height: 140px;
-  }
-
-  .card-value {
-    font-size: 24px;
-  }
-}
-
-// Animations
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-10px) rotate(5deg); }
-}
-
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-@keyframes trendUp {
-  0% { transform: scaleX(0); }
-  50% { transform: scaleX(1) scaleY(1.5); }
-  100% { transform: scaleX(1); }
-}
-
-@keyframes trendDown {
-  0% { transform: scaleX(0); }
-  50% { transform: scaleX(1) scaleY(0.5); }
-  100% { transform: scaleX(1); }
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-// RTL Support
-[dir="rtl"] {
-  .card-title,
-  .card-value {
-    text-align: right;
-  }
-
-  .card-change {
-    flex-direction: row-reverse;
-  }
+.negative {
+  color: #dc2626; // أحمر داكن للدلالة على النقصان
 }
