@@ -11,6 +11,7 @@ import {
 } from '../interfaces/order.interface';
 import { createLinkedSignal } from '@angular/core/primitives/signals';
 import { Result } from '../interfaces/category';
+import { DashboardData } from '../interfaces/dashboard.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -24,6 +25,11 @@ export class OrderService {
   private readonly cacheTTL = 5 * 60 * 1000; // 5 minutes
 
   constructor(private http: HttpClient) {}
+  getDashboardData(): Observable<DashboardData> {
+    return this.http.get<DashboardData>(
+      `${this.apiUrl}/Dashboard/GetDashboardData`
+    );
+  }
 
   getOrders(filter: OrdersFilter): Observable<OrdersResponse> {
     const cacheKey = JSON.stringify(filter);
@@ -38,7 +44,7 @@ export class OrderService {
       .set('PageSize', filter.pageSize ?? 10) // Default page size if not provided
       .set('Search', filter.search ?? '')
       .set('UserId', filter.userId ?? '')
-      .set('Status', filter.orderStatus ?? '')
+      .set('OrderStatus', filter.orderStatus ?? '')
       .set('SortProp', filter.sortProp?.toString() ?? '')
       .set('SortDirection', filter.sortDirection?.toString() ?? '');
 
@@ -60,6 +66,7 @@ export class OrderService {
 
     if (filter.orderStatus) {
       params.set('OrderStatus', filter.orderStatus);
+      console.log(filter.orderStatus);
     }
 
     if (filter.sortProp !== undefined) {

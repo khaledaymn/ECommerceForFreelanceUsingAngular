@@ -1,44 +1,66 @@
 .dashboard-card {
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 16px;
+  background-color: #f9fafb; // خلفية رمادية فاتحة جدًا للراحة البصرية
+  border-radius: 12px; // زوايا أكثر انسيابية
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08); // ظل أعمق للعمق
+  padding: 20px; // مساحة داخلية أكبر لتحسين القراءة
+  border: 1px solid #e5e7eb; // إضافة حدود خفيفة
+  transition: all 0.3s ease; // انتقال سلس للتغييرات
+
+  &:hover {
+    box-shadow: 0 7px 14px rgba(0, 0, 0, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08); // ظل أقوى عند التمرير
+    transform: translateY(-2px); // رفع البطاقة قليلاً
+  }
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 12px; // مساحة أكبر بين العنوان والمحتوى
 }
 
 .card-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #6b7280;
+  font-size: 16px; // زيادة الحجم لتحسين القراءة
+  font-weight: 600; // وزن أقوى للتميز
+  color: #374151; // لون داكن للنصوص
   margin: 0;
+  text-transform: uppercase; // تحويل إلى أحرف كبيرة للأناقة
+  letter-spacing: 0.5px; // تباعد الحروف للمظهر الحديث
 }
 
 .card-icon {
-  color: #9ca3af;
-  font-size: 20px;
+  color: #6b7280; // لون أيقونة أغمق قليلاً
+  font-size: 24px; // زيادة حجم الأيقونة
+  transition: color 0.3s ease; // انتقال لون عند التفاعل
+
+  .dashboard-card:hover & {
+    color: #3b82f6; // لون أزرق عند التمرير
+  }
+}
+
+.card-content {
+  text-align: center; // محاذاة المحتوى للوسط للتوازن
 }
 
 .card-value {
-  font-size: 24px;
+  font-size: 32px; // زيادة الحجم لجعل القيمة بارزة
   font-weight: 700;
+  color: #1f2937; // لون داكن جدًا للقيمة
   line-height: 1.2;
+  margin-bottom: 8px; // مساحة بين القيمة والتغيير
 }
 
 .card-change {
-  font-size: 12px;
-  margin: 4px 0 0 0;
+  font-size: 14px; // زيادة الحجم لتحسين القراءة
+  margin: 0;
+  font-weight: 500;
+  text-align: center;
 }
 
 .positive {
-  color: #10b981;
+  color: #16a34a; // أخضر داكن للدلالة على الزيادة
 }
 
 .negative {
-  color: #ef4444;
+  color: #dc2626; // أحمر داكن للدلالة على النقصان
 }

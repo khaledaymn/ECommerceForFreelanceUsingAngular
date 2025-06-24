@@ -1,52 +1,63 @@
 <div class="dashboard-container">
   <div class="metrics-grid">
     <app-dashboard-card
-      title="إجمالي الإيرادات"
-      [value]="
-        (salesSummary.revenue | currency : 'SAR' : 'symbol' : '1.2-2') ?? ''
-      "
-      [change]="'+' + salesSummary.revenueChange + '%'"
-      icon="attach_money"
-    >
-    </app-dashboard-card>
-
-    <app-dashboard-card
-      title="طلبات جديدة"
-      [value]="'+' + salesSummary.orders"
-      [change]="'+' + salesSummary.ordersChange + '%'"
-      icon="shopping_cart"
-    >
-    </app-dashboard-card>
-
-    <app-dashboard-card
-      title="المنتجات"
-      [value]="salesSummary.products.toString()"
-      [change]="'+' + salesSummary.productsChange + '%'"
+      title="إجمالي المنتجات"
+      [value]="dashboardData.totalProducts.toString()"
       icon="inventory_2"
-    >
-    </app-dashboard-card>
+    ></app-dashboard-card>
 
-    <app-dashboard-card title="المستخدمين النشطين" icon="people">
-    </app-dashboard-card>
+    <app-dashboard-card
+      title="المنتجات المستأجرة"
+      [value]="dashboardData.totalRentProducts.toString()"
+      icon="local_offer"
+    ></app-dashboard-card>
+
+    <app-dashboard-card
+      title="المنتجات المشتراة"
+      [value]="dashboardData.totalPurchaseProducts.toString()"
+      icon="shopping_bag"
+    ></app-dashboard-card>
+
+    <app-dashboard-card
+      title="المنتجات المستأجرة والمشتراة"
+      [value]="dashboardData.totalRentAndPurchaseProducts.toString()"
+      icon="sync_alt"
+    ></app-dashboard-card>
+
+    <app-dashboard-card
+      title="الطلبات الجديدة"
+      [value]="dashboardData.totalNewOrders.toString()"
+      icon="add_shopping_cart"
+    ></app-dashboard-card>
+
+    <app-dashboard-card
+      title="الطلبات قيد المعالجة"
+      [value]="dashboardData.totalProcessingOrders.toString()"
+      icon="hourglass_top"
+    ></app-dashboard-card>
+
+    <app-dashboard-card
+      title="الطلبات المنتهية"
+      [value]="dashboardData.totalCompletedOrders.toString()"
+      icon="check_circle"
+    ></app-dashboard-card>
+
+    <app-dashboard-card
+      title="الطلبات الملغاة"
+      [value]="dashboardData.totalCancelledOrders.toString()"
+      icon="cancel"
+    ></app-dashboard-card>
+
+    <app-dashboard-card
+      title="الطلبات المستأجرة"
+      [value]="dashboardData.totalRentOrders.toString()"
+      icon="local_offer"
+    ></app-dashboard-card>
+
+    <app-dashboard-card
+      title="الطلبات المشتراة"
+      [value]="dashboardData.totalPurchaseOrders.toString()"
+      icon="shopping_bag"
+    ></app-dashboard-card>
   </div>
-  <!-- [change]="'+' + salesSummary.customersChange + '%'" -->
-  <!-- [value]="salesSummary.customers.toString()" -->
-
-  <!-- <div class="charts-grid">
-    <div class="chart-card">
-      <div class="chart-header">
-        <h2>نظرة عامة</h2>
-        <p>نظرة عامة على المبيعات والإيرادات الشهرية</p>
-      </div>
-      <app-chart [data]="chartData"></app-chart>
-    </div>
-
-    <div class="sales-card">
-      <div class="sales-header">
-        <h2>المبيعات الأخيرة</h2>
-        <p>أحدث مشتريات العملاء</p>
-      </div>
-      <app-recent-sales [sales]="recentSales"></app-recent-sales>
-    </div>
-  </div> -->
 </div>
