@@ -38,7 +38,7 @@ export class OrderService {
       .set('PageSize', filter.pageSize ?? 10) // Default page size if not provided
       .set('Search', filter.search ?? '')
       .set('UserId', filter.userId ?? '')
-      .set('Status', filter.orderStatus ?? '')
+      .set('OrderStatus', filter.orderStatus ?? '')
       .set('SortProp', filter.sortProp?.toString() ?? '')
       .set('SortDirection', filter.sortDirection?.toString() ?? '');
 
@@ -60,6 +60,7 @@ export class OrderService {
 
     if (filter.orderStatus) {
       params.set('OrderStatus', filter.orderStatus);
+      console.log(filter.orderStatus);
     }
 
     if (filter.sortProp !== undefined) {
