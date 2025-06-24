@@ -19,11 +19,11 @@ export class SidebarComponent {
   isCollapsed = false;
 
   menuItems: MenuItem[] = [
-    // {
-    //   label: 'لوحة التحكم',
-    //   route: '/admin/dashboard',
-    //   icon: 'dashboard',
-    // },
+    {
+      label: 'لوحة التحكم',
+      route: '/admin/dashboard',
+      icon: 'dashboard',
+    },
     {
       label: 'الفئات',
       route: '/admin/categories',
@@ -34,11 +34,11 @@ export class SidebarComponent {
       route: '/admin/products',
       icon: 'inventory_2',
     },
-    // {
-    //   label: 'الطلبات',
-    //   route: '/admin/orders',
-    //   icon: 'shopping_cart',
-    // },
+    {
+      label: 'الطلبات',
+      route: '/admin/orders',
+      icon: 'shopping_cart',
+    },
     // {
     //   label: 'العملاء',
     //   route: '/admin/customers',

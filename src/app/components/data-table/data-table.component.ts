@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SortDirection } from '../../interfaces/category';
 import { ProductStatus } from '../../interfaces/product.interface';
+import { StatusOrder } from '../../interfaces/order.interface';
 
 export interface TableColumn {
   key: string;
@@ -300,6 +301,14 @@ export class DataTableComponent implements OnInit {
         return 'status-rent';
       case ProductStatus.RentAndPurchase.toString():
         return 'status-rent-and-purchase';
+      case StatusOrder.pending:
+        return 'pending';
+      case StatusOrder.processing:
+        return 'processing';
+      case StatusOrder.delivered:
+        return 'delivered';
+      case StatusOrder.cancelled:
+        return 'cancelled';
       default:
         return 'status-default';
     }

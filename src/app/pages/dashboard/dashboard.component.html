@@ -1,5 +1,3 @@
-<!-- <app-header></app-header> -->
-<!-- <app-sidebar></app-sidebar> -->
 <div class="dashboard-container">
   <div class="metrics-grid">
     <app-dashboard-card
@@ -28,16 +26,13 @@
     >
     </app-dashboard-card>
 
-    <app-dashboard-card
-      title="المستخدمين النشطين"
-      [value]="salesSummary.customers.toString()"
-      [change]="'+' + salesSummary.customersChange + '%'"
-      icon="people"
-    >
+    <app-dashboard-card title="المستخدمين النشطين" icon="people">
     </app-dashboard-card>
   </div>
+  <!-- [change]="'+' + salesSummary.customersChange + '%'" -->
+  <!-- [value]="salesSummary.customers.toString()" -->
 
-  <div class="charts-grid">
+  <!-- <div class="charts-grid">
     <div class="chart-card">
       <div class="chart-header">
         <h2>نظرة عامة</h2>
@@ -53,5 +48,5 @@
       </div>
       <app-recent-sales [sales]="recentSales"></app-recent-sales>
     </div>
-  </div>
+  </div> -->
 </div>

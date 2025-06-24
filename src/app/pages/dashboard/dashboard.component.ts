@@ -11,12 +11,7 @@ import { ChartData } from '../../interfaces/chart-data.interface';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [
-    CommonModule,
-    DashboardCardComponent,
-    ChartComponent,
-    RecentSalesComponent,
-  ],
+  imports: [CommonModule, DashboardCardComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })

@@ -1,33 +1,46 @@
 <div class="order-details">
   <div class="order-details-content">
     <div class="order-details-header">
-      <h2>تفاصيل الطلب رقم {{ order.orderID }}</h2>
+      <h2>تفاصيل الطلب رقم {{ order.id }}</h2>
       <button class="close-btn" (click)="onClose()">
         <span class="material-icons">close</span>
       </button>
     </div>
 
     <div class="order-info">
-      <div class="info-group">
+      <!-- <div class="info-group">
         <div class="info-label">رقم الطلب:</div>
-        <div class="info-value">{{ order.orderID }}</div>
-      </div>
+        <div class="info-value">{{ order.id }}</div>
+      </div> -->
 
       <div class="info-group">
         <div class="info-label">اسم العميل:</div>
-        <div class="info-value">{{ order.name }}</div>
+        <div class="info-value">{{ order.userName }}</div>
       </div>
       <div class="info-group">
-        <div class="info-label">تاريخ الطلب:</div>
-        <div class="info-value">{{ formatDate(order.orderDate) }}</div>
+        <div class="info-label">رقم العميل :</div>
+        <div class="info-value">{{ order.phoneNumber }}</div>
+      </div>
+      <div class="info-group">
+        <div class="info-label">إيميل العميل :</div>
+        <div class="info-value">{{ order.email }}</div>
+      </div>
+      <div class="info-group">
+        <div class="info-label">عنوان العميل :</div>
+        <div class="info-value">{{ order.address }}</div>
       </div>
 
       <div class="info-group">
+        <div class="info-label">تاريخ الطلب:</div>
+        <div class="info-value">{{ formatDate(order.date) }}</div>
+      </div>
+
+      <!-- <div class="info-group">
         <div class="info-label">المبلغ الإجمالي:</div>
         <div class="info-value amount">
           {{ order.totalAmount | currency : "SAR" : "symbol" : "1.2-2" }}
         </div>
-      </div>
+      </div> -->
 
       <div class="info-group">
         <div class="info-label">حالة الطلب:</div>
@@ -40,14 +53,15 @@
     </div>
 
     <div class="order-items">
-      <h3>عناصر الطلب</h3>
+      <h3>الطلب</h3>
       <table class="items-table">
         <thead>
           <tr>
             <th>المنتج</th>
-            <th>السعر</th>
-            <th>الكمية</th>
-            <th>المجموع</th>
+            <th>الموديل</th>
+            <th>البراند</th>
+            <th>الحالة</th>
+            <th>فترة الايجار</th>
           </tr>
         </thead>
         <tbody>
@@ -55,22 +69,22 @@
             <td>
               <div class="product-info">
                 <span class="product-name">{{ item.productName }}</span>
-                <span class="product-id">رقم المنتج: {{ item.productID }}</span>
               </div>
             </td>
-            <td>{{ item.price | currency : "SAR" : "symbol" : "1.2-2" }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ item.subtotal | currency : "SAR" : "symbol" : "1.2-2" }}</td>
+            <td>{{ item.model }}</td>
+            <td>{{ item.brand }}</td>
+            <td>{{ item.productStatus }}</td>
+            <td>{{ item.rentalPeriod }}</td>
           </tr>
         </tbody>
-        <tfoot>
+        <!-- <tfoot>
           <tr>
             <td colspan="3" class="total-label">المجموع الكلي</td>
             <td class="total-value">
               {{ order.totalAmount | currency : "SAR" : "symbol" : "1.2-2" }}
             </td>
           </tr>
-        </tfoot>
+        </tfoot> -->
       </table>
     </div>
 
@@ -80,7 +94,7 @@
         <button
           *ngFor="let status of statusOptions"
           class="status-btn"
-          [class]="status.toLowerCase()"
+          [class]="getStatusClass(status)"
           [disabled]="order.status === status"
           (click)="onUpdateStatus(status)"
         >

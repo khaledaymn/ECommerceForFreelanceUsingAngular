@@ -605,7 +605,30 @@ $rent-and-purchase-color: #FF9800;
     background: rgba($rent-and-purchase-color, 0.1);
     color: $rent-and-purchase-color;
   }
+&.pending {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
 
+    &.processing {
+      background-color: #e0f2fe;
+      color: #0369a1;
+    }
+
+    &.shipped {
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+
+    &.delivered {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+
+    &.cancelled {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }
   &.status-default {
     background-color: #f3f4f6;
     color: #1f2937;

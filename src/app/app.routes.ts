@@ -10,8 +10,6 @@ import { OrderDetailsComponent } from './pages/orders/order-details/order-detail
 import { UsersComponent } from './pages/users/users/users.component';
 import { InventoryComponent } from './pages/inventory/inventory.component';
 import { AnalyticsComponent } from './pages/analytics/analytics.component';
-import { SettingsComponent } from './pages/settings/settings.component';
-import { ChangePasswordComponent } from './pages/auth/change-password/change-password.component';
 import { UserManagementComponent } from './pages/auth/change-email/change-email.component';
 
 export const routes: Routes = [
@@ -31,7 +29,7 @@ export const routes: Routes = [
     data: { role: 'Admin' },
     children: [
       { path: '', component: ProductManagementComponent },
-      // { path: 'dashboard', component: DashboardComponent },
+      { path: 'dashboard', component: DashboardComponent },
       { path: 'categories', component: CategoryManagementComponent },
       { path: 'products', component: ProductManagementComponent },
       { path: 'orders', component: OrdersComponent },
@@ -39,7 +37,6 @@ export const routes: Routes = [
       { path: 'customers', component: UsersComponent },
       { path: 'inventory', component: InventoryComponent },
       { path: 'analytics', component: AnalyticsComponent },
-      // { path: 'settings', component: SettingsComponent },
       { path: 'settings', component: UserManagementComponent },
     ],
   },

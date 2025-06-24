@@ -38,19 +38,19 @@ import { CommonModule } from '@angular/common';
 })
 export class OrdersComponent implements OnInit {
   columns: TableColumn[] = [
-    { key: 'orderID', title: 'رقم الطلب', sortable: true, width: '10%' },
-    { key: 'name', title: 'اسم العميل', sortable: true, width: '20%' },
+    // { key: 'id', title: 'رقم الطلب', sortable: true, width: '10%' },
+    { key: 'userName', title: 'اسم العميل', sortable: true, width: '20%' },
     {
-      key: 'orderDate',
+      key: 'date',
       title: 'تاريخ الطلب',
       type: 'date',
       sortable: true,
       width: '15%',
     },
     {
-      key: 'totalAmount',
-      title: 'المبلغ الإجمالي',
-      type: 'currency',
+      key: 'productName',
+      title: 'اسم المنتج',
+      type: 'text',
       sortable: true,
       width: '15%',
     },
@@ -83,7 +83,7 @@ export class OrdersComponent implements OnInit {
     pageSize: 10,
     search: '',
     userId: '',
-    status: undefined,
+    orderStatus: undefined,
     sortProp: undefined,
     sortDirection: undefined,
   });
@@ -91,11 +91,10 @@ export class OrdersComponent implements OnInit {
   viewMode: 'table' | 'grid' = 'table';
 
   statusOptions: OrderStatus[] = [
-    'Pending',
-    'Processing',
-    'Shipped',
-    'Delivered',
-    'Cancelled',
+    'طلب جديد',
+    'تحت الاجراء',
+    'تم انهاء الطلب',
+    'الغاء الطلب',
   ];
   isModalOpen = false;
   isDetailsModalOpen = false;
@@ -130,9 +129,14 @@ export class OrdersComponent implements OnInit {
     this.loading.set(true);
     const currentFilter = this.filter();
     console.log('Loading orders with filter:', currentFilter);
+
     this.orderService.getOrders(currentFilter).subscribe({
       next: (response: OrdersResponse) => {
-        this.orders.set(response.data);
+        const flattenedData = response.data.flatMap((order) =>
+          order.orderItems.map((item) => ({ ...order, ...item }))
+        );
+        console.log(flattenedData);
+        this.orders.set(flattenedData);
         this.totalItems.set(response.totalCount);
         this.pageSize.set(response.pageSize);
         this.currentPage.set(response.pageIndex || 1);
@@ -245,7 +249,11 @@ export class OrdersComponent implements OnInit {
     const validStatus = this.statusOptions.includes(orderStatus as OrderStatus)
       ? (orderStatus as OrderStatus)
       : undefined;
-    this.filter.update((f) => ({ ...f, status: validStatus, pageIndex: 1 }));
+    this.filter.update((f) => ({
+      ...f,
+      orderStatus: validStatus,
+      pageIndex: 1,
+    }));
     this.loadOrders();
   }
 
@@ -257,23 +265,6 @@ export class OrdersComponent implements OnInit {
     return allStatuses.filter((status) =>
       status.toLowerCase().includes(this.statusSearchTerm.toLowerCase())
     );
-  }
-
-  getStatusClass(status: string): string {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'status-Pending';
-      case 'processing':
-        return 'status-Processing';
-      case 'shipped':
-        return 'status-Shipping';
-      case 'delivered':
-        return 'status-Delivered';
-      case 'canceled':
-        return 'status-Canceled';
-      default:
-        return 'status-default';
-    }
   }
 
   getActiveFiltersCount(): number {
@@ -326,7 +317,7 @@ export class OrdersComponent implements OnInit {
   openDeleteConfirm(order: Order): void {
     this.deleteConfirm = {
       isOpen: true,
-      OrderId: order.orderID,
+      OrderId: order.id,
     };
   }
 
@@ -354,12 +345,25 @@ export class OrdersComponent implements OnInit {
     this.orderService.updateOrderStatus(event.orderId, event.status).subscribe({
       next: () => {
         this.loadOrders();
-        alert('Order status updated successfully');
       },
       error: (err: any) => {
         console.error('Error updating order status:', err);
-        alert('Failed to update order status');
       },
     });
+  }
+  getStatusClass(status: string): string {
+    switch (status) {
+      // Example cases, replace with your actual OrderStatus values
+      case this.statusOptions[0]:
+        return 'pending';
+      case this.statusOptions[1]:
+        return 'shipped';
+      case this.statusOptions[2]:
+        return 'delivered';
+      case this.statusOptions[3]:
+        return 'cancelled';
+      default:
+        return status.toLowerCase();
+    }
   }
 }
