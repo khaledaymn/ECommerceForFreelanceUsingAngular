@@ -1,16 +1,53 @@
-<div class="dashboard-card">
+<div class="dashboard-card" [class]="cardClass">
+  <div class="card-background">
+    <div class="card-pattern"></div>
+    <div class="card-glow"></div>
+  </div>
+
   <div class="card-header">
-    <h3 class="card-title">{{ title }}</h3>
-    <span class="material-icons card-icon">{{ icon }}</span>
+    <div class="icon-container" [style.background]="iconBackground">
+      <span class="material-icons card-icon">{{ icon }}</span>
+    </div>
+    <!-- <div class="card-actions">
+      <button class="action-btn" aria-label="المزيد من الخيارات">
+        <span class="material-icons">more_vert</span>
+      </button>
+    </div> -->
   </div>
+
   <div class="card-content">
-    <div class="card-value">{{ value }}</div>
-    <p
-      class="card-change"
-      [class.positive]="isPositive()"
-      [class.negative]="isNegative()"
-    >
-      {{ change }}
-    </p>
+    <h3 class="card-title">{{ title }}</h3>
+    <div class="card-value-container">
+      <div class="card-value" [attr.data-value]="value">
+        {{ formattedValue }}
+      </div>
+      <div class="value-animation"></div>
+    </div>
+
+    <div class="card-footer" *ngIf="change">
+      <div
+        class="card-change"
+        [class.positive]="isPositive()"
+        [class.negative]="isNegative()"
+        [class.neutral]="isNeutral()"
+      >
+        <span class="material-icons change-icon">
+          {{ getChangeIcon() }}
+        </span>
+        <span class="change-text">{{ change }}</span>
+      </div>
+      <div class="card-trend">
+        <div class="trend-line" [class]="getTrendClass()"></div>
+      </div>
+    </div>
+
+    <div class="card-progress" *ngIf="showProgress">
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="progressValue"></div>
+      </div>
+      <span class="progress-text">{{ progressText }}</span>
+    </div>
   </div>
+
+  <div class="card-hover-effect"></div>
 </div>

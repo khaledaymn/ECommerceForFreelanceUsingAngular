@@ -7,7 +7,7 @@ interface MenuItem {
   route: string;
   icon: string;
 }
-
+//
 @Component({
   selector: 'app-sidebar',
   standalone: true,

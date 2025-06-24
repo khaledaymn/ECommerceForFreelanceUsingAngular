@@ -1,80 +1,100 @@
 .dashboard-container {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  padding: 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  direction: rtl;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 40px;
+
+  .dashboard-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    margin-bottom: 8px;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .dashboard-subtitle {
+    font-size: 1.1rem;
+    color: #64748b;
+    font-weight: 500;
+    margin: 0;
+  }
 }
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 16px;
-}
-
-.charts-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-}
-
-.chart-card, .sales-card {
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-.chart-header, .sales-header {
-  padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.chart-header h2, .sales-header h2 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.chart-header p, .sales-header p {
-  margin: 4px 0 0 0;
-  color: #6b7280;
-  font-size: 14px;
-}
-
-@media (min-width: 640px) {
-  .metrics-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .metrics-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .charts-grid {
-    grid-template-columns: 4fr 3fr;
-  }
-}
-.dashboard-container {
-  display: flex;
-  flex-direction: column;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 16px;
-}
-
-@media (min-width: 640px) {
+// Responsive Design
+@media (max-width: 1200px) {
   .metrics-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
   }
 }
 
-@media (min-width: 1024px) {
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 16px;
+  }
+
+  .dashboard-header {
+    margin-bottom: 24px;
+
+    .dashboard-title {
+      font-size: 2rem;
+    }
+
+    .dashboard-subtitle {
+      font-size: 1rem;
+    }
+  }
+
   .metrics-grid {
-    grid-template-columns: repeat(3, 1fr); // 3 أعمدة لتوزيع 10 بطاقات بشكل جيد
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 12px;
+  }
+
+  .dashboard-header {
+    .dashboard-title {
+      font-size: 1.75rem;
+    }
+  }
+}
+
+// Animation for grid items
+.metrics-grid > * {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+@for $i from 1 through 10 {
+  .metrics-grid > *:nth-child(#{$i}) {
+    animation-delay: #{$i * 0.1}s;
+  }
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

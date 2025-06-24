@@ -1,27 +1,36 @@
 <div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">لوحة التحكم</h1>
+    <p class="dashboard-subtitle">نظرة عامة على أداء متجرك</p>
+  </div>
+
   <div class="metrics-grid">
     <app-dashboard-card
       title="إجمالي المنتجات"
       [value]="dashboardData.totalProducts.toString()"
       icon="inventory_2"
+      cardClass="primary"
     ></app-dashboard-card>
 
     <app-dashboard-card
       title="المنتجات المستأجرة"
       [value]="dashboardData.totalRentProducts.toString()"
       icon="local_offer"
+      cardClass="success"
     ></app-dashboard-card>
 
     <app-dashboard-card
       title="المنتجات المشتراة"
       [value]="dashboardData.totalPurchaseProducts.toString()"
       icon="shopping_bag"
+      cardClass="info"
     ></app-dashboard-card>
 
     <app-dashboard-card
-      title="المنتجات المستأجرة والمشتراة"
+      title="المنتجات المختلطة"
       [value]="dashboardData.totalRentAndPurchaseProducts.toString()"
       icon="sync_alt"
+      cardClass="warning"
     ></app-dashboard-card>
 
     <app-dashboard-card
@@ -31,7 +40,7 @@
     ></app-dashboard-card>
 
     <app-dashboard-card
-      title="الطلبات قيد المعالجة"
+      title="قيد المعالجة"
       [value]="dashboardData.totalProcessingOrders.toString()"
       icon="hourglass_top"
     ></app-dashboard-card>
@@ -49,13 +58,13 @@
     ></app-dashboard-card>
 
     <app-dashboard-card
-      title="الطلبات المستأجرة"
+      title="طلبات الإيجار"
       [value]="dashboardData.totalRentOrders.toString()"
       icon="local_offer"
     ></app-dashboard-card>
 
     <app-dashboard-card
-      title="الطلبات المشتراة"
+      title="طلبات الشراء"
       [value]="dashboardData.totalPurchaseOrders.toString()"
       icon="shopping_bag"
     ></app-dashboard-card>
