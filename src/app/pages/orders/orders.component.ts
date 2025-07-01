@@ -22,6 +22,7 @@ import {
 import { OrderDetailsComponent } from './order-details/order-details.component';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { CommonModule } from '@angular/common';
+import { SortDirection, SortProp } from '../../interfaces/category';
 
 @Component({
   selector: 'app-orders',
@@ -84,8 +85,8 @@ export class OrdersComponent implements OnInit {
     search: '',
     userId: '',
     orderStatus: undefined,
-    sortProp: undefined,
-    sortDirection: undefined,
+    sortProp: 0,
+    sortDirection: SortDirection.Descending,
   });
 
   viewMode: 'table' | 'grid' = 'table';

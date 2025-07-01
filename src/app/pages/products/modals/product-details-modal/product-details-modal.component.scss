@@ -1,8 +1,10 @@
 // Variables
 $primary: #F5C518;
-$secondary: #2563eb;
+$secondary: #3b82f6;
+$primary-dark: #2563eb;
 $success: #10b981;
 $danger: #ef4444;
+$danger-dark: rgba(255, 0, 0, 0.1);
 $warning: #f59e0b;
 $info: #06b6d4;
 $white: #ffffff;
@@ -83,7 +85,7 @@ $rent-and-purchase-color: #FF9800;
 .header-icon {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, $secondary 0%,  ($secondary, 10%) 100%);
+  background: linear-gradient(135deg, $secondary 0%,  $primary-dark 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -763,26 +765,34 @@ $rent-and-purchase-color: #FF9800;
   }
 
   &.edit-button {
-    background: linear-gradient(135deg, $secondary 0%,  ($secondary, 10%) 100%);
+    background: linear-gradient(135deg, $secondary 0%,   $primary-dark 100%);
     color: $white;
     box-shadow: 0 4px 8px rgba($secondary, 0.3);
 
     &:hover {
-      background: linear-gradient(135deg,  ($secondary, 10%) 0%,  ($secondary, 20%) 100%);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba($secondary, 0.4);
-    }
+      background: linear-gradient(135deg,  ($secondary, 10%) 0%,  $primary-dark 50%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba($primary-dark, 0.5);
+      -webkit-transform: translateY(-2px);
+      -moz-transform: translateY(-2px);
+      -ms-transform: translateY(-2px);
+      -o-transform: translateY(-2px);
+}
   }
 
   &.danger-button {
-    background: linear-gradient(135deg, $danger 0%,  ($danger, 10%) 100%);
+     background: linear-gradient(135deg, $danger 100%,  $danger-dark 100%);
     color: $white;
     box-shadow: 0 4px 8px rgba($danger, 0.3);
 
     &:hover {
-      background: linear-gradient(135deg,  ($danger, 10%) 0%,  ($danger, 20%) 100%);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba($danger, 0.4);
+      background: linear-gradient(135deg,  ($danger, 50%) 0%,  ($danger, 20%) 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba($danger, 0.5);
+      -webkit-transform: translateY(-2px);
+      -moz-transform: translateY(-2px);
+      -ms-transform: translateY(-2px);
+      -o-transform: translateY(-2px);
     }
   }
 
