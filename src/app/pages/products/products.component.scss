@@ -63,7 +63,8 @@ $rent-and-purchase-color: #FF9800;
   }
 
   .btn-text {
-    font-family: 'Cairo', sans-serif;
+    // font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     white-space: nowrap;
     transition: color 0.3s ease;
   }
@@ -231,14 +232,14 @@ $rent-and-purchase-color: #FF9800;
     font-weight: 700;
     color: #1f2937;
     margin: 0 0 4px 0;
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
   p {
     font-size: 14px;
     color: #6b7280;
     margin: 0;
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 }
 
@@ -261,7 +262,7 @@ $rent-and-purchase-color: #FF9800;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-family: 'Cairo', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
   &:hover {
     background: #fecaca;
@@ -330,7 +331,7 @@ $rent-and-purchase-color: #FF9800;
     font-size: 16px;
     font-weight: 600;
     color: #1e40af;
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 }
 
@@ -375,13 +376,13 @@ $rent-and-purchase-color: #FF9800;
   .tag-label {
     font-weight: 600;
     color: #6b7280;
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
   .tag-value {
     color: #1f2937;
     font-weight: 500;
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
   .tag-remove {
@@ -447,7 +448,7 @@ $rent-and-purchase-color: #FF9800;
   font-size: 15px;
   font-weight: 600;
   color: #374151;
-  font-family: 'Cairo', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
   .material-icons {
     font-size: 18px;
@@ -491,13 +492,13 @@ $rent-and-purchase-color: #FF9800;
   font-size: 14px;
   font-weight: 500;
   color: #1f2937;
-  font-family: 'Cairo', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .select-placeholder {
   font-size: 14px;
   color: #9ca3af;
-  font-family: 'Cairo', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .expand-icon {
@@ -574,7 +575,7 @@ $rent-and-purchase-color: #FF9800;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     font-size: 14px;
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     outline: none;
     background: white;
     transition: all 0.3s ease;
@@ -679,7 +680,7 @@ $rent-and-purchase-color: #FF9800;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-family: 'Cairo', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
   &:hover {
     background: #fecaca;
@@ -768,7 +769,7 @@ $rent-and-purchase-color: #FF9800;
     border: 2px solid #e5e7eb;
     border-radius: 10px;
     font-size: 14px;
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     outline: none;
     transition: all 0.3s ease;
 
@@ -814,7 +815,7 @@ $rent-and-purchase-color: #FF9800;
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
     &:hover {
       background: #f9fafb;
@@ -892,7 +893,7 @@ $rent-and-purchase-color: #FF9800;
     font-size: 14px;
     font-weight: 500;
     color: #6b7280;
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
     .material-icons {
       font-size: 18px;
@@ -919,7 +920,7 @@ $rent-and-purchase-color: #FF9800;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: 'Cairo', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 
   &:hover {
@@ -992,7 +993,7 @@ $rent-and-purchase-color: #FF9800;
   }
 
   .btn-text {
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     white-space: nowrap;
     transition: color 0.3s ease;
   }
