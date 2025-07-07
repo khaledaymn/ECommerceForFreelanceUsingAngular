@@ -1,59 +1,49 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input } from "@angular/core"
+import { CommonModule } from "@angular/common"
 
 @Component({
-  selector: 'app-dashboard-card',
+  selector: "app-dashboard-card",
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './dashboard-card.component.html',
-  styleUrls: ['./dashboard-card.component.scss'],
+  templateUrl: "./dashboard-card.component.html",
+  styleUrls: ["./dashboard-card.component.scss"],
 })
 export class DashboardCardComponent {
-  @Input() title = '';
-  @Input() value = '0';
-  @Input() icon = 'dashboard';
-  @Input() change?: string;
-  @Input() cardClass?: string;
-  @Input() iconBackground?: string;
-  @Input() showProgress = false;
-  @Input() progressValue = 0;
-  @Input() progressText?: string;
+  @Input() title = ""
+  @Input() value = 0
+  @Input() icon = ""
+  @Input() color = "blue"
+  @Input() description = ""
+  @Input() isLoading = false
+  @Input() trend?: {
+    value: number
+    isPositive: boolean
+  }
 
-  get formattedValue(): string {
-    const numValue = Number.parseInt(this.value);
-    if (numValue >= 1000000) {
-      return (numValue / 1000000).toFixed(1) + 'م';
-    } else if (numValue >= 1000) {
-      return (numValue / 1000).toFixed(1) + 'ك';
+  get colorClass(): string {
+    const colorMap: { [key: string]: string } = {
+      blue: "card-blue",
+      green: "card-green",
+      purple: "card-purple",
+      orange: "card-orange",
+      yellow: "card-yellow",
+      red: "card-red",
+      indigo: "card-indigo",
+      pink: "card-pink",
     }
-    return this.value;
+    return colorMap[this.color] || "card-blue"
   }
 
-  isPositive(): boolean {
-    return this.change
-      ? this.change.includes('+') || this.change.includes('زيادة')
-      : false;
+  get iconClass(): string {
+    // Return the Bootstrap Icon class directly
+    return this.icon || "bi-box-seam"
   }
 
-  isNegative(): boolean {
-    return this.change
-      ? this.change.includes('-') || this.change.includes('نقص')
-      : false;
+  get trendIconClass(): string {
+    return this.trend?.isPositive ? "bi-arrow-up" : "bi-arrow-down"
   }
 
-  isNeutral(): boolean {
-    return this.change ? !this.isPositive() && !this.isNegative() : false;
-  }
-
-  getChangeIcon(): string {
-    if (this.isPositive()) return 'trending_up';
-    if (this.isNegative()) return 'trending_down';
-    return 'trending_flat';
-  }
-
-  getTrendClass(): string {
-    if (this.isPositive()) return 'trend-up';
-    if (this.isNegative()) return 'trend-down';
-    return 'trend-flat';
+  formatNumber(num: number): string {
+    return num.toLocaleString("ar-EG")
   }
 }

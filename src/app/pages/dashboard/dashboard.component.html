@@ -1,72 +1,179 @@
 <div class="dashboard-container">
+  <!-- Header Section -->
   <!-- <div class="dashboard-header">
     <h1 class="dashboard-title">لوحة التحكم</h1>
-    <p class="dashboard-subtitle">نظرة عامة على أداء متجرك</p>
+    <p class="dashboard-subtitle">مرحباً بك! إليك ما يحدث في متجرك اليوم</p>
   </div> -->
 
-  <div class="metrics-grid">
-    <app-dashboard-card
-      title="إجمالي المنتجات"
-      [value]="dashboardData.totalProducts.toString()"
-      icon="inventory_2"
-      cardClass="primary"
-    ></app-dashboard-card>
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>جاري تحميل البيانات...</p>
+    </div>
+  </div>
 
-    <app-dashboard-card
-      title="المنتجات المستأجرة"
-      [value]="dashboardData.totalRentProducts.toString()"
-      icon="local_offer"
-      cardClass="success"
-    ></app-dashboard-card>
+  <!-- Dashboard Content -->
+  <div class="dashboard-content" [class.loading]="isLoading">
+    <!-- Products Section -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="bi bi-box-seam"></i>
+          نظرة عامة على المنتجات
+        </h2>
+      </div>
 
-    <app-dashboard-card
-      title="المنتجات المشتراة"
-      [value]="dashboardData.totalPurchaseProducts.toString()"
-      icon="shopping_bag"
-      cardClass="info"
-    ></app-dashboard-card>
+      <div class="cards-grid">
+        <app-dashboard-card
+          title="إجمالي المنتجات"
+          [value]="dashboardData.totalProducts"
+          icon="bi-box-seam"
+          color="blue"
+          description="جميع المنتجات في المخزون"
+          [isLoading]="isLoading"
+        >
+        </app-dashboard-card>
 
-    <app-dashboard-card
-      title="المنتجات المختلطة"
-      [value]="dashboardData.totalRentAndPurchaseProducts.toString()"
-      icon="sync_alt"
-      cardClass="warning"
-    ></app-dashboard-card>
+        <app-dashboard-card
+          title="منتجات الإيجار"
+          [value]="dashboardData.totalRentProducts"
+          icon="bi-arrow-repeat"
+          color="green"
+          description="متاحة للإيجار"
+          [isLoading]="isLoading"
+        >
+        </app-dashboard-card>
 
-    <app-dashboard-card
-      title="الطلبات الجديدة"
-      [value]="dashboardData.totalNewOrders.toString()"
-      icon="add_shopping_cart"
-    ></app-dashboard-card>
+        <app-dashboard-card
+          title="منتجات الشراء"
+          [value]="dashboardData.totalPurchaseProducts"
+          icon="bi-cart3"
+          color="purple"
+          description="متاحة للشراء"
+          [isLoading]="isLoading"
+        >
+        </app-dashboard-card>
 
-    <app-dashboard-card
-      title="قيد المعالجة"
-      [value]="dashboardData.totalProcessingOrders.toString()"
-      icon="hourglass_top"
-    ></app-dashboard-card>
+        <app-dashboard-card
+          title="إيجار وشراء"
+          [value]="dashboardData.totalRentAndPurchaseProducts"
+          icon="bi-collection"
+          color="orange"
+          description="متاحة للإيجار والشراء"
+          [isLoading]="isLoading"
+        >
+        </app-dashboard-card>
+      </div>
+    </section>
 
-    <app-dashboard-card
-      title="الطلبات المنتهية"
-      [value]="dashboardData.totalCompletedOrders.toString()"
-      icon="check_circle"
-    ></app-dashboard-card>
+    <!-- Orders Section -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="bi bi-graph-up"></i>
+          نظرة عامة على الطلبات
+        </h2>
+      </div>
 
-    <app-dashboard-card
-      title="الطلبات الملغاة"
-      [value]="dashboardData.totalCancelledOrders.toString()"
-      icon="cancel"
-    ></app-dashboard-card>
+      <div class="cards-grid">
+        <app-dashboard-card
+          title="طلبات جديدة"
+          [value]="dashboardData.totalNewOrders"
+          icon="bi-clock"
+          color="blue"
+          description="في انتظار المراجعة"
+          [isLoading]="isLoading"
+        >
+        </app-dashboard-card>
 
-    <app-dashboard-card
-      title="طلبات الإيجار"
-      [value]="dashboardData.totalRentOrders.toString()"
-      icon="local_offer"
-    ></app-dashboard-card>
+        <app-dashboard-card
+          title="طلبات قيد المعالجة"
+          [value]="dashboardData.totalProcessingOrders"
+          icon="bi-gear"
+          color="yellow"
+          description="جاري المعالجة"
+          [isLoading]="isLoading"
+        >
+        </app-dashboard-card>
 
-    <app-dashboard-card
-      title="طلبات الشراء"
-      [value]="dashboardData.totalPurchaseOrders.toString()"
-      icon="shopping_bag"
-    ></app-dashboard-card>
+        <app-dashboard-card
+          title="طلبات مكتملة"
+          [value]="dashboardData.totalCompletedOrders"
+          icon="bi-check-circle"
+          color="green"
+          description="تم إنجازها بنجاح"
+          [isLoading]="isLoading"
+        >
+        </app-dashboard-card>
+
+        <app-dashboard-card
+          title="طلبات ملغاة"
+          [value]="dashboardData.totalCancelledOrders"
+          icon="bi-x-circle"
+          color="red"
+          description="ملغاة من العميل"
+          [isLoading]="isLoading"
+        >
+        </app-dashboard-card>
+      </div>
+    </section>
+
+    <!-- Order Types Section -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="bi bi-pie-chart"></i>
+          أنواع الطلبات
+        </h2>
+      </div>
+
+      <div class="cards-grid order-types-grid">
+        <app-dashboard-card
+          title="طلبات الإيجار"
+          [value]="dashboardData.totalRentOrders"
+          icon="bi-house"
+          color="indigo"
+          description="طلبات الإيجار"
+          [isLoading]="isLoading"
+        >
+        </app-dashboard-card>
+
+        <app-dashboard-card
+          title="طلبات الشراء"
+          [value]="dashboardData.totalPurchaseOrders"
+          icon="bi-cash-coin"
+          color="pink"
+          description="طلبات الشراء"
+          [isLoading]="isLoading"
+        >
+        </app-dashboard-card>
+      </div>
+    </section>
+
+    <!-- Quick Actions Section -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="bi bi-lightning"></i>
+          إجراءات سريعة
+        </h2>
+      </div>
+
+      <div class="quick-actions">
+        <button class="action-btn primary" [routerLink]="['/admin/products']">
+          <i class="bi bi-box-seam"></i>
+          عرض المنتجات
+        </button>
+        <button class="action-btn secondary" [routerLink]="['/admin/categories']">
+          <i class="bi bi-grid"></i>
+          عرض الفئات
+        </button>
+        <button class="action-btn success" [routerLink]="['/admin/orders']">
+          <i class="bi bi-eye"></i>
+          عرض الطلبات
+        </button>
+      </div>
+    </section>
   </div>
 </div>
