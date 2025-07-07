@@ -201,31 +201,31 @@
 }
 
 // Dark mode support
-@media (prefers-color-scheme: dark) {
-  .dashboard-card {
-    background: #1e293b;
-    border-color: #f1f5f9;
-  }
+// @media (prefers-color-scheme: dark) {
+//   .dashboard-card {
+//     background: #1e293b;
+//     border-color: #f1f5f9;
+//   }
 
-  .card-header .card-title {
-    color: #94a3b8;
-  }
+//   .card-header .card-title {
+//     color: #f1f5f9;
+//   }
 
-  .card-body .card-value {
-    color: #f1f5f9;
-  }
+//   .card-body .card-value {
+//     color: #f1f5f9;
+//   }
 
-  .card-body .card-description {
-    color: #94a3b8;
-  }
+//   .card-body .card-description {
+//     color: #94a3b8;
+//   }
 
-  .card-skeleton {
-    .skeleton-title,
-    .skeleton-icon,
-    .skeleton-value,
-    .skeleton-description {
-      background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
-      background-size: 200% 100%;
-    }
-  }
-}
+//   .card-skeleton {
+//     .skeleton-title,
+//     .skeleton-icon,
+//     .skeleton-value,
+//     .skeleton-description {
+//       background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
+//       background-size: 200% 100%;
+//     }
+//   }
+// }

@@ -578,36 +578,36 @@
 }
 
 /* تحسين الوضع الداكن */
-@media (prefers-color-scheme: dark) {
-  .dashboard-container {
-    background-color: #0f172a;
-    color: #e2e8f0 !important;
-  }
+// @media (prefers-color-scheme: dark) {
+//   .dashboard-container {
+//     background-color: #0f172a;
+//     color: #e2e8f0 !important;
+//   }
 
-  .dashboard-title,
-  .section-title {
-    color: #f1f5f9 !important;
-  }
+//   .dashboard-title,
+//   .section-title {
+//     color: #f1f5f9 !important;
+//   }
 
-  .dashboard-subtitle {
-    color: #94a3b8 !important;
-  }
+//   .dashboard-subtitle {
+//     color: #94a3b8 !important;
+//   }
 
-  .quick-actions {
-    background: #1e293b;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  }
+//   .quick-actions {
+//     background: #1e293b;
+//     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+//   }
 
-  .loading-overlay {
-    background-color: rgba(0, 0, 0, 0.9);
-  }
+//   .loading-overlay {
+//     background-color: rgba(0, 0, 0, 0.9);
+//   }
 
-  .loading-spinner p {
-    color: #94a3b8;
-  }
+//   .loading-spinner p {
+//     color: #94a3b8;
+//   }
 
-  .loading-spinner .spinner {
-    border: 4px solid #4b5563;
-    border-top: 4px solid #60a5fa;
-  }
-}
+//   .loading-spinner .spinner {
+//     border: 4px solid #4b5563;
+//     border-top: 4px solid #60a5fa;
+//   }
+// }
