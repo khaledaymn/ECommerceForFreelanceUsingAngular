@@ -292,9 +292,9 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
 
-  // .loading-overlay {
-  //   background-color: rgba(0, 0, 0, 0.9);
-  // }
+  .loading-overlay {
+    background-color: rgba(0, 0, 0, 0.9);
+  }
 
   .loading-spinner p {
     color: #94a3b8;
@@ -581,7 +581,7 @@
 @media (prefers-color-scheme: dark) {
   .dashboard-container {
     background-color: #0f172a;
-    color: #e2e8f0;
+    color: #e2e8f0 !important;
   }
 
   .dashboard-title,
