@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
@@ -23,7 +23,15 @@ export class OrderService {
     { data: OrdersResponse; timestamp: number }
   >();
   private readonly cacheTTL = 5 * 60 * 1000; // 5 minutes
-
+  // headers = new HttpHeaders();
+  private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem('auth_token'); // Adjust based on your token storage
+    console.log(token);
+    return new HttpHeaders({
+      Accept: '*/*',
+      Authorization: token ? `Bearer ${token}` : '',
+    });
+  }
   constructor(private http: HttpClient) {}
   getDashboardData(): Observable<DashboardData> {
     return this.http.get<DashboardData>(
@@ -81,9 +89,13 @@ export class OrderService {
       `Cache status for key "${cacheKey}": ${cached ? 'HIT' : 'MISS'}`
     );
     console.log(`Final HTTP params: ${params.toString()}`);
-
+    // const headers = new HttpHeaders({ accept: '*/*' });
+    console.log(this.getHeaders());
     return this.http
-      .get<OrdersResponse>(`${this.apiUrl}/orders/GetAllOrders`, { params })
+      .get<OrdersResponse>(`${this.apiUrl}/orders/GetAllOrders`, {
+        params,
+        headers: this.getHeaders(),
+      })
       .pipe(
         tap((response) => {
           console.log(response);
