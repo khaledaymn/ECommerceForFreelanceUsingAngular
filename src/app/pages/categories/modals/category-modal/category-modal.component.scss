@@ -180,8 +180,8 @@ $breakpoint-xl: 1280px;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
   width: 100%;
   max-width: 650px; // Increased from 600px
-  max-height: 95vh; // Increased from 90vh
-  overflow: hidden;
+  max-height: 100vh; // Increased from 90vh
+  overflow-y: auto;
   @include flex-column;
   animation: slideUp 0.3s ease-out;
   direction: rtl;
@@ -297,7 +297,6 @@ $breakpoint-xl: 1280px;
   min-height: 0;
   -webkit-overflow-scrolling: touch;
   background: $gray-50;
-
   @media (max-width: 768px) {
     padding: 1.5rem;
   }
