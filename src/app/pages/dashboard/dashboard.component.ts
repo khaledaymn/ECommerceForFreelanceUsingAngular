@@ -6,12 +6,13 @@ import { DashboardCardComponent } from './dashboard-card/dashboard-card.componen
 import { DashboardData } from '../../interfaces/dashboard.interface';
 import { DashboardService } from '../../services/dashboard.service';
 import { OrderService } from '../../services/order.service';
+import { RouterLink } from '@angular/router';
 // import { DashboardData } from '../../interfaces/dashboard-data.interface';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, DashboardCardComponent],
+  imports: [CommonModule, DashboardCardComponent,RouterLink],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })

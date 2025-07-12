@@ -1,66 +1,231 @@
 .dashboard-card {
-  background-color: #f9fafb; // خلفية رمادية فاتحة جدًا للراحة البصرية
-  border-radius: 12px; // زوايا أكثر انسيابية
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08); // ظل أعمق للعمق
-  padding: 20px; // مساحة داخلية أكبر لتحسين القراءة
-  border: 1px solid #e5e7eb; // إضافة حدود خفيفة
-  transition: all 0.3s ease; // انتقال سلس للتغييرات
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
 
   &:hover {
-    box-shadow: 0 7px 14px rgba(0, 0, 0, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08); // ظل أقوى عند التمرير
-    transform: translateY(-2px); // رفع البطاقة قليلاً
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+
+    .card-overlay {
+      opacity: 1;
+    }
   }
+
+  &.loading {
+    pointer-events: none;
+  }
+}
+
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px; // مساحة أكبر بين العنوان والمحتوى
-}
+  align-items: flex-start;
+  margin-bottom: 1rem;
 
-.card-title {
-  font-size: 16px; // زيادة الحجم لتحسين القراءة
-  font-weight: 600; // وزن أقوى للتميز
-  color: #374151; // لون داكن للنصوص
-  margin: 0;
-  text-transform: uppercase; // تحويل إلى أحرف كبيرة للأناقة
-  letter-spacing: 0.5px; // تباعد الحروف للمظهر الحديث
-}
+  .card-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.4;
+  }
 
-.card-icon {
-  color: #6b7280; // لون أيقونة أغمق قليلاً
-  font-size: 24px; // زيادة حجم الأيقونة
-  transition: color 0.3s ease; // انتقال لون عند التفاعل
+  .card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 
-  .dashboard-card:hover & {
-    color: #3b82f6; // لون أزرق عند التمرير
+    i {
+      font-size: 1.2rem;
+      color: white;
+    }
   }
 }
 
-.card-content {
-  text-align: center; // محاذاة المحتوى للوسط للتوازن
+.card-body {
+  .card-value-container {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+
+    .card-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1e293b;
+      line-height: 1;
+    }
+
+    .card-trend {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+
+      &.positive {
+        color: #10b981;
+      }
+
+      &.negative {
+        color: #ef4444;
+      }
+
+      i {
+        font-size: 0.7rem;
+      }
+    }
+  }
+
+  .card-description {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.4;
+  }
 }
 
-.card-value {
-  font-size: 32px; // زيادة الحجم لجعل القيمة بارزة
-  font-weight: 700;
-  color: #1f2937; // لون داكن جدًا للقيمة
-  line-height: 1.2;
-  margin-bottom: 8px; // مساحة بين القيمة والتغيير
+// Color variants
+.card-blue .card-icon { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.card-green .card-icon { background: linear-gradient(135deg, #10b981, #047857); }
+.card-purple .card-icon { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+.card-orange .card-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.card-yellow .card-icon { background: linear-gradient(135deg, #eab308, #ca8a04); }
+.card-red .card-icon { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.card-indigo .card-icon { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+.card-pink .card-icon { background: linear-gradient(135deg, #ec4899, #db2777); }
+
+// Skeleton loading styles
+.card-skeleton {
+  .skeleton-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    .skeleton-title {
+      width: 60%;
+      height: 16px;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 4px;
+    }
+
+    .skeleton-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 8px;
+    }
+  }
+
+  .skeleton-content {
+    .skeleton-value {
+      width: 40%;
+      height: 32px;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+
+    .skeleton-description {
+      width: 80%;
+      height: 12px;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 4px;
+    }
+  }
 }
 
-.card-change {
-  font-size: 14px; // زيادة الحجم لتحسين القراءة
-  margin: 0;
-  font-weight: 500;
-  text-align: center;
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
-.positive {
-  color: #16a34a; // أخضر داكن للدلالة على الزيادة
+// Responsive design
+@media (max-width: 768px) {
+  .dashboard-card {
+    padding: 1.25rem;
+  }
+
+  .card-header .card-title {
+    font-size: 0.85rem;
+  }
+
+  .card-body .card-value {
+    font-size: 1.75rem;
+  }
+
+  .card-header .card-icon {
+    width: 36px;
+    height: 36px;
+
+    i {
+      font-size: 1rem;
+    }
+  }
 }
 
-.negative {
-  color: #dc2626; // أحمر داكن للدلالة على النقصان
-}
+// Dark mode support
+// @media (prefers-color-scheme: dark) {
+//   .dashboard-card {
+//     background: #1e293b;
+//     border-color: #f1f5f9;
+//   }
+
+//   .card-header .card-title {
+//     color: #f1f5f9;
+//   }
+
+//   .card-body .card-value {
+//     color: #f1f5f9;
+//   }
+
+//   .card-body .card-description {
+//     color: #94a3b8;
+//   }
+
+//   .card-skeleton {
+//     .skeleton-title,
+//     .skeleton-icon,
+//     .skeleton-value,
+//     .skeleton-description {
+//       background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
+//       background-size: 200% 100%;
+//     }
+//   }
+// }
