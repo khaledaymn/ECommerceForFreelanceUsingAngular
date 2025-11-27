@@ -325,6 +325,12 @@ export class DataTableComponent implements OnInit {
         return 'delivered';
       case StatusOrder.cancelled:
         return 'cancelled';
+      case 'تم الشراء':
+        return 'status-purchase-sale';
+      case 'تم البيع':
+        return 'status-rent-sale';
+      case 'تم الإيجار':
+        return 'status-rent';
       default:
         return 'status-default';
     }

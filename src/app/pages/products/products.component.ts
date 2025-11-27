@@ -55,6 +55,7 @@ export class ProductManagementComponent implements OnInit {
   // Filters
   searchTerm = '';
   statusFilter = '';
+  confirmationStatusFilter = '';
   categoryFilter = '';
   brandFilter = '';
   modelFilter = '';
@@ -70,6 +71,7 @@ export class ProductManagementComponent implements OnInit {
 
   // Filter search terms
   statusSearchTerm = '';
+  confirmationStatusSearchTerm = '';
   categorySearchTerm = '';
   brandSearchTerm = '';
   modelSearchTerm = '';
@@ -128,6 +130,14 @@ export class ProductManagementComponent implements OnInit {
     {
       key: 'status',
       title: 'الحالة',
+      type: 'badge',
+      sortable: false,
+      width: '15%',
+      align: 'center',
+    },
+    {
+      key: 'confirmationStatus',
+      title: 'حالة المخزون',
       type: 'badge',
       sortable: false,
       width: '15%',
@@ -199,6 +209,10 @@ export class ProductManagementComponent implements OnInit {
     this.onStatusFilterChange(status);
     this.activeDropdown = null;
   }
+  selectConfirmationStatus(confirmationStatus: string): void {
+    this.onStatusFilterChange(confirmationStatus);
+    this.activeDropdown = null;
+  }
 
   selectCategory(categoryId: string): void {
     this.onCategoryFilterChange(categoryId);
@@ -254,6 +268,7 @@ export class ProductManagementComponent implements OnInit {
       pageSize: this.pageSize,
       search: this.searchTerm,
       status: this.statusFilter || undefined,
+      confirmationStatus: this.confirmationStatusFilter || undefined,
       categoryId: this.categoryFilter ? Number(this.categoryFilter) : undefined,
       brand: this.brandFilter || undefined,
       model: this.modelFilter || undefined,
@@ -413,7 +428,17 @@ export class ProductManagementComponent implements OnInit {
       status.toLowerCase().includes(this.statusSearchTerm.toLowerCase())
     );
   }
-
+  getFilteredConfirmationStatuses(): string[] {
+    const allStatuses = [
+      ...new Set(this.products.map((p) => p.confirmationStatus)),
+    ];
+    if (!this.confirmationStatusSearchTerm) return allStatuses;
+    return allStatuses.filter((status) =>
+      status
+        .toLowerCase()
+        .includes(this.confirmationStatusSearchTerm.toLowerCase())
+    );
+  }
   getStatusCount(status: string): number {
     return this.products.filter((p) => p.status === status).length;
   }
@@ -429,6 +454,18 @@ export class ProductManagementComponent implements OnInit {
       case ProductStatus.Rent.toString():
         return 'status-rent';
       case ProductStatus.Sale.toString():
+        return 'status-rent-and-purchase';
+      default:
+        return 'status-default';
+    }
+  }
+  getConfirmationStatusClass(confirmationStatus: string): string {
+    switch (confirmationStatus) {
+      case 'تم الشراء':
+        return 'status-purchase';
+      case 'تم البيع':
+        return 'status-rent';
+      case 'تم الإيجار':
         return 'status-rent-and-purchase';
       default:
         return 'status-default';

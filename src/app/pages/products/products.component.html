@@ -128,16 +128,16 @@
               </div>
 
               <!-- Model Filter -->
-          <div class="filter-tag" *ngIf="modelFilter">
-            <div class="tag-icon">
-              <i class="material-icons">toys</i>
-            </div>
-            <span class="tag-label">الموديل:</span>
-            <span class="tag-value">{{ modelFilter }}</span>
-            <button class="tag-remove" (click)="onModelFilterChange('')">
-              <i class="material-icons">close</i>
-            </button>
-          </div>
+              <div class="filter-tag" *ngIf="modelFilter">
+                <div class="tag-icon">
+                  <i class="material-icons">toys</i>
+                </div>
+                <span class="tag-label">الموديل:</span>
+                <span class="tag-value">{{ modelFilter }}</span>
+                <button class="tag-remove" (click)="onModelFilterChange('')">
+                  <i class="material-icons">close</i>
+                </button>
+              </div>
               <div
                 *ngFor="let attr of getActiveAttributeFilters()"
                 class="filter-tag"
@@ -159,9 +159,8 @@
 
           <!-- Filters Grid -->
           <div class="filters-grid">
-            <!-- Row 1: Status and Category -->
+            <!-- Row 1: confirmationStatus and Category -->
             <div class="filter-row">
-              <!-- Status Filter -->
               <div class="filter-field">
                 <label class="filter-label">
                   <i class="material-icons">inventory</i>
@@ -470,6 +469,98 @@
                           <i class="material-icons">toys</i>
                           <span>{{ model }}</span>
                         </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="filter-row">
+              <!-- confirmationStatus Filter -->
+              <div class="filter-field">
+                <label class="filter-label">
+                  <i class="material-icons">inventory</i>
+                  مخزون المنتج
+                </label>
+                <div
+                  class="searchable-select"
+                  [class.open]="activeDropdown === 'confirmationStatus'"
+                >
+                  <div
+                    class="select-trigger"
+                    (click)="toggleDropdown('confirmationStatus')"
+                  >
+                    <span
+                      class="select-value"
+                      *ngIf="
+                        confirmationStatusFilter;
+                        else ConfirmationstatusPlaceholder
+                      "
+                    >
+                      <div
+                        class="status-indicator"
+                        [class]="
+                          getConfirmationStatusClass(confirmationStatusFilter)
+                        "
+                      ></div>
+                      {{ confirmationStatusFilter }}
+                    </span>
+                    <ng-template #ConfirmationstatusPlaceholder>
+                      <span class="select-placeholder">اختر الحالة</span>
+                    </ng-template>
+                    <i
+                      class="material-icons expand-icon"
+                      [class.rotated]="activeDropdown === 'confirmationStatus'"
+                      >expand_more</i
+                    >
+                  </div>
+
+                  <div
+                    class="select-dropdown"
+                    *ngIf="activeDropdown === 'confirmationStatus'"
+                  >
+                    <div class="dropdown-search">
+                      <input
+                        type="text"
+                        placeholder="البحث في الحالات..."
+                        [(ngModel)]="confirmationStatusSearchTerm"
+                        class="search-input"
+                        (click)="$event.stopPropagation()"
+                      />
+                      <i class="material-icons">search</i>
+                    </div>
+
+                    <div class="dropdown-options">
+                      <div
+                        class="dropdown-option"
+                        [class.selected]="confirmationStatusFilter === ''"
+                        (click)="selectConfirmationStatus('')"
+                      >
+                        <div class="option-content">
+                          <i class="material-icons">all_inclusive</i>
+                          <span>جميع الحالات</span>
+                        </div>
+                        <!-- <span class="option-count">{{ getTotalProductsCount() }}</span> -->
+                      </div>
+
+                      <div
+                        *ngFor="
+                          let confirmationStatus of getFilteredConfirmationStatuses()
+                        "
+                        class="dropdown-option"
+                        [class.selected]="
+                          confirmationStatusFilter === confirmationStatus
+                        "
+                        (click)="selectStatus(confirmationStatus)"
+                      >
+                        <div class="option-content">
+                          <div
+                            class="status-indicator"
+                            [class]="getStatusClass(confirmationStatus)"
+                          ></div>
+                          <span>{{ confirmationStatus }}</span>
+                        </div>
+                        <!-- <span class="option-count">{{ getStatusCount(status) }}</span> -->
                       </div>
                     </div>
                   </div>

@@ -175,6 +175,17 @@
                 <label class="info-label">الكميه</label>
                 <div class="info-value price-value">{{ product.quantity }}</div>
               </div>
+              <div class="info-item">
+                <label class="info-label">حالة المخزون</label>
+                <div class="info-value">
+                  <span
+                    class="status-badge"
+                    [class]="getStatusClass(product.confirmationStatus)"
+                  >
+                    {{ getStatusText(product.confirmationStatus) }}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 

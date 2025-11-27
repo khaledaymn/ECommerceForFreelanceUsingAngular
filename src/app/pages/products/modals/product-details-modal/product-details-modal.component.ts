@@ -116,9 +116,12 @@ export class ProductDetailsModalComponent implements OnInit {
     switch (sorted) {
       case 'شراء':
         return 'status-purchase';
+      case 'تم الشراء':
       case 'إيجار':
+      case 'تم الإيجار':
         return 'status-rent';
       case 'بيع':
+      case 'تم البيع':
         return 'status-sale';
 
       case 'إيجار و بيع':
