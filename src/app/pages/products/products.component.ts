@@ -3,7 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../services/product.service';
 import { CategoryService } from '../../services/category.service';
-import { Product, ProductParams, ProductStatus } from '../../interfaces/product.interface';
+import {
+  Product,
+  ProductParams,
+  ProductStatus,
+} from '../../interfaces/product.interface';
 import { Category, CategoryParams } from '../../interfaces/category';
 import {
   DataTableComponent,
@@ -97,13 +101,13 @@ export class ProductManagementComponent implements OnInit {
       key: 'name',
       title: 'النوع',
       sortable: true,
-      width: '20%'
+      width: '20%',
     },
     {
       key: 'categoryName',
       title: 'الفئة',
       sortable: false,
-      width: '10%'
+      width: '10%',
     },
     {
       key: 'brand',
@@ -126,7 +130,7 @@ export class ProductManagementComponent implements OnInit {
       title: 'الحالة',
       type: 'badge',
       sortable: false,
-      width: '12%',
+      width: '15%',
       align: 'center',
     },
     {
@@ -134,7 +138,7 @@ export class ProductManagementComponent implements OnInit {
       title: 'الكميه',
       type: 'currency',
       sortable: false,
-      width: '12%',
+      width: '9%',
       align: 'center',
     },
     {
@@ -269,7 +273,10 @@ export class ProductManagementComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading products:', error);
-        this.notificationService.error("خطأ في تحميل البيانات", "فشل في تحميل قائمة المنتجات. يرجى المحاولة مرة أخرى.")
+        this.notificationService.error(
+          'خطأ في تحميل البيانات',
+          'فشل في تحميل قائمة المنتجات. يرجى المحاولة مرة أخرى.'
+        );
         this.loading = false;
       },
     });
@@ -463,14 +470,16 @@ export class ProductManagementComponent implements OnInit {
   }
 
   getFilteredBrands(): string[] {
-    const allBrands = [...new Set(this.products.map((p) => p.brand || ''))].filter(Boolean);
+    const allBrands = [
+      ...new Set(this.products.map((p) => p.brand || '')),
+    ].filter(Boolean);
     if (!this.brandSearchTerm) return allBrands;
     return allBrands.filter((brand) =>
       brand.toLowerCase().includes(this.brandSearchTerm.toLowerCase())
     );
   }
 
-onModelFilterChange(model: string): void {
+  onModelFilterChange(model: string): void {
     this.modelFilter = model;
     this.activeFilter = null;
     this.currentPage = 1;
@@ -478,7 +487,9 @@ onModelFilterChange(model: string): void {
   }
 
   getFilteredModels(): string[] {
-    const allModels = [...new Set(this.products.map((p) => p.model || ''))].filter(Boolean);
+    const allModels = [
+      ...new Set(this.products.map((p) => p.model || '')),
+    ].filter(Boolean);
     if (!this.modelSearchTerm) return allModels;
     return allModels.filter((model) =>
       model.toLowerCase().includes(this.modelSearchTerm.toLowerCase())
@@ -548,10 +559,12 @@ onModelFilterChange(model: string): void {
 
   hasActiveFilters(): boolean {
     return !!(
-      this.statusFilter ||
-      this.categoryFilter ||
-      this.brandFilter ||
-      this.modelFilter
+      (
+        this.statusFilter ||
+        this.categoryFilter ||
+        this.brandFilter ||
+        this.modelFilter
+      )
       // this.hasActiveAttributeFilters() ||
       // this.priceFilter.min ||
       // this.priceFilter.max
@@ -612,7 +625,10 @@ onModelFilterChange(model: string): void {
         })
         .subscribe({
           next: () => {
-            this.notificationService.success("تم التحديث بنجاح", `تم تحديث المنتج "${productData.name}" بنجاح.`)
+            this.notificationService.success(
+              'تم التحديث بنجاح',
+              `تم تحديث المنتج "${productData.name}" بنجاح.`
+            );
             this.loadProducts();
             this.closeModal();
           },
@@ -620,7 +636,10 @@ onModelFilterChange(model: string): void {
             this.errorMessage =
               error.message || 'فشل في تحديث المنتج. حاول مرة أخرى.';
             console.error('Error updating product:', error);
-            this.notificationService.error("خطأ في التحديث", "فشل في تحديث المنتج. يرجى المحاولة مرة أخرى.")
+            this.notificationService.error(
+              'خطأ في التحديث',
+              'فشل في تحديث المنتج. يرجى المحاولة مرة أخرى.'
+            );
           },
         });
     } else {
@@ -636,11 +655,14 @@ onModelFilterChange(model: string): void {
           quantity: productData.quantity,
           mainImage: productData.mainImage,
           additionalMedia: productData.additionalMedia || [],
-          additionalAttributes: formattedAttributes
+          additionalAttributes: formattedAttributes,
         })
         .subscribe({
           next: () => {
-            this.notificationService.success("تم الإنشاء بنجاح", `تم إنشاء المنتج "${productData.name}" بنجاح.`)
+            this.notificationService.success(
+              'تم الإنشاء بنجاح',
+              `تم إنشاء المنتج "${productData.name}" بنجاح.`
+            );
             this.loadProducts();
             this.closeModal();
             console.log('Product created successfully', productData);
@@ -650,7 +672,10 @@ onModelFilterChange(model: string): void {
               error.message ||
               'فشل في إنشاء المنتج. تأكد من أن جميع الملفات مدعومة.';
             console.error('Error creating product:', error);
-             this.notificationService.error("خطأ في الإنشاء", "فشل في إنشاء المنتج. يرجى المحاولة مرة أخرى.")
+            this.notificationService.error(
+              'خطأ في الإنشاء',
+              'فشل في إنشاء المنتج. يرجى المحاولة مرة أخرى.'
+            );
           },
         });
     }
@@ -672,19 +697,27 @@ onModelFilterChange(model: string): void {
 
   confirmDelete(): void {
     if (this.deleteConfirm.productId) {
-      const productToDelete = this.products.find((p) => p.id === this.deleteConfirm.productId)
-      const productName = productToDelete?.name || "المنتج"
+      const productToDelete = this.products.find(
+        (p) => p.id === this.deleteConfirm.productId
+      );
+      const productName = productToDelete?.name || 'المنتج';
       this.productService
         .deleteProduct(this.deleteConfirm.productId)
         .subscribe({
           next: () => {
-            this.notificationService.success("تم الحذف بنجاح", `تم حذف المنتج "${productName}" بنجاح.`)
+            this.notificationService.success(
+              'تم الحذف بنجاح',
+              `تم حذف المنتج "${productName}" بنجاح.`
+            );
             this.loadProducts();
             this.closeDeleteConfirm();
           },
           error: (error) => {
             console.error('Error deleting product:', error);
-            this.notificationService.error("خطأ في الحذف", "فشل في حذف المنتج. يرجى المحاولة مرة أخرى.")
+            this.notificationService.error(
+              'خطأ في الحذف',
+              'فشل في حذف المنتج. يرجى المحاولة مرة أخرى.'
+            );
             this.closeDeleteConfirm();
           },
         });

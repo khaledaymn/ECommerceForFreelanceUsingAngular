@@ -133,6 +133,14 @@ export class OrdersComponent implements OnInit {
 
     this.orderService.getOrders(currentFilter).subscribe({
       next: (response: OrdersResponse) => {
+        if (!response || response.data.length === 0) {
+          this.orders.set([]);
+          this.totalItems.set(0);
+          this.pageSize.set(0);
+          this.currentPage.set(1);
+          this.loading.set(false);
+          return;
+        }
         const flattenedData = response.data.flatMap((order) =>
           order.orderItems.map((item) => ({ ...order, ...item }))
         );
@@ -145,6 +153,7 @@ export class OrdersComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error fetching orders:', err);
+        this.orders.set([]);
         this.loading.set(false);
       },
     });

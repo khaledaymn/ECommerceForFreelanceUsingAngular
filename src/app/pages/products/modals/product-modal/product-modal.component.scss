@@ -952,12 +952,12 @@ $gray-900: #111827;
           align-items: center;
           gap: 6px;
 
-          &.purchase { background: #2563eb; }
-          &.lease    { background: #16a34a; }
-          &.sale     { background: #dc2626; }
+          &.purchase { background: #5c8cf5; }
+          &.lease    { background: #32a45c; }
+          &.sale     { background: #da4848; }
 
           .remove-btn {
-            margin-left: 8px;
+            // margin-left: 8px;
             background: rgba(255,255,255,0.2);
             border: none;
             color: white;
@@ -966,17 +966,17 @@ $gray-900: #111827;
             border-radius: 50%;
             font-size: 16px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
+            display: grid;
+            // align-items: end;
             justify-content: center;
-
+font: -webkit-small-control;
             &:hover { background: rgba(255,255,255,0.3); }
           }
         }
 
         .placeholder {
           color: $gray-500;
-          font-size: 14px;
+          font-size: 16px;
         }
       }
 
