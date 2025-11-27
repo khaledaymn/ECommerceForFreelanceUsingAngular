@@ -56,11 +56,11 @@
         </app-dashboard-card>
 
         <app-dashboard-card
-          title="إيجار وشراء"
+          title="بيع"
           [value]="dashboardData.totalRentAndPurchaseProducts"
           icon="bi-collection"
           color="orange"
-          description="متاحة للإيجار والشراء"
+          description="متاحة للبيع"
           [isLoading]="isLoading"
         >
         </app-dashboard-card>
@@ -148,6 +148,15 @@
           [isLoading]="isLoading"
         >
         </app-dashboard-card>
+        <app-dashboard-card
+          title="طلبات البيع"
+          [value]="dashboardData.totalSalesOrders"
+          icon="bi-collection"
+          color="red"
+          description="طلبات البيع"
+          [isLoading]="isLoading"
+        >
+        </app-dashboard-card>
       </div>
     </section>
 
@@ -165,7 +174,10 @@
           <i class="bi bi-box-seam"></i>
           عرض المنتجات
         </button>
-        <button class="action-btn secondary" [routerLink]="['/admin/categories']">
+        <button
+          class="action-btn secondary"
+          [routerLink]="['/admin/categories']"
+        >
           <i class="bi bi-grid"></i>
           عرض الفئات
         </button>
