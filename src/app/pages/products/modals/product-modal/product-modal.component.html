@@ -488,13 +488,33 @@
                 </div>
                 <div class="form-group">
                   <label class="form-label">
+                    <span> حالةالمخزن</span>
+                    <span class="required-indicator">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.confirmationStatus"
+                    name="confirmationStatus"
+                    required
+                    class="form-input"
+                    placeholder="تم الشراء او تم البيع او تم الإيجار ......... "
+                    (focus)="onInputFocus($event)"
+                    (blur)="onInputBlur($event)"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">
                     <span>الكميه</span>
                     <span class="required-indicator">*</span>
                   </label>
                   <input
                     type="number"
                     [(ngModel)]="formData.quantity"
+                    (ngModelChange)="
+                      formData.quantity = $event < 0 ? 0 : $event
+                    "
                     name="quantity"
+                    min="0"
                     required
                     class="form-input"
                     placeholder="أدخل الكميه"

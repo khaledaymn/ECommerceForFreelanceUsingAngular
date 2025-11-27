@@ -42,6 +42,7 @@ export interface Product {
   status: string;
   brand: string; // Corrected typo from "brabd" to "brand"
   model: string; // Corrected typo from "modle" to "model"
+  confirmationStatus: string;
   mainImageURL?: string | null;
   imagePublicId?: string | null;
   categoryId: number;
@@ -88,6 +89,7 @@ export interface ProductParams {
   search?: string;
   status?: string;
   categoryId?: number;
+  confirmationStatus?: string;
   brand?: string;
   model?: string;
   sortProp?: string;
