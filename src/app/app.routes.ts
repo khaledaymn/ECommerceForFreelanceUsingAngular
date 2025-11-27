@@ -11,6 +11,7 @@ import { UsersComponent } from './pages/users/users/users.component';
 import { InventoryComponent } from './pages/inventory/inventory.component';
 import { AnalyticsComponent } from './pages/analytics/analytics.component';
 import { UserManagementComponent } from './pages/auth/change-email/change-email.component';
+import { ContentComponent } from './pages/Content/Content.component';
 
 export const routes: Routes = [
   {
@@ -37,6 +38,7 @@ export const routes: Routes = [
       { path: 'customers', component: UsersComponent },
       { path: 'inventory', component: InventoryComponent },
       { path: 'analytics', component: AnalyticsComponent },
+      { path: 'content', component: ContentComponent },
       { path: 'settings', component: UserManagementComponent },
     ],
   },

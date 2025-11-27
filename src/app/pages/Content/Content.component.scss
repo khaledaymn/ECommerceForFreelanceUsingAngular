@@ -1,0 +1,110 @@
+.site-settings-container {
+  padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  font-family: 'Cairo', sans-serif;
+}
+
+.settings-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  h2 { font-size: 2.4rem; color: #1e293b; margin-bottom: 0.5rem; }
+  p { color: #64748b; font-size: 1.1rem; }
+}
+
+.loading-state {
+  text-align: center; padding: 4rem;
+  .spinner {
+    width: 50px; height: 50px; border: 5px solid #f3f4f6;
+    border-top-color: #F5C518; border-radius: 50%;
+    animation: spin 1s linear infinite; margin: 0 auto 1rem;
+  }
+}
+
+.settings-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+  padding: 3rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  .full { grid-column: 1 / -1; }
+}
+
+.form-group {
+  label {
+    display: block; margin-bottom: 0.8rem; font-weight: 600; color: #334155;
+    .req { color: #ef4444; }
+  }
+  .form-input {
+    width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0;
+    border-radius: 12px; font-size: 1rem; transition: all 0.3s;
+    &:focus { outline: none; border-color: #F5C518; box-shadow: 0 0 0 4px rgba(245,197,24,0.2); }
+  }
+}
+
+.upload-box {
+  .upload-area {
+    border: 3px dashed #cbd5e1;
+    border-radius: 16px;
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: #f8fafc;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+
+    &:hover { border-color: #F5C518; background: #fffbeb; }
+
+    img { color: #94a3b8; font-size: 48px; margin-bottom: 1rem; }
+    .big { font-size: 64px; }
+    p { color: #64748b; margin: 0; }
+
+    img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+
+    .overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.7);
+      color: white; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; opacity: 0; transition: 0.3s;
+      &:hover { opacity: 1; }
+    }
+  }
+
+  &.hero .upload-area { height: 320px; }
+}
+
+.actions {
+  text-align: center; margin-top: 3rem;
+  .save-btn {
+    background: #F5C518; color: #000; padding: 16px 48px;
+    border: none; border-radius: 16px; font-size: 1.2rem; font-weight: 700;
+    cursor: pointer; transition: all 0.3s; min-width: 200px;
+    &:hover:not(:disabled) {
+      background: #e6b800; transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(245,197,24,0.4);
+    }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.error-text {
+  color: #ef4444;
+  background: #fee;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin: 1rem 0;
+  font-weight: 600;
+  text-align: center;
+  i { vertical-align: middle; margin-left: 8px; }
+}
