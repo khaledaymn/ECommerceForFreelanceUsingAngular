@@ -457,8 +457,10 @@ export class ProductModalComponent implements OnInit, OnChanges {
 
     if (current.includes(value)) {
       updated = current.filter((v) => v !== value);
+      updated.sort(); // للحفاظ على ترتيب ثابت
     } else {
       updated = [...current, value];
+      updated.sort(); // للحفاظ على ترتيب ثابت
     }
 
     this.formData.status = updated.join(' و ');
