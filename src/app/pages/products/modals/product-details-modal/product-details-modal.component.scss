@@ -19,9 +19,15 @@ $gray-600: #4b5563;
 $gray-700: #374151;
 $gray-800: #1f2937;
 $gray-900: #111827;
-$rent-color: #2196F3;
-$purchase-color: #4CAF50;
-$rent-and-purchase-color: #FF9800;
+// ألوان الحالات - مخصصة ومتناسقة مع تصميمك
+$color-purchase: #2563eb;        // أزرق غامق (شراء)
+$color-rent:     #16a34a;        // أخضر (إيجار)
+$color-sale:     #dc2626;        // أحمر (بيع)
+
+$color-purchase-rent:   #7c3aed; // بنفسجي (شراء + إيجار)
+$color-purchase-sale:   #ea580c; // برتقالي غامق (شراء + بيع)
+$color-rent-sale:       #be123c; // وردي/أحمر غامق (إيجار + بيع)
+$color-all-three:       #7c2d12; // بني فخم (الثلاثة معًا)
 // Modal Base
 .modal-overlay {
   position: fixed;
@@ -580,25 +586,21 @@ $rent-and-purchase-color: #FF9800;
   font-size: 12px;
   font-weight: 600;
 
-  &.status-purchase {
-    background: rgba($purchase-color, 0.1);
-    color: $purchase-color;
-  }
+  // حالة واحدة
+  &.status-purchase       { background: rgba($color-purchase, 0.12); color: $color-purchase; }
+  &.status-rent           { background: rgba($color-rent, 0.12);     color: $color-rent; }
+  &.status-sale           { background: rgba($color-sale, 0.12);     color: $color-sale; }
 
-  &.status-rent {
-    background: rgba($rent-color, 0.1);
-    color: $rent-color;
-  }
+  // حالتين
+  &.status-purchase-rent  { background: rgba($color-purchase-rent, 0.12); color: $color-purchase-rent; }
+  &.status-purchase-sale  { background: rgba($color-purchase-sale, 0.12); color: $color-purchase-sale; }
+  &.status-rent-sale      { background: rgba($color-rent-sale, 0.12);     color: $color-rent-sale; }
 
-  &.status-rent-and-purchase {
-    background: rgba($rent-and-purchase-color, 0.1);
-    color: $rent-and-purchase-color;
-  }
+  // الثلاث حالات
+  &.status-all            { background: rgba($color-all-three, 0.15); color: $color-all-three; font-weight: 700; }
 
-  &.status-default {
-    background: rgba($gray-600, 0.1);
-    color: $gray-600;
-  }
+  // افتراضي
+  &.status-default       { background: rgba($gray-600, 0.1); color: $gray-600; }
 }
 
 .description-content {

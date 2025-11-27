@@ -12,7 +12,7 @@ import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, DashboardCardComponent,RouterLink],
+  imports: [CommonModule, DashboardCardComponent, RouterLink],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })
@@ -28,6 +28,7 @@ export class DashboardComponent implements OnInit {
     totalCancelledOrders: 0,
     totalRentOrders: 0,
     totalPurchaseOrders: 0,
+    totalSalesOrders: 0,
   };
 
   isLoading = true;

@@ -31,7 +31,7 @@ export interface UpdateProduct {
 export enum ProductStatus {
   Rent = 'إيجار', // For short-term renting (e.g., cars, equipment)
   Purchase = 'شراء', // For purchasing only
-  RentAndPurchase = 'إيجار وشراء', // For both renting and purchasing
+  Sale = 'بيع', // For both renting and purchasing
 }
 
 export interface Product {

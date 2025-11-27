@@ -103,26 +103,56 @@ export class ProductDetailsModalComponent implements OnInit {
   }
 
   getStatusClass(status: string): string {
-    switch (status) {
-      case ProductStatus.Purchase.toString():
+    if (!status) return 'status-default';
+
+    const items = status
+      .split(' و ')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    // ترتيب ثابت عشان الكلاس يبقى متسق مهما كان الترتيب
+    const sorted = [...items].sort().join(' و ');
+
+    switch (sorted) {
+      case 'شراء':
         return 'status-purchase';
-      case ProductStatus.Rent.toString():
+      case 'إيجار':
         return 'status-rent';
-      case ProductStatus.RentAndPurchase.toString():
-        return 'status-rent-and-purchase';
+      case 'بيع':
+        return 'status-sale';
+
+      case 'إيجار و بيع':
+      case 'بيع و إيجار':
+        return 'status-rent-sale';
+
+      case 'إيجار و شراء':
+      case 'شراء و إيجار':
+        return 'status-purchase-rent';
+
+      case 'بيع و شراء':
+      case 'شراء و بيع':
+        return 'status-purchase-sale';
+
+      case 'إيجار و بيع و شراء':
+      case 'إيجار و شراء و بيع':
+      case 'بيع و إيجار و شراء':
+      case 'بيع و شراء و إيجار':
+      case 'شراء و إيجار و بيع':
+      case 'شراء و بيع و إيجار':
+        return 'status-all';
+
       default:
         return 'status-default';
     }
   }
-
   getStatusText(status: string): string {
     switch (status) {
       case ProductStatus.Purchase.toString():
         return ProductStatus.Purchase.toString();
       case ProductStatus.Rent.toString():
         return ProductStatus.Rent.toString();
-      case ProductStatus.RentAndPurchase.toString():
-        return ProductStatus.RentAndPurchase.toString();
+      case ProductStatus.Sale.toString():
+        return ProductStatus.Sale.toString();
       default:
         return status || 'غير محدد';
     }

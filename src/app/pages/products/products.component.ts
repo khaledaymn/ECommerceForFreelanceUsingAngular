@@ -421,7 +421,7 @@ export class ProductManagementComponent implements OnInit {
         return 'status-purchase';
       case ProductStatus.Rent.toString():
         return 'status-rent';
-      case ProductStatus.RentAndPurchase.toString():
+      case ProductStatus.Sale.toString():
         return 'status-rent-and-purchase';
       default:
         return 'status-default';

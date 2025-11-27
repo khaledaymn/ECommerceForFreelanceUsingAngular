@@ -10,4 +10,5 @@ export interface DashboardData {
   totalCancelledOrders: number; // إجمالي الطلبات الملغاة
   totalRentOrders: number; // إجمالي الطلبات المستأجرة
   totalPurchaseOrders: number; // إجمالي الطلبات المشتراة
+  totalSalesOrders: number; // إجمالي الطلبات المشتراة
 }

@@ -9,10 +9,14 @@ import {
   ViewChild,
   ElementRef,
   Renderer2,
+  HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Product, ProductStatus } from '../../../../interfaces/product.interface';
+import {
+  Product,
+  ProductStatus,
+} from '../../../../interfaces/product.interface';
 import { Category } from '../../../../interfaces/category';
 
 interface MediaPreview {
@@ -41,7 +45,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
   @ViewChild('mainImageInput') mainImageInput!: ElementRef<HTMLInputElement>;
   @ViewChild('additionalMediaInput')
   additionalMediaInput!: ElementRef<HTMLInputElement>;
-
+  statusDropdownOpen = false;
   formData = {
     id: null as number | null,
     name: '',
@@ -102,7 +106,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
         description: this.product.description || '',
         brand: this.product.brand || '',
         model: this.product.model || '',
-        status: this.product.status || ProductStatus.Purchase.toString(),
+        status: this.product.status || '',
         categoryId: this.product.categoryId?.toString() || '',
         quantity: this.product.quantity || 0,
         mainImage: null,
@@ -291,8 +295,8 @@ export class ProductModalComponent implements OnInit, OnChanges {
       }
     }
     this.additionalMediaPreviews.forEach((preview, idx) => {
-    preview.originalIndex = idx;
-  });
+      preview.originalIndex = idx;
+    });
   }
 
   validateImageFile(file: File): boolean {
@@ -429,7 +433,59 @@ export class ProductModalComponent implements OnInit, OnChanges {
       delete this.formData.additionalAttributes[key];
     }
   }
+  getStatusArray(): string[] {
+    return this.formData.status
+      ? this.formData.status.split(' و ').filter((s) => s)
+      : [];
+  }
 
+  getStatus(): string[] {
+    return this.getStatusArray();
+  }
+
+  isStatusSelected(value: string): boolean {
+    return this.getStatusArray().includes(value);
+  }
+
+  toggleStatusDropdown() {
+    this.statusDropdownOpen = !this.statusDropdownOpen;
+  }
+
+  toggleStatusItem(value: string) {
+    const current = this.getStatusArray();
+    let updated: string[];
+
+    if (current.includes(value)) {
+      updated = current.filter((v) => v !== value);
+    } else {
+      updated = [...current, value];
+    }
+
+    this.formData.status = updated.join(' و ');
+    // إغلاق القائمة بعد الاختيار (اختياري)
+    // this.statusDropdownOpen = false;
+  }
+  getStatusIcon(value: string): string {
+    switch (value) {
+      case 'شراء':
+        return 'fa fa-shopping-cart';
+      case 'إيجار':
+        return 'fa fa-key';
+      case 'بيع':
+        return 'fa fa-sign-hanging';
+      default:
+        return 'fa fa-circle';
+    }
+  }
+
+  // إغلاق القائمة عند الكبس برا
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.multi-select-wrapper')) {
+      this.statusDropdownOpen = false;
+    }
+  }
   onInputFocus(event: FocusEvent): void {
     const parent = (event.target as HTMLElement).closest('.form-group');
     if (parent) {
@@ -454,7 +510,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
       description: this.formData.description || '',
       brand: this.formData.brand || '',
       model: this.formData.model || '',
-      status: this.formData.status || ProductStatus.Purchase.toString(),
+      status: this.formData.status || '',
       categoryId: this.formData.categoryId
         ? Number(this.formData.categoryId)
         : 0,
