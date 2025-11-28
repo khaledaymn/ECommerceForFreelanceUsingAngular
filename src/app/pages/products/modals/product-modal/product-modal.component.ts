@@ -516,6 +516,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
       brand: this.formData.brand || '',
       model: this.formData.model || '',
       status: this.formData.status || '',
+      confirmationStatus: this.formData.confirmationStatus || '',
       categoryId: this.formData.categoryId
         ? Number(this.formData.categoryId)
         : 0,
