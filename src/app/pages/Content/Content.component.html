@@ -1,0 +1,95 @@
+<div class="site-settings-container">
+  <div class="settings-header">
+    <h2>إعدادات الموقع</h2>
+    <p>تحكم في عنوان الموقع والشعار والصورة الرئيسية</p>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>جاري تحميل الإعدادات...</p>
+  </div>
+
+  <!-- Form -->
+  <div class="settings-card" *ngIf="!loading">
+    <div class="form-grid">
+      <!-- عنوان الموقع -->
+      <div class="form-group">
+        <label>عنوان الموقع <span class="req">*</span></label>
+        <input
+          type="text"
+          [(ngModel)]="form.title"
+          placeholder="مثال: قطع غيار العوفي الأصلية"
+          class="form-input"
+        />
+      </div>
+
+      <!-- وصف الموقع -->
+      <div class="form-group full">
+        <label>وصف الموقع</label>
+        <textarea
+          [(ngModel)]="form.description"
+          rows="4"
+          placeholder="وصف مختصر يظهر في الموقع ..."
+          class="form-input"
+        ></textarea>
+      </div>
+
+      <!-- شعار الموقع -->
+      <div class="form-group">
+        <label>الشعار (Logo)</label>
+        <div class="upload-box" (click)="$event.stopPropagation()">
+          <input
+            type="file"
+            accept="image/*"
+            (change)="onLogoSelected($event)"
+            hidden
+            #logoInput
+          />
+          <div class="upload-area" (click)="logoInput.click()">
+            <ng-container *ngIf="logoPreview; else logoPlaceholder">
+              <img [src]="logoPreview" alt="Logo" />
+              <div class="overlay">تغيير الشعار</div>
+            </ng-container>
+            <ng-template #logoPlaceholder>
+              <i class="material-icons">add_photo_alternate</i>
+              <p>اختر شعار الموقع</p>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- صورة الهيرو -->
+      <div class="form-group full">
+        <label>صورة الخلفية الرئيسية</label>
+        <div class="upload-box hero" (click)="$event.stopPropagation()">
+          <input
+            type="file"
+            accept="image/*"
+            (change)="onHeroSelected($event)"
+            hidden
+            #heroInput
+          />
+          <div class="upload-area" (click)="heroInput.click()">
+            <ng-container *ngIf="heroPreview; else heroPlaceholder">
+              <img [src]="heroPreview" alt="Hero" />
+              <div class="overlay">تغيير الصورة</div>
+            </ng-container>
+            <ng-template #heroPlaceholder>
+              <i class="material-icons big">add_photo_alternate</i>
+              <p>اختر صورة خلفية للصفحة الرئيسية</p>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- زر الحفظ -->
+    <div class="actions">
+      <button class="save-btn" (click)="saveChanges()" [disabled]="saving">
+        <span *ngIf="!saving">حفظ التغييرات</span>
+        <span *ngIf="saving">جاري الحفظ...</span>
+      </button>
+    </div>
+  </div>
+</div>
