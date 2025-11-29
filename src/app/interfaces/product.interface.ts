@@ -7,6 +7,7 @@ export interface CreateProduct {
   brand: string;
   model: string;
   status?: string | null;
+  confirmationStatus?: string | null;
   categoryId: number;
   quantity: number;
   mainImage?: File | null; // Image only (png, jpg, jpeg, webp, svg)
@@ -22,6 +23,7 @@ export interface UpdateProduct {
   model?: string | null;
   quantity?: number | null; // Optional for updates
   status?: string | null;
+  confirmationStatus?: string | null;
   categoryId?: number | null;
   mainImage?: File | null; // Image only
   additionalMedia?: File[] | null; // Images or videos
