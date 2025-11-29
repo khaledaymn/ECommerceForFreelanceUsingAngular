@@ -532,7 +532,7 @@ export class ProductModalComponent implements OnInit, OnChanges {
           ? this.formData.additionalAttributes
           : {},
     };
-    console.log(submitData.quantity);
+    console.log(submitData);
 
     this.save.emit(submitData);
     this.isSubmitting = false;

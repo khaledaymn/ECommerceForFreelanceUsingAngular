@@ -69,6 +69,8 @@ export class ProductService {
     if (product.brand) formData.append('brand', product.brand);
     if (product.model) formData.append('model', product.model);
     if (product.status) formData.append('status', product.status);
+    if (product.confirmationStatus)
+      formData.append('confirmationStatus', product.confirmationStatus);
     formData.append('categoryId', product.categoryId.toString());
     if (product.mainImage) formData.append('mainImage', product.mainImage);
     if (product.additionalMedia && product.additionalMedia.length > 0) {
@@ -101,7 +103,7 @@ export class ProductService {
     //   });
     // }
     if (params.brand) httpParams = httpParams.set('brand', params.brand);
-  if (params.model) httpParams = httpParams.set('model', params.model);
+    if (params.model) httpParams = httpParams.set('model', params.model);
     if (params.categoryId)
       httpParams = httpParams.set('categoryId', params.categoryId.toString());
     if (params.status) httpParams = httpParams.set('status', params.status);
@@ -147,6 +149,8 @@ export class ProductService {
   }
 
   updateProduct(product: UpdateProduct): Observable<Result> {
+    console.log(product.confirmationStatus + 'from update');
+    console.log(product.status);
     if (!product.id || product.id <= 0) {
       return throwError(
         () =>
@@ -171,6 +175,7 @@ export class ProductService {
       .set('Model', product.model || '')
       .set('Quantity', product.quantity?.toString() || '')
       .set('Status', product.status || '')
+      .set('ConfirmationStatus', product.confirmationStatus || '')
       .set('CategoryId', product.categoryId?.toString() || '');
 
     // Normalize AdditionalAttributes
@@ -194,11 +199,10 @@ export class ProductService {
       );
     }
 
-
     if (product.mediaToDelete && product.mediaToDelete.length > 0) {
-      product.mediaToDelete.forEach(item => {
+      product.mediaToDelete.forEach((item) => {
         params = params.append(`MediaToDelete`, item);
-      })
+      });
     }
 
     const formData = new FormData();
@@ -217,7 +221,8 @@ export class ProductService {
     }
     // console.log('Query Params in updateProduct:', params.toString());
     // console.log('FormData in updateProduct:', debugData);
-
+    console.log(formData);
+    console.log(params);
     return this.http
       .put<Result>(`${this.baseUrl}/Update`, formData, {
         headers: { Accept: 'text/plain' },
