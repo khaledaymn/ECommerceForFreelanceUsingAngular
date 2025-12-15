@@ -13,7 +13,7 @@ import { NotificationService } from '../../services/notification.service';
 })
 export class HeaderComponent {
   isLoading = false;
-  storeUrl = 'https://heavyequipments.vercel.app/'; // Replace with your actual store URL
+  storeUrl = 'https://aloufi-group.com/'; // Replace with your actual store URL
 
   constructor(
     private authService: AuthService,
